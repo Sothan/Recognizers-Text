@@ -1,4 +1,5 @@
-[{
+[
+  {
     "Input": "3 $",
     "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
@@ -12,8 +13,7 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "3 €",
     "NotSupported": "javascript",
@@ -28,15 +28,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "3 USD",
     "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
     "Results": [
       {
-        "Text": "3 USD",
+        "Text": "3 usd",
         "TypeName": "currency",
         "Resolution": {
           "value": "3",
@@ -44,8 +43,7 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "17 dollar",
     "NotSupported": "javascript",
@@ -60,15 +58,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "sieben Euro",
     "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
     "Results": [
       {
-        "Text": "sieben Euro",
+        "Text": "sieben euro",
         "TypeName": "currency",
         "Resolution": {
           "value": "7",
@@ -76,15 +73,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "30 kambodschanische Riel",
     "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
     "Results": [
       {
-        "Text": "30 kambodschanische Riel",
+        "Text": "30 kambodschanische riel",
         "TypeName": "currency",
         "Resolution": {
           "value": "30",
@@ -92,15 +88,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "75 Millionen Dollar",
     "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
     "Results": [
       {
-        "Text": "75 Millionen Dollar",
+        "Text": "75 millionen dollar",
         "TypeName": "currency",
         "Resolution": {
           "value": "75000000",
@@ -108,15 +103,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Das finnische Konglomerat Nokia oy ab sagte, es habe eine Einigung erzielt, dass niederländische Unternehmen Nkf Kabel b.v. für 420000000 finnische Mark zu kaufen.",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "420000000 finnische Mark",
+        "Text": "420000000 finnische mark",
         "TypeName": "currency",
         "Resolution": {
           "value": "420000000",
@@ -124,8 +118,7 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "National zahlte Siegel und Shuster 94.000 $, damit alle klagen fallen gelassen werden.",
     "NotSupportedByDesign": "python",
@@ -140,8 +133,7 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "National zahlte Siegel und Shuster 94.000 $, um alle klagen fallen zu lassen.",
     "NotSupportedByDesign": "python",
@@ -156,8 +148,7 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Das dürften ca. 99$ pro Kopf sein.",
     "NotSupportedByDesign": "python",
@@ -172,8 +163,7 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "94£",
     "NotSupportedByDesign": "python",
@@ -188,15 +178,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "General Dynamics Services Co., eine Abteilung der General Dynamics Corp., hat einen 48 Millionen Dollar Vertrag, zur Errichtung von Wartungseinrichtungen für Kettenfahrzeuge der Armee, gewonnen.",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "48 Millionen Dollar",
+        "Text": "48 millionen dollar",
         "TypeName": "currency",
         "Resolution": {
           "value": "48000000",
@@ -204,15 +193,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Der Preis für einen zweiten Simulator liegt bei 16,4 Millionen kanadischen Dollar.",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "16,4 Millionen kanadischen Dollar",
+        "Text": "16,4 millionen kanadischen dollar",
         "TypeName": "currency",
         "Resolution": {
           "value": "16400000",
@@ -220,15 +208,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "bard / ems hatte 1988 Verkäufe mit einem Wert von rund 14 Millionen Dollar, sagte Birchter.",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "14 Millionen Dollar",
+        "Text": "14 millionen dollar",
         "TypeName": "currency",
         "Resolution": {
           "value": "14000000",
@@ -236,8 +223,7 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Preise starten bei 12.345$.",
     "NotSupportedByDesign": "python",
@@ -252,15 +238,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Der Haushalt beläuft sich auf 12 500 EUR.",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "12 500 EUR",
+        "Text": "12 500 eur",
         "TypeName": "currency",
         "Resolution": {
           "value": "12500",
@@ -268,15 +253,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Der Wert dieses Unternehmens liegt bei 2,5 Mio USD",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "2,5 Mio USD",
+        "Text": "2,5 mio usd",
         "TypeName": "currency",
         "Resolution": {
           "value": "2500000",
@@ -284,15 +268,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Der Umsatz sank in der zweiten Jahreshälfte um 27% auf 300 000 GBP",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "300 000 GBP",
+        "Text": "300 000 gbp",
         "TypeName": "currency",
         "Resolution": {
           "value": "300000",
@@ -300,15 +283,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Hast du mal einen Euro für mich?",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "einen Euro",
+        "Text": "einen euro",
         "TypeName": "currency",
         "Resolution": {
           "value": "1",
@@ -316,15 +298,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Hast du zwei Euro für mich?",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "zwei Euro",
+        "Text": "zwei euro",
         "TypeName": "currency",
         "Resolution": {
           "value": "2",
@@ -332,15 +313,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "zwei Euro fünfzig",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript,dotnet,java",
     "Results": [
       {
-        "Text": "zwei Euro fünfzig",
+        "Text": "zwei euro fünfzig",
         "TypeName": "currency",
         "Resolution": {
           "value": "2,5",
@@ -348,15 +328,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "zwei Euro und fünfzig cent",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "zwei Euro",
+        "Text": "zwei euro",
         "TypeName": "currency",
         "Resolution": {
           "value": "2",
@@ -372,15 +351,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "siebenhundert Euro",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "siebenhundert Euro",
+        "Text": "siebenhundert euro",
         "TypeName": "currency",
         "Resolution": {
           "value": "700",
@@ -388,15 +366,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "achtundsiebzig Millionen Dollar",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "achtundsiebzig Millionen Dollar",
+        "Text": "achtundsiebzig millionen dollar",
         "TypeName": "currency",
         "Resolution": {
           "value": "78000000",
@@ -404,15 +381,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "try the Dollar haben sie gesagt",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "Dollar",
+        "Text": "dollar",
         "TypeName": "currency",
         "Resolution": {
           "value": null,
@@ -420,15 +396,14 @@
         }
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "für drei Dollar können sie jetzt das SOS Signal senden",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "drei Dollar",
+        "Text": "drei dollar",
         "TypeName": "currency",
         "Resolution": {
           "value": "3",
@@ -437,4 +412,4 @@
       }
     ]
   }
-  ]
+]

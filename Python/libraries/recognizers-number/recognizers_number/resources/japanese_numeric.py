@@ -4,74 +4,85 @@
 #     Changes to this file may cause incorrect behavior and will be lost if
 #     the code is regenerated.
 # </auto-generated>
+#
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
 # ------------------------------------------------------------------------------
 
 from .base_numbers import BaseNumbers
 # pylint: disable=line-too-long
+
+
 class JapaneseNumeric:
-    LangMarker = ''
+    LangMarker = 'Jpn'
+    CompoundNumberLanguage = True
+    MultiDecimalSeparatorCulture = True
     DecimalSeparatorChar = '.'
     FractionMarkerToken = ''
     NonDecimalSeparatorChar = ' '
     HalfADozenText = ''
     WordSeparatorToken = ''
-    RoundNumberMap = dict([('k', 1000),
-                           ('m', 1000000),
-                           ('g', 1000000000),
-                           ('t', 1000000000000)])
-    RoundNumberMapChar = dict([('十', 10),
-                               ('百', 100),
-                               ('千', 1000),
-                               ('万', 10000),
-                               ('億', 100000000),
-                               ('兆', 1000000000000)])
-    ZeroToNineMap = dict([('零', 0),
-                          ('一', 1),
-                          ('二', 2),
-                          ('三', 3),
-                          ('四', 4),
-                          ('五', 5),
-                          ('六', 6),
-                          ('七', 7),
-                          ('八', 8),
-                          ('九', 9),
-                          ('0', 0),
-                          ('1', 1),
-                          ('2', 2),
-                          ('3', 3),
-                          ('4', 4),
-                          ('5', 5),
-                          ('6', 6),
-                          ('7', 7),
-                          ('8', 8),
-                          ('9', 9),
-                          ('半', 0.5)])
-    FullToHalfMap = dict([('０', '0'),
-                          ('１', '1'),
-                          ('２', '2'),
-                          ('３', '3'),
-                          ('４', '4'),
-                          ('５', '5'),
-                          ('６', '6'),
-                          ('７', '7'),
-                          ('８', '8'),
-                          ('９', '9'),
-                          ('／', '/'),
-                          ('－', '-'),
-                          ('，', '\''),
-                          ('、', '\''),
-                          ('Ｇ', 'G'),
-                          ('Ｍ', 'M'),
-                          ('Ｔ', 'T'),
-                          ('Ｋ', 'K'),
-                          ('ｋ', 'k'),
-                          ('．', '.')])
-    UnitMap = dict([('万万', '億'),
-                    ('億万', '兆'),
-                    ('万億', '兆'),
-                    (' ', '')])
-    RoundDirectList = ['万', '億', '兆']
-    DigitalNumberRegex = f'((?<=(\\d|\\b))(k|t|m|g)(?=\\b))'
+    ZeroChar = '零'
+    PairChar = '対'
+    RoundNumberMap = dict([("k", 1000),
+                           ("m", 1000000),
+                           ("g", 1000000000),
+                           ("t", 1000000000000),
+                           ("b", 1000000000)])
+    RoundNumberMapChar = dict([("十", 10),
+                               ("百", 100),
+                               ("千", 1000),
+                               ("万", 10000),
+                               ("億", 100000000),
+                               ("兆", 1000000000000)])
+    ZeroToNineMap = dict([("零", 0),
+                          ("一", 1),
+                          ("二", 2),
+                          ("三", 3),
+                          ("四", 4),
+                          ("五", 5),
+                          ("六", 6),
+                          ("七", 7),
+                          ("八", 8),
+                          ("九", 9),
+                          ("0", 0),
+                          ("1", 1),
+                          ("2", 2),
+                          ("3", 3),
+                          ("4", 4),
+                          ("5", 5),
+                          ("6", 6),
+                          ("7", 7),
+                          ("8", 8),
+                          ("9", 9),
+                          ("半", 0.5)])
+    FullToHalfMap = dict([("０", "0"),
+                          ("１", "1"),
+                          ("２", "2"),
+                          ("３", "3"),
+                          ("４", "4"),
+                          ("５", "5"),
+                          ("６", "6"),
+                          ("７", "7"),
+                          ("８", "8"),
+                          ("９", "9"),
+                          ("／", "/"),
+                          ("－", "-"),
+                          ("，", "'"),
+                          ("、", "'"),
+                          ("Ｇ", "G"),
+                          ("Ｍ", "M"),
+                          ("Ｔ", "T"),
+                          ("Ｋ", "K"),
+                          ("ｋ", "k"),
+                          ("．", ".")])
+    UnitMap = dict([("万万", "億"),
+                    ("億万", "兆"),
+                    ("万億", "兆"),
+                    (" ", "")])
+    RoundDirectList = [r'万', r'億', r'兆']
+    TenChars = [r'十']
+    DigitalNumberRegex = f'((?<=(\\d|\\b)){BaseNumbers.MultiplierLookupRegex}(?=\\b))'
     ZeroToNineFullHalfRegex = f'[\\d１２３４５６７８９０]'
     DigitNumRegex = f'{ZeroToNineFullHalfRegex}+'
     DozenRegex = f'.*ダース$'
@@ -85,12 +96,14 @@ class JapaneseNumeric:
     SpeGetNumberRegex = f'{ZeroToNineFullHalfRegex}|{ZeroToNineIntegerRegex}|[半対]|[分厘]'
     PairRegex = '.*[対膳足]$'
     RoundNumberIntegerRegex = f'[十百千万億兆]'
-    WhiteListRegex = f'(。|，|、|（|）|”｜国|週間|時間|時|匹|キロ|トン|年|個|足|本|\\s|$)'
+    AllowListRegex = f'(。|，|、|（|）|”｜国|週間|時間|時|匹|キロ|トン|年|個|足|本|\\s|$)'
     NotSingleRegex = f'(?<!(第|だい))(({RoundNumberIntegerRegex}+({ZeroToNineIntegerRegex}+|{ZeroToNineFullHalfRegex}+|十)\\s*))|(({ZeroToNineIntegerRegex}+|{ZeroToNineFullHalfRegex}+|十)\\s*({RoundNumberIntegerRegex}\\s*){{1,2}})\\s*(([零]?({ZeroToNineIntegerRegex}+|{ZeroToNineFullHalfRegex}+|十)\\s*{RoundNumberIntegerRegex}{{0,1}})\\s*)*\\s*(\\s*(以上)?)'
-    SingleRegex = f'(({ZeroToNineIntegerRegex}|{ZeroToNineFullHalfRegex}|十)(?={WhiteListRegex}))'
+    SingleRegex = f'(({ZeroToNineIntegerRegex}|{ZeroToNineFullHalfRegex}|十)(?={AllowListRegex}))'
     AllIntRegex = f'(((({ZeroToNineIntegerRegex}|[十百千])\\s*{RoundNumberIntegerRegex}*)|({ZeroToNineFullHalfRegex}\\s*{RoundNumberIntegerRegex})){{1,2}}(\\s*[以上])?)'
+    PlaceHolderPureNumber = f'\\b'
+    PlaceHolderDefault = f'\\D|\\b'
     NumbersSpecialsChars = f'(({NegativeNumberTermsRegexNum}|{NegativeNumberTermsRegex})\\s*)?{ZeroToNineFullHalfRegex}+'
-    NumbersSpecialsCharsWithSuffix = f'{NegativeNumberTermsRegexNum}?{ZeroToNineFullHalfRegex}+\\s*(K|k|M|G|T|Ｍ|Ｋ|ｋ|Ｇ|Ｔ)'
+    NumbersSpecialsCharsWithSuffix = f'{NegativeNumberTermsRegexNum}?{ZeroToNineFullHalfRegex}+\\s*{BaseNumbers.NumberMultiplierRegex}'
     DottedNumbersSpecialsChar = f'{NegativeNumberTermsRegexNum}?{ZeroToNineFullHalfRegex}{{1,3}}([,，、]{ZeroToNineFullHalfRegex}{{3}})+'
     NumbersWithHalfDozen = f'半({RoundNumberIntegerRegex}|(ダース))'
     NumbersWithDozen = f'{AllIntRegex}(ダース)(?!{AllIntRegex})'
@@ -102,7 +115,7 @@ class JapaneseNumeric:
     DoubleSpecialsChars = f'(?<!({ZeroToNineFullHalfRegex}+[\\.．]{ZeroToNineFullHalfRegex}*))({NegativeNumberTermsRegexNum}\\s*)?{ZeroToNineFullHalfRegex}+[\\.．]{ZeroToNineFullHalfRegex}+(?!{ZeroToNineFullHalfRegex}*[\\.．]{ZeroToNineFullHalfRegex}+)'
     DoubleSpecialsCharsWithNegatives = f'(?<!({ZeroToNineFullHalfRegex}+|\\.\\.|．．))({NegativeNumberTermsRegexNum}\\s*)?[\\.．]{ZeroToNineFullHalfRegex}+(?!{ZeroToNineFullHalfRegex}*([\\.．]{ZeroToNineFullHalfRegex}+))'
     SimpleDoubleSpecialsChars = f'({NegativeNumberTermsRegexNum}\\s*)?{ZeroToNineFullHalfRegex}{{1,3}}([,，]{ZeroToNineFullHalfRegex}{{3}})+[\\.．]{ZeroToNineFullHalfRegex}+'
-    DoubleWithMultiplierRegex = f'({NegativeNumberTermsRegexNum}\\s*)?{ZeroToNineFullHalfRegex}+[\\.．]{ZeroToNineFullHalfRegex}+\\s*(K|k|M|G|T|Ｍ|Ｋ|ｋ|Ｇ|Ｔ)'
+    DoubleWithMultiplierRegex = f'({NegativeNumberTermsRegexNum}\\s*)?{ZeroToNineFullHalfRegex}+[\\.．]{ZeroToNineFullHalfRegex}+\\s*{BaseNumbers.NumberMultiplierRegex}'
     DoubleWithThousandsRegex = f'{NegativeNumberTermsRegex}{{0,1}}\\s*({ZeroToNineFullHalfRegex}+([\\.．]{ZeroToNineFullHalfRegex}+)?\\s*[万亿萬億]{{1,2}})'
     DoubleAllFloatRegex = f'(?<!(({AllIntRegex}[.]*)|{AllFloatRegex})*){AllFloatRegex}(?!{ZeroToNineIntegerRegex}*\\s*パーセント)'
     DoubleExponentialNotationRegex = f'(?<!{ZeroToNineFullHalfRegex}+[\\.．])({NegativeNumberTermsRegexNum}\\s*)?{ZeroToNineFullHalfRegex}+([\\.．]{ZeroToNineFullHalfRegex}+)?e(([-－+＋]*[1-9１２３４５６７８９]{ZeroToNineFullHalfRegex}*)|[0０](?!{ZeroToNineFullHalfRegex}+))'
@@ -116,15 +129,15 @@ class JapaneseNumeric:
     SimplePercentageRegex = f'({AllFloatRegex}|{AllIntRegex}|[百])\\s*パ\\s*ー\\s*セ\\s*ン\\s*ト'
     NumbersPercentagePointRegex = f'({ZeroToNineFullHalfRegex})+([\\.．]({ZeroToNineFullHalfRegex})+)?\\s*パ\\s*ー\\s*セ\\s*ン\\s*ト'
     NumbersPercentageWithSeparatorRegex = f'({ZeroToNineFullHalfRegex}{{1,3}}[,，、]{ZeroToNineFullHalfRegex}{{3}})+([\\.．]{ZeroToNineFullHalfRegex}+)*\\s*パ\\s*ー\\s*セ\\s*ン\\s*ト'
-    NumbersPercentageWithMultiplierRegex = f'(?<!{ZeroToNineIntegerRegex}){ZeroToNineFullHalfRegex}+[\\.．]{ZeroToNineFullHalfRegex}+\\s*(K|k|M|G|T|Ｍ|Ｋ|ｋ|Ｇ|Ｔ)\\s*パ\\s*ー\\s*セ\\s*ン\\s*ト'
+    NumbersPercentageWithMultiplierRegex = f'(?<!{ZeroToNineIntegerRegex}){ZeroToNineFullHalfRegex}+[\\.．]{ZeroToNineFullHalfRegex}+\\s*{BaseNumbers.NumberMultiplierRegex}\\s*パ\\s*ー\\s*セ\\s*ン\\s*ト'
     FractionPercentagePointRegex = f'(?<!({ZeroToNineFullHalfRegex}+[\\.．])){ZeroToNineFullHalfRegex}+[\\.．]{ZeroToNineFullHalfRegex}+(?!([\\.．]{ZeroToNineFullHalfRegex}+))\\s*パ\\s*ー\\s*セ\\s*ン\\s*ト'
     FractionPercentageWithSeparatorRegex = f'{ZeroToNineFullHalfRegex}{{1,3}}([,，、]{ZeroToNineFullHalfRegex}{{3}})+[\\.．]{ZeroToNineFullHalfRegex}+\\s*パ\\s*ー\\s*セ\\s*ン\\s*ト'
-    FractionPercentageWithMultiplierRegex = f'{ZeroToNineFullHalfRegex}+[\\.．]{ZeroToNineFullHalfRegex}+\\s*(K|k|M|G|T|Ｍ|Ｋ|ｋ|Ｇ|Ｔ)\\s*パ\\s*ー\\s*セ\\s*ン\\s*ト'
+    FractionPercentageWithMultiplierRegex = f'{ZeroToNineFullHalfRegex}+[\\.．]{ZeroToNineFullHalfRegex}+\\s*{BaseNumbers.NumberMultiplierRegex}\\s*パ\\s*ー\\s*セ\\s*ン\\s*ト'
     SimpleNumbersPercentageRegex = f'(?<!{ZeroToNineIntegerRegex}){ZeroToNineFullHalfRegex}+\\s*パ\\s*ー\\s*セ\\s*ン\\s*ト(?!([\\.．]{ZeroToNineFullHalfRegex}+))'
-    SimpleNumbersPercentageWithMultiplierRegex = f'(?<!{ZeroToNineIntegerRegex}){ZeroToNineFullHalfRegex}+\\s*(K|k|M|G|T|Ｍ|Ｋ|ｋ|Ｇ|Ｔ)\\s*パ\\s*ー\\s*セ\\s*ン\\s*ト'
+    SimpleNumbersPercentageWithMultiplierRegex = f'(?<!{ZeroToNineIntegerRegex}){ZeroToNineFullHalfRegex}+\\s*{BaseNumbers.NumberMultiplierRegex}\\s*パ\\s*ー\\s*セ\\s*ン\\s*ト'
     SimpleNumbersPercentagePointRegex = f'(?!{ZeroToNineIntegerRegex}){ZeroToNineFullHalfRegex}{{1,3}}([,，]{ZeroToNineFullHalfRegex}{{3}})+\\s*パ\\s*ー\\s*セ\\s*ン\\s*ト'
     IntegerPercentageRegex = f'{ZeroToNineFullHalfRegex}+\\s*パ\\s*ー\\s*セ\\s*ン\\s*ト'
-    IntegerPercentageWithMultiplierRegex = f'{ZeroToNineFullHalfRegex}+\\s*(K|k|M|G|T|Ｍ|Ｋ|ｋ|Ｇ|Ｔ)\\s*パ\\s*ー\\s*セ\\s*ン\\s*ト'
+    IntegerPercentageWithMultiplierRegex = f'{ZeroToNineFullHalfRegex}+\\s*{BaseNumbers.NumberMultiplierRegex}\\s*パ\\s*ー\\s*セ\\s*ン\\s*ト'
     NumbersFractionPercentageRegex = f'{ZeroToNineFullHalfRegex}{{1,3}}([,，]{ZeroToNineFullHalfRegex}{{3}})+\\s*パ\\s*ー\\s*セ\\s*ン\\s*ト'
     SimpleIntegerPercentageRegex = f'{NegativeNumberTermsRegexNum}?{ZeroToNineFullHalfRegex}+([\\.．]{ZeroToNineFullHalfRegex}+)?(\\s*)[％%]'
     NumbersFoldsPercentageRegex = f'{ZeroToNineFullHalfRegex}(([\\.．]?|\\s*){ZeroToNineFullHalfRegex})?\\s*[の]*\\s*割引'
@@ -158,4 +171,6 @@ class JapaneseNumeric:
     TwoNumberRangeRegex3 = f'({OneNumberRangeLessRegex1}|{OneNumberRangeLessRegex2}|{OneNumberRangeLessRegex3}|{OneNumberRangeLessRegex4})\\s*(と|は|((と)?同時に)|((と)?そして)|が|，|、|,)?\\s*({OneNumberRangeMoreRegex1}|{OneNumberRangeMoreRegex2}|{OneNumberRangeMoreRegex3}|{OneNumberRangeMoreRegex4})'
     TwoNumberRangeRegex4 = f'(?<number1>((?!((，(?!\\d+))|(,(?!\\d+))|。)).)+)\\s*{TillRegex}\\s*(?<number2>((?!((，(?!\\d+))|(,(?!\\d+))|。)).)+)'
     AmbiguousFractionConnectorsRegex = f'^[.]'
+    RelativeReferenceOffsetMap = dict([("", "")])
+    RelativeReferenceRelativeToMap = dict([("", "")])
 # pylint: enable=line-too-long

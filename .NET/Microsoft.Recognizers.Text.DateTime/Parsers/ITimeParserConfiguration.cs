@@ -5,7 +5,7 @@ using Microsoft.Recognizers.Text.DateTime.Utilities;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
-    public interface ITimeParserConfiguration : IOptionsConfiguration
+    public interface ITimeParserConfiguration : IDateTimeOptionsConfiguration
     {
         string TimeTokenPrefix { get; }
 
@@ -22,6 +22,5 @@ namespace Microsoft.Recognizers.Text.DateTime
         void AdjustByPrefix(string prefix, ref int hour, ref int min, ref bool hasMin);
 
         void AdjustBySuffix(string suffix, ref int hour, ref int min, ref bool hasMin, ref bool hasAm, ref bool hasPm);
-
     }
 }

@@ -1,8 +1,8 @@
-import { BaseNumberExtractor, RegExpValue, BasePercentageExtractor } from "../extractors";
+import { BaseNumberExtractor, RegExpValue, RegExpRegExp, BasePercentageExtractor } from "../extractors";
 import { Constants } from "../constants";
 import { LongFormatType } from "../models";
 import { ChineseNumeric } from "../../resources/chineseNumeric";
-import { RegExpUtility } from "@microsoft/recognizers-text"
+import { RegExpUtility } from "@microsoft/recognizers-text";
 
 export enum ChineseNumberExtractorMode {
     // Number extraction with an allow list that filters what numbers to extract.
@@ -27,6 +27,10 @@ export class ChineseNumberExtractor extends BaseNumberExtractor {
         fracExtract.regexes.forEach(r => regexes.push(r));
 
         this.regexes = regexes;
+
+        // Add filter
+        let ambiguityFiltersDict = new Array<RegExpRegExp>();
+        this.ambiguityFiltersDict = ambiguityFiltersDict;
     }
 }
 
@@ -70,6 +74,10 @@ export class ChineseIntegerExtractor extends BaseNumberExtractor {
             },
             { // 半百  半打
                 regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.NumbersWithHalfDozen, "gis"),
+                value: "IntegerChs"
+            },
+            { // 半
+                regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.HalfUnitRegex, "gis"),
                 value: "IntegerChs"
             },
             { // 一打  五十打
@@ -251,7 +259,7 @@ export class ChinesePercentageExtractor extends BaseNumberExtractor {
                 regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.NumbersFractionPercentageRegex, "gis"),
                 value: "PerNum"
             },
-            {
+            { // 32.5%
                 regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.SimpleIntegerPercentageRegex, "gis"),
                 value: "PerNum"
             },
@@ -279,7 +287,7 @@ export class ChinesePercentageExtractor extends BaseNumberExtractor {
                 regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.SimpleSpecialsPercentageRegex, "gis"),
                 value: "PerSpe"
             },
-            {
+            { // 打对折 半成
                 regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.SpecialsFoldsPercentageRegex, "gis"),
                 value: "PerSpe"
             }

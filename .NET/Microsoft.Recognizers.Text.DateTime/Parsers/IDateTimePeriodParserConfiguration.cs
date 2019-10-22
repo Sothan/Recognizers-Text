@@ -1,15 +1,13 @@
 ﻿using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
-using Microsoft.Recognizers.Text.Number;
-
 namespace Microsoft.Recognizers.Text.DateTime
 {
-    public interface IDateTimePeriodParserConfiguration : IOptionsConfiguration
+    public interface IDateTimePeriodParserConfiguration : IDateTimeOptionsConfiguration
     {
         string TokenBeforeDate { get; }
 
-        IDateTimeExtractor DateExtractor { get; }
+        IDateExtractor DateExtractor { get; }
 
         IDateTimeExtractor TimeExtractor { get; }
 
@@ -33,6 +31,8 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         IDateTimeParser DurationParser { get; }
 
+        IDateTimeParser TimeZoneParser { get; }
+
         Regex PureNumberFromToRegex { get; }
 
         Regex PureNumberBetweenAndRegex { get; }
@@ -41,7 +41,7 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         Regex TimeOfDayRegex { get; }
 
-        Regex PastRegex { get; }
+        Regex PreviousPrefixRegex { get; }
 
         Regex FutureRegex { get; }
 
@@ -68,6 +68,8 @@ namespace Microsoft.Recognizers.Text.DateTime
         Regex BeforeRegex { get; }
 
         Regex AfterRegex { get; }
+
+        bool CheckBothBeforeAfter { get; }
 
         IImmutableDictionary<string, string> UnitMap { get; }
 

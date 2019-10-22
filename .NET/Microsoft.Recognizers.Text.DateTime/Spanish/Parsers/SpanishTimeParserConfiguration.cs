@@ -4,11 +4,23 @@ using System.Text.RegularExpressions;
 
 using Microsoft.Recognizers.Definitions.Spanish;
 using Microsoft.Recognizers.Text.DateTime.Utilities;
+using Microsoft.Recognizers.Text.Utilities;
 
 namespace Microsoft.Recognizers.Text.DateTime.Spanish
 {
-    public class SpanishTimeParserConfiguration : BaseOptionsConfiguration, ITimeParserConfiguration
+    public class SpanishTimeParserConfiguration : BaseDateTimeOptionsConfiguration, ITimeParserConfiguration
     {
+        public SpanishTimeParserConfiguration(ICommonDateTimeParserConfiguration config)
+            : base(config)
+        {
+            TimeTokenPrefix = DateTimeDefinitions.TimeTokenPrefix;
+            AtRegex = SpanishTimeExtractorConfiguration.AtRegex;
+            TimeRegexes = SpanishTimeExtractorConfiguration.TimeRegexList;
+            UtilityConfiguration = config.UtilityConfiguration;
+            Numbers = config.Numbers;
+            TimeZoneParser = config.TimeZoneParser;
+        }
+
         public string TimeTokenPrefix { get; }
 
         public Regex AtRegex { get; }
@@ -23,20 +35,10 @@ namespace Microsoft.Recognizers.Text.DateTime.Spanish
 
         public IDateTimeParser TimeZoneParser { get; }
 
-        public SpanishTimeParserConfiguration(ICommonDateTimeParserConfiguration config) : base(config)
-        {
-            TimeTokenPrefix = DateTimeDefinitions.TimeTokenPrefix;
-            AtRegex = SpanishTimeExtractorConfiguration.AtRegex;
-            TimeRegexes = SpanishTimeExtractorConfiguration.TimeRegexList;
-            UtilityConfiguration = config.UtilityConfiguration;
-            Numbers = config.Numbers;
-            TimeZoneParser = new BaseTimeZoneParser();
-        }
-
         public void AdjustByPrefix(string prefix, ref int hour, ref int min, ref bool hasMin)
         {
             var deltaMin = 0;
-            var trimedPrefix = prefix.Trim().ToLowerInvariant();
+            var trimedPrefix = prefix.Trim();
 
             if (trimedPrefix.StartsWith("cuarto") || trimedPrefix.StartsWith("y cuarto"))
             {
@@ -60,7 +62,7 @@ namespace Microsoft.Recognizers.Text.DateTime.Spanish
                 }
                 else
                 {
-                    minStr = match.Groups["deltaminnum"].Value.ToLower();
+                    minStr = match.Groups["deltaminnum"].Value;
                     Numbers.TryGetValue(minStr, out deltaMin);
                 }
             }
@@ -69,7 +71,7 @@ namespace Microsoft.Recognizers.Text.DateTime.Spanish
                 trimedPrefix.EndsWith("pasadas las") || trimedPrefix.EndsWith("pasados las") ||
                 trimedPrefix.EndsWith("pasadas de las") || trimedPrefix.EndsWith("pasados de las"))
             {
-                //deltaMin it's positive
+                // deltaMin it's positive
             }
             else if (trimedPrefix.EndsWith("para la") || trimedPrefix.EndsWith("para las") ||
                      trimedPrefix.EndsWith("antes de la") || trimedPrefix.EndsWith("antes de las"))
@@ -89,33 +91,36 @@ namespace Microsoft.Recognizers.Text.DateTime.Spanish
 
         public void AdjustBySuffix(string suffix, ref int hour, ref int min, ref bool hasMin, ref bool hasAm, ref bool hasPm)
         {
-            var trimedSuffix = suffix.Trim().ToLowerInvariant();
+            var trimedSuffix = suffix.Trim();
             AdjustByPrefix(trimedSuffix, ref hour, ref min, ref hasMin);
 
             var deltaHour = 0;
-            var match = SpanishTimeExtractorConfiguration.TimeSuffix.Match(trimedSuffix);
-            if (match.Success && match.Index == 0 && match.Length == trimedSuffix.Length)
+            var match = SpanishTimeExtractorConfiguration.TimeSuffix.MatchExact(trimedSuffix, trim: true);
+
+            if (match.Success)
             {
                 var oclockStr = match.Groups["oclock"].Value;
                 if (string.IsNullOrEmpty(oclockStr))
                 {
-                    var amStr = match.Groups[Constants.AmGroupName].Value;
-                    if (!string.IsNullOrEmpty(amStr))
+                    var matchAmStr = match.Groups[Constants.AmGroupName].Value;
+                    if (!string.IsNullOrEmpty(matchAmStr))
                     {
                         if (hour >= Constants.HalfDayHourCount)
                         {
                             deltaHour = -Constants.HalfDayHourCount;
                         }
+
                         hasAm = true;
                     }
 
-                    var pmStr = match.Groups[Constants.PmGroupName].Value;
-                    if (!string.IsNullOrEmpty(pmStr))
+                    var matchPmStr = match.Groups[Constants.PmGroupName].Value;
+                    if (!string.IsNullOrEmpty(matchPmStr))
                     {
                         if (hour < Constants.HalfDayHourCount)
                         {
                             deltaHour = Constants.HalfDayHourCount;
                         }
+
                         hasPm = true;
                     }
                 }

@@ -1,15 +1,32 @@
 ﻿using System.Collections.Immutable;
 using System.Globalization;
-
+using System.Linq;
 using Microsoft.Recognizers.Definitions.Spanish;
 
 namespace Microsoft.Recognizers.Text.NumberWithUnit.Spanish
 {
     public class DimensionExtractorConfiguration : SpanishNumberWithUnitExtractorConfiguration
     {
-        public DimensionExtractorConfiguration() : base(new CultureInfo(Culture.Spanish)) { }
+        public static readonly ImmutableDictionary<string, string> DimensionSuffixList =
+            NumbersWithUnitDefinitions.InformationSuffixList
+                .Concat(AreaExtractorConfiguration.AreaSuffixList)
+                .Concat(LengthExtractorConfiguration.LengthSuffixList)
+                .Concat(SpeedExtractorConfiguration.SpeedSuffixList)
+                .Concat(VolumeExtractorConfiguration.VolumeSuffixList)
+                .Concat(WeightExtractorConfiguration.WeightSuffixList)
+                .ToImmutableDictionary(x => x.Key, x => x.Value);
 
-        public DimensionExtractorConfiguration(CultureInfo ci) : base(ci) { }
+        private static readonly ImmutableList<string> AmbiguousValues = NumbersWithUnitDefinitions.AmbiguousDimensionUnitList.ToImmutableList();
+
+        public DimensionExtractorConfiguration()
+               : base(new CultureInfo(Culture.Spanish))
+        {
+        }
+
+        public DimensionExtractorConfiguration(CultureInfo ci)
+               : base(ci)
+        {
+        }
 
         public override ImmutableDictionary<string, string> SuffixList => DimensionSuffixList;
 
@@ -18,9 +35,5 @@ namespace Microsoft.Recognizers.Text.NumberWithUnit.Spanish
         public override ImmutableList<string> AmbiguousUnitList => AmbiguousValues;
 
         public override string ExtractType => Constants.SYS_UNIT_DIMENSION;
-
-        public static readonly ImmutableDictionary<string, string> DimensionSuffixList = NumbersWithUnitDefinitions.DimensionSuffixList.ToImmutableDictionary();
-
-        private static readonly ImmutableList<string> AmbiguousValues = NumbersWithUnitDefinitions.AmbiguousDimensionUnitList.ToImmutableList();
     }
 }

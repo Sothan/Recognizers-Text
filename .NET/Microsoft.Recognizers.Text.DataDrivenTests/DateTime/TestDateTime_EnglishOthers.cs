@@ -7,39 +7,31 @@ namespace Microsoft.Recognizers.Text.DateTime.Tests
     [TestClass]
     public class TestDateTime_EnglishOthers : TestBase
     {
-        public static TestResources TestResources { get; private set; }
         public static IDictionary<string, IDateTimeExtractor> Extractors { get; private set; }
+
         public static IDictionary<string, IDateTimeParser> Parsers { get; private set; }
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            TestResources = new TestResources();
-            TestResources.InitFromTestContext(context);
             Extractors = new Dictionary<string, IDateTimeExtractor>();
             Parsers = new Dictionary<string, IDateTimeParser>();
         }
 
-        [TestInitialize]
-        public void TestInitialize()
+        [NetCoreTestDataSource]
+        [TestMethod]
+        public void DateParser(TestModel testSpec)
         {
-            base.TestSpecInitialize(TestResources);
+            ExtractorInitialize(Extractors);
+            ParserInitialize(Parsers);
+            TestDateTimeParser(testSpec);
         }
 
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "DateParser-EnglishOthers.csv", "DateParser-EnglishOthers#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void DateParser()
+        public void DateTimeModel(TestModel testSpec)
         {
-            base.ExtractorInitialize(Extractors);
-            base.ParserInitialize(Parsers);
-            base.TestDateTimeParser();
-        }
-
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "DateTimeModel-EnglishOthers.csv", "DateTimeModel-EnglishOthers#csv", DataAccessMethod.Sequential)]
-        [TestMethod]
-        public void DateTimeModel()
-        {
-            base.TestDateTime();
+            TestDateTime(testSpec);
         }
     }
 }

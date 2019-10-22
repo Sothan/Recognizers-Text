@@ -4,31 +4,37 @@ using System.Text.RegularExpressions;
 
 using Microsoft.Recognizers.Definitions.German;
 using Microsoft.Recognizers.Text.DateTime.Utilities;
+using Microsoft.Recognizers.Text.Utilities;
 
 namespace Microsoft.Recognizers.Text.DateTime.German
 {
-    public class GermanTimeParserConfiguration : BaseOptionsConfiguration, ITimeParserConfiguration
+    public class GermanTimeParserConfiguration : BaseDateTimeOptionsConfiguration, ITimeParserConfiguration
     {
+        private static readonly Regex TimeSuffixFull =
+            new Regex(DateTimeDefinitions.TimeSuffixFull, RegexOptions.Singleline);
+
+        private static readonly Regex LunchRegex =
+            new Regex(DateTimeDefinitions.LunchRegex, RegexOptions.Singleline);
+
+        private static readonly Regex NightRegex =
+            new Regex(DateTimeDefinitions.NightRegex, RegexOptions.Singleline);
+
+        public GermanTimeParserConfiguration(ICommonDateTimeParserConfiguration config)
+            : base(config)
+        {
+            TimeTokenPrefix = DateTimeDefinitions.TimeTokenPrefix;
+            AtRegex = GermanTimeExtractorConfiguration.AtRegex;
+            TimeRegexes = GermanTimeExtractorConfiguration.TimeRegexList;
+            UtilityConfiguration = config.UtilityConfiguration;
+            Numbers = config.Numbers;
+            TimeZoneParser = config.TimeZoneParser;
+        }
+
         public string TimeTokenPrefix { get; }
 
         public Regex AtRegex { get; }
 
         public Regex MealTimeRegex { get; }
-
-        private static readonly Regex TimeSuffixFull =
-            new Regex(
-                DateTimeDefinitions.TimeSuffixFull,
-                RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-        private static readonly Regex LunchRegex =
-            new Regex(
-                DateTimeDefinitions.LunchRegex,
-                RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-        private static readonly Regex NightRegex =
-            new Regex(
-                DateTimeDefinitions.NightRegex,
-                RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
         public IEnumerable<Regex> TimeRegexes { get; }
 
@@ -38,36 +44,26 @@ namespace Microsoft.Recognizers.Text.DateTime.German
 
         public IDateTimeParser TimeZoneParser { get; }
 
-        public GermanTimeParserConfiguration(ICommonDateTimeParserConfiguration config) : base(config)
-        {
-            TimeTokenPrefix = DateTimeDefinitions.TimeTokenPrefix;
-            AtRegex = GermanTimeExtractorConfiguration.AtRegex;
-            TimeRegexes = GermanTimeExtractorConfiguration.TimeRegexList;
-            UtilityConfiguration = config.UtilityConfiguration;
-            Numbers = config.Numbers;
-            TimeZoneParser = new BaseTimeZoneParser();
-        }
-
         public void AdjustByPrefix(string prefix, ref int hour, ref int min, ref bool hasMin)
         {
             var deltaMin = 0;
-            var trimedPrefix = prefix.Trim().ToLowerInvariant();
+            var trimmedPrefix = prefix.Trim();
 
-            if (trimedPrefix.StartsWith("halb"))
+            if (trimmedPrefix.StartsWith("halb"))
             {
                 deltaMin = -30;
             }
-            else if ( trimedPrefix.StartsWith("viertel nach"))
+            else if (trimmedPrefix.StartsWith("viertel nach"))
             {
                 deltaMin = 15;
             }
-            else if (trimedPrefix.StartsWith("viertel vor"))
+            else if (trimmedPrefix.StartsWith("viertel vor"))
             {
                 deltaMin = -15;
             }
             else
             {
-                var match = GermanTimeExtractorConfiguration.LessThanOneHour.Match(trimedPrefix);
+                var match = GermanTimeExtractorConfiguration.LessThanOneHour.Match(trimmedPrefix);
                 var minStr = match.Groups["deltamin"].Value;
                 if (!string.IsNullOrWhiteSpace(minStr))
                 {
@@ -75,12 +71,12 @@ namespace Microsoft.Recognizers.Text.DateTime.German
                 }
                 else
                 {
-                    minStr = match.Groups["deltaminnum"].Value.ToLower();
+                    minStr = match.Groups["deltaminnum"].Value;
                     deltaMin = Numbers[minStr];
                 }
             }
 
-            if (trimedPrefix.EndsWith("zum"))
+            if (trimmedPrefix.EndsWith("zum"))
             {
                 deltaMin = -deltaMin;
             }
@@ -91,21 +87,23 @@ namespace Microsoft.Recognizers.Text.DateTime.German
                 min += 60;
                 hour -= 1;
             }
+
             hasMin = true;
         }
 
         public void AdjustBySuffix(string suffix, ref int hour, ref int min, ref bool hasMin, ref bool hasAm, ref bool hasPm)
         {
-            var trimedSuffix = suffix.Trim().ToLowerInvariant();
+
             var deltaHour = 0;
-            var match = TimeSuffixFull.Match(trimedSuffix);
-            if (match.Success && match.Index == 0 && match.Length == trimedSuffix.Length)
+            var match = TimeSuffixFull.MatchExact(suffix, trim: true);
+
+            if (match.Success)
             {
                 var oclockStr = match.Groups["oclock"].Value;
                 if (string.IsNullOrEmpty(oclockStr))
                 {
-                    var amStr = match.Groups[Constants.AmGroupName].Value;
-                    if (!string.IsNullOrEmpty(amStr))
+                    var matchAmStr = match.Groups[Constants.AmGroupName].Value;
+                    if (!string.IsNullOrEmpty(matchAmStr))
                     {
                         if (hour >= Constants.HalfDayHourCount)
                         {
@@ -117,18 +115,18 @@ namespace Microsoft.Recognizers.Text.DateTime.German
                         }
                     }
 
-                    var pmStr = match.Groups[Constants.PmGroupName].Value;
-                    if (!string.IsNullOrEmpty(pmStr))
+                    var matchPmStr = match.Groups[Constants.PmGroupName].Value;
+                    if (!string.IsNullOrEmpty(matchPmStr))
                     {
                         if (hour < Constants.HalfDayHourCount)
                         {
                             deltaHour = Constants.HalfDayHourCount;
                         }
 
-                        if (LunchRegex.IsMatch(pmStr))
+                        if (LunchRegex.IsMatch(matchPmStr))
                         {
                             // for hour>=10, <12
-                            if (hour >=10 && hour <=Constants.HalfDayHourCount)
+                            if (hour >= 10 && hour <= Constants.HalfDayHourCount)
                             {
                                 deltaHour = 0;
                                 if (hour == Constants.HalfDayHourCount)
@@ -145,15 +143,16 @@ namespace Microsoft.Recognizers.Text.DateTime.German
                                 hasPm = true;
                             }
                         }
-                        else if (NightRegex.IsMatch(pmStr))
+                        else if (NightRegex.IsMatch(matchPmStr))
                         {
-                            //For hour <=3 or ==12, we treat it as am, for example 1 in the night (midnight) == 1am
+                            // For hour <=3 or ==12, we treat it as am, for example 1 in the night (midnight) == 1am
                             if (hour <= 3 || hour == Constants.HalfDayHourCount)
                             {
                                 if (hour == Constants.HalfDayHourCount)
                                 {
                                     hour = 0;
                                 }
+
                                 deltaHour = 0;
                                 hasAm = true;
                             }
@@ -166,7 +165,6 @@ namespace Microsoft.Recognizers.Text.DateTime.German
                         {
                             hasPm = true;
                         }
-                        
                     }
                 }
             }

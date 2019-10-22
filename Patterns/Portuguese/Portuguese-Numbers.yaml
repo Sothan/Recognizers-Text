@@ -1,5 +1,9 @@
 ---
 LangMarker: Por
+#Does this language use non-whitespace-separated numbers?
+CompoundNumberLanguage: !bool false
+#Does this culture uses period and comma intercheangeably as decimal separator?
+MultiDecimalSeparatorCulture: !bool false
 #Integer Regex
 HundredsNumberIntegerRegex: !simpleRegex
   def: (quatrocent[ao]s|trezent[ao]s|seiscent[ao]s|setecent[ao]s|oitocent[ao]s|novecent[ao]s|duzent[ao]s|quinhent[ao]s|cem|(?<!por\s+)(cento))
@@ -53,8 +57,9 @@ AllIntRegexWithDozenSuffixLocks: !nestedRegex
 NumbersWithPlaceHolder: !paramsRegex
   def: (((?<!\d+\s*)-\s*)|(?<=\b))\d+(?!(,\d+[a-zA-Z]))(?={placeholder})
   params: [ placeholder ]
-NumbersWithSuffix: !simpleRegex
-  def: (((?<=\W|^)-\s*)|(?<=\b))\d+\s*(k|M|T|G)(?=\b)
+NumbersWithSuffix: !nestedRegex
+  def: (((?<=\W|^)-\s*)|(?<=\b))\d+\s*{BaseNumbers.NumberMultiplierRegex}(?=\b)
+  references: [ BaseNumbers.NumberMultiplierRegex ]
 RoundNumberIntegerRegexWithLocks: !nestedRegex
   def: (?<=\b)({DigitsNumberRegex})+\s+{RoundNumberIntegerRegex}(?=\b)
   references: [ DigitsNumberRegex, RoundNumberIntegerRegex ]
@@ -111,14 +116,15 @@ FractionNounWithArticleRegex: !nestedRegex
   def: (?<=\b)({AllIntRegex}\s+(e\s+)?)?(um|um[as])(\s+)(({AllOrdinalRegex})|({SuffixRoundOrdinalRegex})|(e\s+)?mei[oa]?)(?=\b)
   references: [ AllIntRegex, AllOrdinalRegex, SuffixRoundOrdinalRegex ]
 FractionPrepositionRegex: !nestedRegex
-  def: (?<=\b)(?<numerator>({AllIntRegex})|((?<!\.)\d+))\s+sobre\s+(?<denominator>({AllIntRegex})|((\d+)(?!\.)))(?=\b)
-  references: [ AllIntRegex ]
+  def: (?<!{BaseNumbers.CommonCurrencySymbol}\s*)(?<=\b)(?<numerator>({AllIntRegex})|((?<!\.)\d+))\s+sobre\s+(?<denominator>({AllIntRegex})|((\d+)(?!\.)))(?=\b)
+  references: [ AllIntRegex, BaseNumbers.CommonCurrencySymbol ]
 #Double Regex
 AllFloatRegex: !nestedRegex
   def: '{AllIntRegex}(\s+(vírgula|virgula|e|ponto)){AllPointRegex}'
   references: [ AllIntRegex, AllPointRegex ]
-DoubleWithMultiplierRegex: !simpleRegex
-  def: (((?<!\d+\s*)-\s*)|((?<=\b)(?<!\d+\,)))\d+,\d+\s*(K|k|M|G|T)(?=\b)
+DoubleWithMultiplierRegex: !nestedRegex
+  def: (((?<!\d+\s*)-\s*)|((?<=\b)(?<!\d+\,)))\d+,\d+\s*{BaseNumbers.NumberMultiplierRegex}(?=\b)
+  references: [ BaseNumbers.NumberMultiplierRegex ]
 DoubleExponentialNotationRegex: !simpleRegex
   def: (((?<!\d+\s*)-\s*)|((?<=\b)(?<!\d+,)))(\d+(,\d+)?)e([+-]*[1-9]\d*)(?=\b)
 DoubleCaretExponentialNotationRegex: !simpleRegex
@@ -135,9 +141,6 @@ DoubleWithRoundNumber: !nestedRegex
 DoubleAllFloatRegex: !nestedRegex
   def: ((?<=\b){AllFloatRegex}(?=\b))
   references: [ AllFloatRegex ]
-#Number Regex
-CurrencyRegex: !simpleRegex
-  def: (((?<=\W|^)-\s*)|(?<=\b))\d+\s*(B|b|m|t|g)(?=\b)
 #Percentage Regex
 NumberWithSuffixPercentage: !nestedRegex
   def: (?<!%)({BaseNumbers.NumberReplaceToken})(\s*)(%(?!{BaseNumbers.NumberReplaceToken})|(por cento|pontos percentuais)\b)
@@ -159,8 +162,9 @@ WrittenFractionSuffix: [avo, ava]
 PluralSuffix: !char 's'
 HalfADozenRegex: !simpleRegex
   def: meia\s+d[uú]zia
-DigitalNumberRegex: !simpleRegex
-  def: ((?<=\b)(mil|cem|milh[oõ]es|milh[aã]o|bilh[oõ]es|bilh[aã]o|trilh[oõ]es|trilh[aã]o|milhares|centena|centenas|dezena|dezenas?)(?=\b))|((?<=(\d|\b))(k|t|m|g)(?=\b))
+DigitalNumberRegex: !nestedRegex
+  def: ((?<=\b)(mil|cem|milh[oõ]es|milh[aã]o|bilh[oõ]es|bilh[aã]o|trilh[oõ]es|trilh[aã]o|milhares|centena|centenas|dezena|dezenas?)(?=\b))|((?<=(\d|\b)){BaseNumbers.MultiplierLookupRegex}(?=\b))
+  references: [ BaseNumbers.MultiplierLookupRegex ]
 CardinalNumberMap: !dictionary
   types: [ string, long ]
   entries:
@@ -459,5 +463,20 @@ RoundNumberMap: !dictionary
     k: 1000
     m: 1000000
     g: 1000000000
+    b: 1000000000
     t: 1000000000000
+AmbiguityFiltersDict: !dictionary
+  types: [ string, string ]
+  entries:
+    '^[.]': ''
+RelativeReferenceOffsetMap: !dictionary
+  types: [ string, string ]
+# TODO: modify below regex according to the counterpart in English
+  entries:
+    '': ''
+RelativeReferenceRelativeToMap: !dictionary
+  types: [ string, string ]
+# TODO: modify below regex according to the counterpart in English
+  entries:
+    '': ''
 ...

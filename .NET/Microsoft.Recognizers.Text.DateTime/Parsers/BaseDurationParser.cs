@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using DateObject = System.DateTime;
@@ -16,6 +17,13 @@ namespace Microsoft.Recognizers.Text.DateTime
             config = configuration;
         }
 
+        public static bool IsLessThanDay(string unit)
+        {
+            return unit.Equals("S", StringComparison.Ordinal) ||
+                   unit.Equals("M", StringComparison.Ordinal) ||
+                   unit.Equals("H", StringComparison.Ordinal);
+        }
+
         public ParseResult Parse(ExtractResult result)
         {
             return this.Parse(result, DateObject.Now);
@@ -26,7 +34,7 @@ namespace Microsoft.Recognizers.Text.DateTime
             var referenceTime = refTime;
 
             object value = null;
-            if (er.Type.Equals(ParserName))
+            if (er.Type.Equals(ParserName, StringComparison.Ordinal))
             {
                 var innerResult = ParseMergedDuration(er.Text, referenceTime);
                 if (!innerResult.Success)
@@ -43,13 +51,14 @@ namespace Microsoft.Recognizers.Text.DateTime
                 {
                     innerResult.FutureResolution = new Dictionary<string, string>
                     {
-                        {TimeTypeConstants.DURATION, innerResult.FutureValue.ToString()}
+                        { TimeTypeConstants.DURATION, innerResult.FutureValue.ToString() },
                     };
 
                     innerResult.PastResolution = new Dictionary<string, string>
                     {
-                        {TimeTypeConstants.DURATION, innerResult.PastValue.ToString()}
+                        { TimeTypeConstants.DURATION, innerResult.PastValue.ToString() },
                     };
+
                     value = innerResult;
                 }
             }
@@ -75,10 +84,16 @@ namespace Microsoft.Recognizers.Text.DateTime
                 Type = er.Type,
                 Data = er.Data,
                 Value = value,
-                TimexStr = value == null ? "" : ((DateTimeResolutionResult)value).Timex,
-                ResolutionStr = ""
+                TimexStr = value == null ? string.Empty : ((DateTimeResolutionResult)value).Timex,
+                ResolutionStr = string.Empty,
             };
+
             return ret;
+        }
+
+        public List<DateTimeParseResult> FilterResults(string query, List<DateTimeParseResult> candidateResults)
+        {
+            return candidateResults;
         }
 
         // check {and} suffix after a {number} {unit}
@@ -87,8 +102,9 @@ namespace Microsoft.Recognizers.Text.DateTime
             double numVal = 0;
 
             var match = this.config.SuffixAndRegex.Match(text);
-            if (match.Success) {
-                var numStr = match.Groups["suffix_num"].Value.ToLower();
+            if (match.Success)
+            {
+                var numStr = match.Groups["suffix_num"].Value;
                 if (this.config.DoubleNumbers.ContainsKey(numStr))
                 {
                     numVal = this.config.DoubleNumbers[numStr];
@@ -101,7 +117,6 @@ namespace Microsoft.Recognizers.Text.DateTime
         // simple cases made by a number followed an unit
         private DateTimeResolutionResult ParseNumberWithUnit(string text, DateObject referenceTime)
         {
-
             DateTimeResolutionResult ret;
 
             if ((ret = ParseNumberSpaceUnit(text)).Success)
@@ -132,26 +147,27 @@ namespace Microsoft.Recognizers.Text.DateTime
             var ret = new DateTimeResolutionResult();
             var suffixStr = text;
 
-            // if there are spaces between nubmer and unit
-            var ers = this.config.CardinalExtractor.Extract(text);
+            // if there are spaces between number and unit
+            var ers = ExtractNumbersBeforeUnit(text);
+
             if (ers.Count == 1)
             {
                 var pr = this.config.NumberParser.Parse(ers[0]);
 
                 // followed unit: {num} (<followed unit>and a half hours)
                 var srcUnit = string.Empty;
-                var noNum = text.Substring(ers[0].Start + ers[0].Length ?? 0).Trim().ToLower();
+                var noNum = text.Substring(ers[0].Start + ers[0].Length ?? 0).Trim();
 
                 var match = this.config.FollowedUnit.Match(noNum);
                 if (match.Success)
                 {
-                    srcUnit = match.Groups["unit"].Value.ToLower();
-                    suffixStr = match.Groups[Constants.SuffixGroupName].Value.ToLower();
+                    srcUnit = match.Groups["unit"].Value;
+                    suffixStr = match.Groups[Constants.SuffixGroupName].Value;
                 }
 
                 if (match.Success && match.Groups[Constants.BusinessDayGroupName].Success)
                 {
-                    var numVal = int.Parse(pr.Value.ToString());
+                    var numVal = int.Parse(pr.Value.ToString(), CultureInfo.InvariantCulture);
                     ret.Timex = TimexUtility.GenerateDurationTimex(numVal, Constants.TimexBusinessDay, false);
                     ret.FutureValue = ret.PastValue = numVal * this.config.UnitValueMap[srcUnit.Split()[1]];
                     ret.Success = true;
@@ -161,7 +177,7 @@ namespace Microsoft.Recognizers.Text.DateTime
 
                 if (this.config.UnitMap.TryGetValue(srcUnit, out var unitStr))
                 {
-                    var numVal = double.Parse(pr.Value.ToString()) + ParseNumberWithUnitAndSuffix(suffixStr);
+                    var numVal = double.Parse(pr.Value.ToString(), CultureInfo.InvariantCulture) + ParseNumberWithUnitAndSuffix(suffixStr);
 
                     ret.Timex = TimexUtility.GenerateDurationTimex(numVal, unitStr, IsLessThanDay(unitStr));
                     ret.FutureValue = ret.PastValue = numVal * this.config.UnitValueMap[srcUnit];
@@ -169,7 +185,31 @@ namespace Microsoft.Recognizers.Text.DateTime
                     return ret;
                 }
             }
+
             return ret;
+        }
+
+        // @TODO improve re-use with Extractor
+        private List<ExtractResult> ExtractNumbersBeforeUnit(string text)
+        {
+            var ers = this.config.CardinalExtractor.Extract(text);
+
+            // In special cases some languages will treat "both" as a number to be combined with duration units.
+            var specialNumberUnitTokens = Token.GetTokenFromRegex(config.SpecialNumberUnitRegex, text);
+
+            foreach (var token in specialNumberUnitTokens)
+            {
+                var er = new ExtractResult
+                {
+                    Start = token.Start,
+                    Length = token.Length,
+                    Text = text.Substring(token.Start, token.Length),
+                };
+
+                ers.Add(er);
+            }
+
+            return ers;
         }
 
         private DateTimeResolutionResult ParseNumberCombinedUnit(string text)
@@ -181,27 +221,28 @@ namespace Microsoft.Recognizers.Text.DateTime
             var match = this.config.NumberCombinedWithUnit.Match(text);
             if (match.Success)
             {
-                var numVal = double.Parse(match.Groups["num"].Value) + ParseNumberWithUnitAndSuffix(suffixStr);
-                var numStr = numVal.ToString(CultureInfo.InvariantCulture);
+                var numVal = double.Parse(match.Groups["num"].Value, CultureInfo.InvariantCulture) + ParseNumberWithUnitAndSuffix(suffixStr);
 
-                var srcUnit = match.Groups["unit"].Value.ToLower();
+                var srcUnit = match.Groups["unit"].Value;
                 if (this.config.UnitMap.ContainsKey(srcUnit))
                 {
                     var unitStr = this.config.UnitMap[srcUnit];
 
-                    if (double.Parse(numStr) > 1000 && (unitStr.Equals(Constants.TimexYear) || unitStr.Equals(Constants.TimexMonthFull) ||
-                                                        unitStr.Equals(Constants.TimexWeek)))
+                    if (numVal > 1000 && (unitStr.Equals(Constants.TimexYear, StringComparison.Ordinal) ||
+                                                        unitStr.Equals(Constants.TimexMonthFull, StringComparison.Ordinal) ||
+                                                        unitStr.Equals(Constants.TimexWeek, StringComparison.Ordinal)))
                     {
                         return ret;
                     }
 
                     ret.Timex = TimexUtility.GenerateDurationTimex(numVal, unitStr, IsLessThanDay(unitStr));
-                    ret.FutureValue = ret.PastValue = double.Parse(numStr) * this.config.UnitValueMap[srcUnit];
+                    ret.FutureValue = ret.PastValue = numVal * this.config.UnitValueMap[srcUnit];
                     ret.Success = true;
 
                     return ret;
                 }
             }
+
             return ret;
         }
 
@@ -219,16 +260,18 @@ namespace Microsoft.Recognizers.Text.DateTime
             if (match.Success)
             {
                 var numVal = match.Groups["half"].Success ? 0.5 : 1;
-                numVal += ParseNumberWithUnitAndSuffix(suffixStr);
-                var numStr = numVal.ToString(CultureInfo.InvariantCulture);
+                numVal = match.Groups["quarter"].Success ? 0.25 : numVal;
+                numVal = match.Groups["threequarter"].Success ? 0.75 : numVal;
 
-                var srcUnit = match.Groups["unit"].Value.ToLower();
+                numVal += ParseNumberWithUnitAndSuffix(suffixStr);
+
+                var srcUnit = match.Groups["unit"].Value;
                 if (this.config.UnitMap.ContainsKey(srcUnit))
                 {
                     var unitStr = this.config.UnitMap[srcUnit];
 
                     ret.Timex = TimexUtility.GenerateDurationTimex(numVal, unitStr, IsLessThanDay(unitStr));
-                    ret.FutureValue = ret.PastValue = double.Parse(numStr) * this.config.UnitValueMap[srcUnit];
+                    ret.FutureValue = ret.PastValue = numVal * this.config.UnitValueMap[srcUnit];
                     ret.Success = true;
                 }
                 else if (match.Groups[Constants.BusinessDayGroupName].Success)
@@ -251,22 +294,21 @@ namespace Microsoft.Recognizers.Text.DateTime
             {
                 // set the inexact number "few", "some" to 3 for now
                 double numVal = match.Groups["NumTwoTerm"].Success ? 2 : 3;
+                var srcUnit = match.Groups["unit"].Value;
 
-                var numStr = numVal.ToString(CultureInfo.InvariantCulture);
-
-                var srcUnit = match.Groups["unit"].Value.ToLower();
                 if (this.config.UnitMap.ContainsKey(srcUnit))
                 {
                     var unitStr = this.config.UnitMap[srcUnit];
 
-                    if (double.Parse(numStr) > 1000 && (unitStr.Equals(Constants.TimexYear) || unitStr.Equals(Constants.TimexMonthFull) ||
-                                                        unitStr.Equals(Constants.TimexWeek)))
+                    if (numVal > 1000 && (unitStr.Equals(Constants.TimexYear, StringComparison.Ordinal) ||
+                                          unitStr.Equals(Constants.TimexMonthFull, StringComparison.Ordinal) ||
+                                          unitStr.Equals(Constants.TimexWeek, StringComparison.Ordinal)))
                     {
                         return ret;
                     }
 
                     ret.Timex = TimexUtility.GenerateDurationTimex(numVal, unitStr, IsLessThanDay(unitStr));
-                    ret.FutureValue = ret.PastValue = double.Parse(numStr) * this.config.UnitValueMap[srcUnit];
+                    ret.FutureValue = ret.PastValue = numVal * this.config.UnitValueMap[srcUnit];
                     ret.Success = true;
                 }
                 else if (match.Groups[Constants.BusinessDayGroupName].Success)
@@ -276,10 +318,11 @@ namespace Microsoft.Recognizers.Text.DateTime
                     ret.Success = true;
                 }
             }
+
             return ret;
         }
 
-        // handle cases that don't contain nubmer
+        // handle cases that don't contain numbers
         private DateTimeResolutionResult ParseImplicitDuration(string text, DateObject referenceTime)
         {
             var ret = new DateTimeResolutionResult();
@@ -323,7 +366,7 @@ namespace Microsoft.Recognizers.Text.DateTime
                 if (this.config.UnitValueMap.ContainsKey(srcUnit))
                 {
                     var unitStr = this.config.UnitMap[srcUnit];
-                    var numVal = double.Parse(numStr);
+                    var numVal = double.Parse(numStr, CultureInfo.InvariantCulture);
                     ret.Timex = TimexUtility.GenerateDurationTimex(numVal, unitStr, IsLessThanDay(unitStr));
                     ret.FutureValue = ret.PastValue = numVal * this.config.UnitValueMap[srcUnit];
                     ret.Success = true;
@@ -333,16 +376,12 @@ namespace Microsoft.Recognizers.Text.DateTime
             return match.Success;
         }
 
-        public static bool IsLessThanDay(string unit) {
-            return unit.Equals("S") || unit.Equals("M") || unit.Equals("H");
-        }
-
         private DateTimeResolutionResult ParseMergedDuration(string text, DateObject referenceTime)
         {
             var ret = new DateTimeResolutionResult();
             var durationExtractor = this.config.DurationExtractor;
 
-            //DurationExtractor without parameter will not extract merged duration
+            // DurationExtractor without parameter will not extract merged duration
             var ers = durationExtractor.Extract(text);
 
             // only handle merged duration cases like "1 month 21 days"
@@ -362,7 +401,7 @@ namespace Microsoft.Recognizers.Text.DateTime
                 }
             }
 
-            var end = ers[ers.Count - 1].Start + ers[ers.Count - 1].Length?? 0;
+            var end = ers[ers.Count - 1].Start + ers[ers.Count - 1].Length ?? 0;
             if (end != text.Length)
             {
                 var afterStr = text.Substring(end);
@@ -374,6 +413,7 @@ namespace Microsoft.Recognizers.Text.DateTime
 
             var prs = new List<DateTimeParseResult>();
             var timexDict = new Dictionary<string, string>();
+
             // insert timex into a dictionary
             foreach (var er in ers)
             {
@@ -393,18 +433,12 @@ namespace Microsoft.Recognizers.Text.DateTime
             // sort the timex using the granularity of the duration, "P1M23D" for "1 month 23 days" and "23 days 1 month"
             if (prs.Count == ers.Count)
             {
-                var unitList = new List<string>(timexDict.Keys);
-                unitList.Sort((x, y) => (this.config.UnitValueMap[x] < this.config.UnitValueMap[y]? 1 : -1));
-                ret.Timex = "P";
-                foreach (var unit in unitList)
-                {
-                    ret.Timex = $"{ret.Timex}{timexDict[unit].Substring(1)}";
-                }
+                ret.Timex = TimexUtility.GenerateCompoundDurationTimex(timexDict, config.UnitValueMap);
 
                 double value = 0;
                 foreach (var pr in prs)
                 {
-                    value += double.Parse(((DateTimeResolutionResult)pr.Value).FutureValue.ToString());
+                    value += double.Parse(((DateTimeResolutionResult)pr.Value).FutureValue.ToString(), CultureInfo.InvariantCulture);
                 }
 
                 ret.FutureValue = ret.PastValue = value;
@@ -412,11 +446,6 @@ namespace Microsoft.Recognizers.Text.DateTime
 
             ret.Success = true;
             return ret;
-        }
-
-        public List<DateTimeParseResult> FilterResults(string query, List<DateTimeParseResult> candidateResults)
-        {
-            return candidateResults;
         }
     }
 }

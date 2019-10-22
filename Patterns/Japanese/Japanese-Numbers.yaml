@@ -1,11 +1,17 @@
 ---
 #JapaneseNumberParserConfiguration
-LangMarker: ''
+LangMarker: Jpn
+#Does this language use non-whitespace-separated numbers?
+CompoundNumberLanguage: !bool true
+#Does this culture uses period and comma intercheangeably as decimal separator?
+MultiDecimalSeparatorCulture: !bool false
 DecimalSeparatorChar: !char '.'
 FractionMarkerToken: ''
 NonDecimalSeparatorChar: !char ' '
 HalfADozenText: ''
 WordSeparatorToken: ''
+ZeroChar: !char '零'
+PairChar: !char '対'
 RoundNumberMap: !dictionary
   types: [string, long]
   entries:
@@ -13,6 +19,7 @@ RoundNumberMap: !dictionary
     m: 1000000
     g: 1000000000
     t: 1000000000000
+    b: 1000000000
 RoundNumberMapChar: !dictionary
   types: [char, long]
   entries:
@@ -61,8 +68,8 @@ FullToHalfMap: !dictionary
     ９: '9'
     ／: '/'
     －: '-'
-    ，: \'
-    、: \'
+    ，: "'"
+    、: "'"
     Ｇ: G
     Ｍ: M
     Ｔ: T
@@ -82,8 +89,13 @@ RoundDirectList: !list
     - 万
     - 億
     - 兆
-DigitalNumberRegex: !simpleRegex
-  def: ((?<=(\d|\b))(k|t|m|g)(?=\b))
+TenChars: !list
+  types: [char]
+  entries:
+    - 十
+DigitalNumberRegex: !nestedRegex
+  def: ((?<=(\d|\b)){BaseNumbers.MultiplierLookupRegex}(?=\b))
+  references: [BaseNumbers.MultiplierLookupRegex]
 ZeroToNineFullHalfRegex: !simpleRegex
   def: '[\d１２３４５６７８９０]'
 DigitNumRegex: !nestedRegex
@@ -114,23 +126,27 @@ PairRegex: .*[対膳足]$
 #IntegerExtractor
 RoundNumberIntegerRegex: !simpleRegex
   def: '[十百千万億兆]'
-WhiteListRegex: !simpleRegex
+AllowListRegex: !simpleRegex
   def: (。|，|、|（|）|”｜国|週間|時間|時|匹|キロ|トン|年|個|足|本|\s|$)
 NotSingleRegex: !nestedRegex
   def: (?<!(第|だい))(({RoundNumberIntegerRegex}+({ZeroToNineIntegerRegex}+|{ZeroToNineFullHalfRegex}+|十)\s*))|(({ZeroToNineIntegerRegex}+|{ZeroToNineFullHalfRegex}+|十)\s*({RoundNumberIntegerRegex}\s*){1,2})\s*(([零]?({ZeroToNineIntegerRegex}+|{ZeroToNineFullHalfRegex}+|十)\s*{RoundNumberIntegerRegex}{0,1})\s*)*\s*(\s*(以上)?)
   references: [ZeroToNineIntegerRegex, ZeroToNineFullHalfRegex, RoundNumberIntegerRegex]
 SingleRegex: !nestedRegex
-  def: (({ZeroToNineIntegerRegex}|{ZeroToNineFullHalfRegex}|十)(?={WhiteListRegex}))
-  references: [ZeroToNineIntegerRegex, ZeroToNineFullHalfRegex, WhiteListRegex]
+  def: (({ZeroToNineIntegerRegex}|{ZeroToNineFullHalfRegex}|十)(?={AllowListRegex}))
+  references: [ZeroToNineIntegerRegex, ZeroToNineFullHalfRegex, AllowListRegex]
 AllIntRegex: !nestedRegex
   def: (((({ZeroToNineIntegerRegex}|[十百千])\s*{RoundNumberIntegerRegex}*)|({ZeroToNineFullHalfRegex}\s*{RoundNumberIntegerRegex})){1,2}(\s*[以上])?)
   references: [ZeroToNineIntegerRegex, ZeroToNineFullHalfRegex, RoundNumberIntegerRegex]
+PlaceHolderPureNumber: !simpleRegex
+  def: \b
+PlaceHolderDefault: !simpleRegex
+  def: \D|\b
 NumbersSpecialsChars: !nestedRegex
   def: (({NegativeNumberTermsRegexNum}|{NegativeNumberTermsRegex})\s*)?{ZeroToNineFullHalfRegex}+
   references: [NegativeNumberTermsRegexNum, ZeroToNineFullHalfRegex, NegativeNumberTermsRegex ]
 NumbersSpecialsCharsWithSuffix: !nestedRegex
-  def: '{NegativeNumberTermsRegexNum}?{ZeroToNineFullHalfRegex}+\s*(K|k|M|G|T|Ｍ|Ｋ|ｋ|Ｇ|Ｔ)'
-  references: [NegativeNumberTermsRegexNum, ZeroToNineFullHalfRegex]
+  def: '{NegativeNumberTermsRegexNum}?{ZeroToNineFullHalfRegex}+\s*{BaseNumbers.NumberMultiplierRegex}'
+  references: [NegativeNumberTermsRegexNum, ZeroToNineFullHalfRegex, BaseNumbers.NumberMultiplierRegex]
 DottedNumbersSpecialsChar: !nestedRegex
   def: '{NegativeNumberTermsRegexNum}?{ZeroToNineFullHalfRegex}{1,3}([,，、]{ZeroToNineFullHalfRegex}{3})+'
   references: [NegativeNumberTermsRegexNum, ZeroToNineFullHalfRegex]
@@ -165,8 +181,8 @@ SimpleDoubleSpecialsChars: !nestedRegex
   def: ({NegativeNumberTermsRegexNum}\s*)?{ZeroToNineFullHalfRegex}{1,3}([,，]{ZeroToNineFullHalfRegex}{3})+[\.．]{ZeroToNineFullHalfRegex}+
   references: [NegativeNumberTermsRegexNum, ZeroToNineFullHalfRegex]
 DoubleWithMultiplierRegex: !nestedRegex
-  def: ({NegativeNumberTermsRegexNum}\s*)?{ZeroToNineFullHalfRegex}+[\.．]{ZeroToNineFullHalfRegex}+\s*(K|k|M|G|T|Ｍ|Ｋ|ｋ|Ｇ|Ｔ)
-  references: [NegativeNumberTermsRegexNum, ZeroToNineFullHalfRegex]
+  def: ({NegativeNumberTermsRegexNum}\s*)?{ZeroToNineFullHalfRegex}+[\.．]{ZeroToNineFullHalfRegex}+\s*{BaseNumbers.NumberMultiplierRegex}
+  references: [NegativeNumberTermsRegexNum, ZeroToNineFullHalfRegex, BaseNumbers.NumberMultiplierRegex]
 DoubleWithThousandsRegex: !nestedRegex
   def: '{NegativeNumberTermsRegex}{0,1}\s*({ZeroToNineFullHalfRegex}+([\.．]{ZeroToNineFullHalfRegex}+)?\s*[万亿萬億]{1,2})'
   references: [NegativeNumberTermsRegex, ZeroToNineFullHalfRegex]
@@ -210,8 +226,8 @@ NumbersPercentageWithSeparatorRegex: !nestedRegex
   def: ({ZeroToNineFullHalfRegex}{1,3}[,，、]{ZeroToNineFullHalfRegex}{3})+([\.．]{ZeroToNineFullHalfRegex}+)*\s*パ\s*ー\s*セ\s*ン\s*ト
   references: [ZeroToNineIntegerRegex, ZeroToNineFullHalfRegex]
 NumbersPercentageWithMultiplierRegex: !nestedRegex
-  def: (?<!{ZeroToNineIntegerRegex}){ZeroToNineFullHalfRegex}+[\.．]{ZeroToNineFullHalfRegex}+\s*(K|k|M|G|T|Ｍ|Ｋ|ｋ|Ｇ|Ｔ)\s*パ\s*ー\s*セ\s*ン\s*ト
-  references: [ZeroToNineIntegerRegex, ZeroToNineFullHalfRegex]
+  def: (?<!{ZeroToNineIntegerRegex}){ZeroToNineFullHalfRegex}+[\.．]{ZeroToNineFullHalfRegex}+\s*{BaseNumbers.NumberMultiplierRegex}\s*パ\s*ー\s*セ\s*ン\s*ト
+  references: [ZeroToNineIntegerRegex, ZeroToNineFullHalfRegex, BaseNumbers.NumberMultiplierRegex]
 FractionPercentagePointRegex: !nestedRegex
   def: (?<!({ZeroToNineFullHalfRegex}+[\.．])){ZeroToNineFullHalfRegex}+[\.．]{ZeroToNineFullHalfRegex}+(?!([\.．]{ZeroToNineFullHalfRegex}+))\s*パ\s*ー\s*セ\s*ン\s*ト
   references: [ZeroToNineFullHalfRegex]
@@ -219,14 +235,14 @@ FractionPercentageWithSeparatorRegex: !nestedRegex
   def: '{ZeroToNineFullHalfRegex}{1,3}([,，、]{ZeroToNineFullHalfRegex}{3})+[\.．]{ZeroToNineFullHalfRegex}+\s*パ\s*ー\s*セ\s*ン\s*ト'
   references: [ZeroToNineFullHalfRegex]
 FractionPercentageWithMultiplierRegex: !nestedRegex
-  def: '{ZeroToNineFullHalfRegex}+[\.．]{ZeroToNineFullHalfRegex}+\s*(K|k|M|G|T|Ｍ|Ｋ|ｋ|Ｇ|Ｔ)\s*パ\s*ー\s*セ\s*ン\s*ト'
-  references: [ZeroToNineFullHalfRegex]
+  def: '{ZeroToNineFullHalfRegex}+[\.．]{ZeroToNineFullHalfRegex}+\s*{BaseNumbers.NumberMultiplierRegex}\s*パ\s*ー\s*セ\s*ン\s*ト'
+  references: [ZeroToNineFullHalfRegex, BaseNumbers.NumberMultiplierRegex]
 SimpleNumbersPercentageRegex: !nestedRegex
   def: (?<!{ZeroToNineIntegerRegex}){ZeroToNineFullHalfRegex}+\s*パ\s*ー\s*セ\s*ン\s*ト(?!([\.．]{ZeroToNineFullHalfRegex}+))
   references: [ZeroToNineIntegerRegex, ZeroToNineFullHalfRegex]
 SimpleNumbersPercentageWithMultiplierRegex: !nestedRegex
-  def: (?<!{ZeroToNineIntegerRegex}){ZeroToNineFullHalfRegex}+\s*(K|k|M|G|T|Ｍ|Ｋ|ｋ|Ｇ|Ｔ)\s*パ\s*ー\s*セ\s*ン\s*ト
-  references: [ZeroToNineIntegerRegex, ZeroToNineFullHalfRegex]
+  def: (?<!{ZeroToNineIntegerRegex}){ZeroToNineFullHalfRegex}+\s*{BaseNumbers.NumberMultiplierRegex}\s*パ\s*ー\s*セ\s*ン\s*ト
+  references: [ZeroToNineIntegerRegex, ZeroToNineFullHalfRegex, BaseNumbers.NumberMultiplierRegex]
 SimpleNumbersPercentagePointRegex: !nestedRegex
   def: (?!{ZeroToNineIntegerRegex}){ZeroToNineFullHalfRegex}{1,3}([,，]{ZeroToNineFullHalfRegex}{3})+\s*パ\s*ー\s*セ\s*ン\s*ト
   references: [ZeroToNineIntegerRegex,ZeroToNineFullHalfRegex]
@@ -234,8 +250,8 @@ IntegerPercentageRegex: !nestedRegex
   def: '{ZeroToNineFullHalfRegex}+\s*パ\s*ー\s*セ\s*ン\s*ト'
   references: [ZeroToNineFullHalfRegex]
 IntegerPercentageWithMultiplierRegex: !nestedRegex
-  def: '{ZeroToNineFullHalfRegex}+\s*(K|k|M|G|T|Ｍ|Ｋ|ｋ|Ｇ|Ｔ)\s*パ\s*ー\s*セ\s*ン\s*ト'
-  references: [ZeroToNineFullHalfRegex]
+  def: '{ZeroToNineFullHalfRegex}+\s*{BaseNumbers.NumberMultiplierRegex}\s*パ\s*ー\s*セ\s*ン\s*ト'
+  references: [ZeroToNineFullHalfRegex, BaseNumbers.NumberMultiplierRegex]
 NumbersFractionPercentageRegex: !nestedRegex
   def: '{ZeroToNineFullHalfRegex}{1,3}([,，]{ZeroToNineFullHalfRegex}{3})+\s*パ\s*ー\s*セ\s*ン\s*ト'
   references: [ZeroToNineFullHalfRegex]
@@ -325,4 +341,14 @@ TwoNumberRangeRegex4: !nestedRegex
 AmbiguousFractionConnectorsRegex: !simpleRegex
 # TODO: modify below regex according to the counterpart in English
   def: ^[.]
+RelativeReferenceOffsetMap: !dictionary
+  types: [ string, string ]
+# TODO: modify below regex according to the counterpart in English
+  entries:
+    '': ''
+RelativeReferenceRelativeToMap: !dictionary
+  types: [ string, string ]
+# TODO: modify below regex according to the counterpart in English
+  entries:
+    '': ''
 ...

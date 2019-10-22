@@ -17,6 +17,8 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         public string Mod { get; set; }
 
+        public bool HasRangeChangingMod { get; set; } = false;
+
         public string Comment { get; set; }
 
         public Dictionary<string, string> FutureResolution { get; set; }
@@ -32,14 +34,5 @@ namespace Microsoft.Recognizers.Text.DateTime
         public TimeZoneResolutionResult TimeZoneResolution { get; set; }
 
         public List<object> List { get; set; }
-    }
-
-    public class TimeZoneResolutionResult
-    {
-        public string Value { get; set; }
-
-        public int UtcOffsetMins { get; set; }
-
-        public string TimeZoneText { get; set; }
     }
 }

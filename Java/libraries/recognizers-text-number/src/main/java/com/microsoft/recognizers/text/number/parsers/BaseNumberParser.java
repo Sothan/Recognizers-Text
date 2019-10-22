@@ -1,12 +1,21 @@
 package com.microsoft.recognizers.text.number.parsers;
 
+import com.microsoft.recognizers.text.CultureInfo;
 import com.microsoft.recognizers.text.ExtractResult;
 import com.microsoft.recognizers.text.IParser;
 import com.microsoft.recognizers.text.ParseResult;
 import com.microsoft.recognizers.text.number.Constants;
-import com.microsoft.recognizers.text.utilities.FormatUtility;
+import com.microsoft.recognizers.text.utilities.QueryProcessor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,17 +57,17 @@ public class BaseNumberParser implements IParser {
     @Override
     public ParseResult parse(ExtractResult extractResult) {
         // check if the parser is configured to support specific types
-        if (supportedTypes.isPresent() && !this.supportedTypes.get().contains(extractResult.type)) {
+        if (supportedTypes.isPresent() && !this.supportedTypes.get().contains(extractResult.getType())) {
             return null;
         }
 
         String extra;
         ParseResult ret = null;
 
-        if (extractResult.data instanceof String) {
-            extra = (String) extractResult.data;
+        if (extractResult.getData() instanceof String) {
+            extra = (String)extractResult.getData();
         } else {
-            if (this.longFormatRegex.matcher(extractResult.text).find()) {
+            if (this.longFormatRegex.matcher(extractResult.getText()).find()) {
                 extra = "Num";
             } else {
                 extra = config.getLangMarker();
@@ -67,15 +76,16 @@ public class BaseNumberParser implements IParser {
 
         // Resolve symbol prefix
         boolean isNegative = false;
-        Matcher matchNegative = config.getNegativeNumberSignRegex().matcher(extractResult.text);
+        Matcher matchNegative = config.getNegativeNumberSignRegex().matcher(extractResult.getText());
         if (matchNegative.find()) {
             isNegative = true;
             extractResult = new ExtractResult(
-                    extractResult.start,
-                    extractResult.length,
-                    extractResult.text.substring(matchNegative.group(1).length()),
-                    extractResult.type,
-                    extractResult.data);
+                    extractResult.getStart(),
+                    extractResult.getLength(),
+                    extractResult.getText().substring(matchNegative.group(1).length()),
+                    extractResult.getType(),
+                    extractResult.getData(),
+                    extractResult.getMetadata());
         }
 
         if (extra.contains("Num")) {
@@ -89,23 +99,25 @@ public class BaseNumberParser implements IParser {
             ret = powerNumberParse(extractResult);
         }
 
-        if (ret != null && ret.value != null) {
+        if (ret != null && ret.getValue() != null) {
             if (isNegative) {
                 // Recover to the original extracted Text
                 ret = new ParseResult(
-                        ret.start,
-                        ret.length,
-                        matchNegative.group(1) + extractResult.text,
-                        ret.type,
-                        ret.data,
-                        -(double) ret.value,
-                        ret.resolutionStr);
+                        ret.getStart(),
+                        ret.getLength(),
+                        matchNegative.group(1) + extractResult.getText(),
+                        ret.getType(),
+                        ret.getData(),
+                        -(double)ret.getValue(),
+                        ret.getResolutionStr());
             }
 
-            String resolutionStr = config.getCultureInfo() != null
-                    ? NumberFormatUtility.format(ret.value, config.getCultureInfo())
-                    : ret.value.toString();
-            ret = ret.withResolutionStr(resolutionStr);
+            String resolutionStr = config.getCultureInfo() != null ? NumberFormatUtility.format(ret.getValue(), config.getCultureInfo()) : ret.getValue().toString();
+            ret.setResolutionStr(resolutionStr);
+        }
+
+        if (ret != null) {
+            ret.setText(ret.getText().toLowerCase(Locale.ROOT));
         }
 
         return ret;
@@ -118,14 +130,9 @@ public class BaseNumberParser implements IParser {
      * @return
      */
     protected ParseResult digitNumberParse(ExtractResult extractResult) {
-        ParseResult result = new ParseResult(
-                extractResult.start,
-                extractResult.length,
-                extractResult.text,
-                extractResult.type,
-                null,
-                null,
-                null);
+
+        ParseResult result = new ParseResult(extractResult.getStart(), extractResult.getLength(), extractResult.getText(),
+                extractResult.getType(),null,null,null);
 
         //[1] 24
         //[2] 12 32/33
@@ -133,9 +140,9 @@ public class BaseNumberParser implements IParser {
         //[4] 234.567
         //[5] 44/55
         //[6] 2 hundred
-        //dot occured.
+        //dot occurred.
         double power = 1;
-        String handle = extractResult.text.toLowerCase();
+        String handle = extractResult.getText().toLowerCase();
         Matcher match = config.getDigitalNumberRegex().matcher(handle);
         int startIndex = 0;
         while (match.find()) {
@@ -147,22 +154,22 @@ public class BaseNumberParser implements IParser {
             power *= rep;
 
             while ((tmpIndex = handle.indexOf(matched.toLowerCase(), startIndex)) >= 0) {
-                String front = FormatUtility.trimEnd(handle.substring(0, tmpIndex));
+                String front = QueryProcessor.trimEnd(handle.substring(0, tmpIndex));
                 startIndex = front.length();
                 handle = front + handle.substring(tmpIndex + matched.length());
             }
         }
 
-        //scale used in the calculate of double
-        result = result.withValue(getDigitalValue(handle, power));
+        // Scale used in the calculate of double
+        result.setValue(getDigitalValue(handle, power));
 
         return result;
     }
 
     private ParseResult fracLikeNumberParse(ExtractResult extractResult) {
 
-        ParseResult result = new ParseResult(extractResult.start, extractResult.length, extractResult.text, extractResult.type, null, null, null);
-        String resultText = extractResult.text.toLowerCase();
+        ParseResult result = new ParseResult(extractResult.getStart(), extractResult.getLength(), extractResult.getText(), extractResult.getType(), null, null, null);
+        String resultText = extractResult.getText().toLowerCase();
 
         Matcher match = config.getFractionPrepositionRegex().matcher(resultText);
         if (match.find()) {
@@ -170,15 +177,15 @@ public class BaseNumberParser implements IParser {
             String numerator = match.group("numerator");
             String denominator = match.group("denominator");
 
-            double smallValue = Character.isDigit(numerator.charAt(0))
-                    ? getDigitalValue(numerator, 1)
-                    : getIntValue(getMatches(numerator));
+            double smallValue = Character.isDigit(numerator.charAt(0)) ?
+                    getDigitalValue(numerator, 1) :
+                    getIntValue(getMatches(numerator));
 
-            double bigValue = Character.isDigit(denominator.charAt(0))
-                    ? getDigitalValue(denominator, 1)
-                    : getIntValue(getMatches(denominator));
+            double bigValue = Character.isDigit(denominator.charAt(0)) ?
+                    getDigitalValue(denominator, 1) :
+                    getIntValue(getMatches(denominator));
 
-            result = result.withValue(smallValue / bigValue);
+            result.setValue(smallValue / bigValue);
         } else {
             List<String> fracWords = config.normalizeTokenSet(Arrays.asList(resultText.split(" ")), result);
 
@@ -187,11 +194,17 @@ public class BaseNumberParser implements IParser {
             long currentValue = config.resolveCompositeNumber(fracWords.get(splitIndex));
             long roundValue = 1;
 
+            // For case like "half"
+            if (fracWords.size() == 1) {
+                result.setValue(1 / getIntValue(fracWords));
+                return result;
+            }
+
             for (splitIndex = fracWords.size() - 2; splitIndex >= 0; splitIndex--) {
 
                 String fracWord = fracWords.get(splitIndex);
                 if (config.getWrittenFractionSeparatorTexts().contains(fracWord) ||
-                        config.getWrittenIntegerSeparatorTexts().contains(fracWord)) {
+                    config.getWrittenIntegerSeparatorTexts().contains(fracWord)) {
                     continue;
                 }
 
@@ -202,8 +215,8 @@ public class BaseNumberParser implements IParser {
 
                 // previous : hundred
                 // current : one
-                if ((previousValue >= smHundreds && previousValue > currentValue)
-                        || (previousValue < smHundreds && isComposable(currentValue, previousValue))) {
+                if ((previousValue >= smHundreds && previousValue > currentValue) ||
+                        (previousValue < smHundreds && isComposable(currentValue, previousValue))) {
                     if (previousValue < smHundreds && currentValue >= roundValue) {
                         roundValue = currentValue;
                     } else if (previousValue < smHundreds && currentValue < roundValue) {
@@ -218,9 +231,9 @@ public class BaseNumberParser implements IParser {
                         while (splitIndex <= fracWords.size() - 2) {
                             // e.g. one hundred thousand
                             // frac[i+1] % 100 && frac[i] % 100 = 0
-                            if (config.resolveCompositeNumber(fracWords.get(splitIndex)) >= smHundreds
-                                    && !config.getWrittenFractionSeparatorTexts().contains(fracWords.get(splitIndex + 1))
-                                    && config.resolveCompositeNumber(fracWords.get(splitIndex + 1)) < smHundreds) {
+                            if (config.resolveCompositeNumber(fracWords.get(splitIndex)) >= smHundreds &&
+                                    !config.getWrittenFractionSeparatorTexts().contains(fracWords.get(splitIndex + 1)) &&
+                                    config.resolveCompositeNumber(fracWords.get(splitIndex + 1)) < smHundreds) {
                                 splitIndex++;
                                 break;
                             }
@@ -273,9 +286,9 @@ public class BaseNumberParser implements IParser {
 
             // Find mixed number
             if (mixedIndex != fracWords.size() && numerValue < denomiValue) {
-                result = result.withValue(intValue + numerValue / denomiValue);
+                result.setValue(intValue + numerValue / denomiValue);
             } else {
-                result = result.withValue((intValue + numerValue) / denomiValue);
+                result.setValue((intValue + numerValue) / denomiValue);
             }
         }
 
@@ -284,23 +297,23 @@ public class BaseNumberParser implements IParser {
 
     private ParseResult textNumberParse(ExtractResult extractResult) {
 
-        ParseResult result = new ParseResult(extractResult.start, extractResult.length, extractResult.text, extractResult.type, null, null, null);
-        String handle = extractResult.text.toLowerCase();
+        ParseResult result = new ParseResult(extractResult.getStart(), extractResult.getLength(), extractResult.getText(), extractResult.getType(), null, null, null);
+        String handle = extractResult.getText().toLowerCase();
 
         //region Special case for "dozen"
         handle = config.getHalfADozenRegex().matcher(handle).replaceAll(config.getHalfADozenText());
         //endregion
 
-        List<String> numGroup = FormatUtility.split(handle, config.getWrittenDecimalSeparatorTexts());
+        List<String> numGroup = QueryProcessor.split(handle, config.getWrittenDecimalSeparatorTexts());
 
         //region IntegerPart
         String intPart = numGroup.get(0);
 
         //Store all match str.
         List<String> matchStrs = new ArrayList<>();
-        Matcher sMatch = textNumberRegex.matcher(intPart);
-        while (sMatch.find()) {
-            String matchStr = sMatch.group().toLowerCase();
+        Matcher smatch = textNumberRegex.matcher(intPart);
+        while (smatch.find()) {
+            String matchStr = smatch.group().toLowerCase();
             matchStrs.add(matchStr);
         }
 
@@ -312,27 +325,27 @@ public class BaseNumberParser implements IParser {
         double pointPartRet = 0;
         if (numGroup.size() == 2) {
             String pointPart = numGroup.get(1);
-            sMatch = textNumberRegex.matcher(pointPart);
+            smatch = textNumberRegex.matcher(pointPart);
             matchStrs.clear();
-            while (sMatch.find()) {
-                String matchStr = sMatch.group().toLowerCase();
+            while (smatch.find()) {
+                String matchStr = smatch.group().toLowerCase();
                 matchStrs.add(matchStr);
             }
             pointPartRet += getPointValue(matchStrs);
         }
         //endregion
 
-        result = result.withValue(intPartRet + pointPartRet);
+        result.setValue(intPartRet + pointPartRet);
 
         return result;
     }
 
     protected ParseResult powerNumberParse(ExtractResult extractResult) {
 
-        ParseResult result = new ParseResult(extractResult.start, extractResult.length, extractResult.text, extractResult.type, null, null, null);
+        ParseResult result = new ParseResult(extractResult.getStart(), extractResult.getLength(), extractResult.getText(), extractResult.getType(), null, null, null);
 
-        String handle = extractResult.text.toUpperCase();
-        boolean isE = !extractResult.text.contains("^");
+        String handle = extractResult.getText().toUpperCase();
+        boolean isE = !extractResult.getText().contains("^");
 
         //[1] 1e10
         //[2] 1.1^-23
@@ -342,76 +355,53 @@ public class BaseNumberParser implements IParser {
         boolean dot = false;
         boolean isNegative = false;
         double tmp = 0;
-        for (int i = 0; i < handle.length(); i++)
-        {
+        for (int i = 0; i < handle.length(); i++) {
             char ch = handle.charAt(i);
-            if (ch == '^' || ch == 'E')
-            {
-                if (isNegative)
-                {
+            if (ch == '^' || ch == 'E') {
+                if (isNegative) {
                     calStack.add(-tmp);
-                }
-                else
-                {
+                } else {
                     calStack.add(tmp);
                 }
                 tmp = 0;
                 scale = 10;
                 dot = false;
                 isNegative = false;
-            }
-            else if (ch >= '0' && ch <= '9')
-            {
-                if (dot)
-                {
+            } else if (ch >= '0' && ch <= '9') {
+                if (dot) {
                     tmp = tmp + scale * (ch - '0');
                     scale *= 0.1;
-                }
-                else
-                {
+                } else {
                     tmp = tmp * scale + (ch - '0');
                 }
-            }
-            else if (ch == config.getDecimalSeparatorChar())
-            {
+            } else if (ch == config.getDecimalSeparatorChar()) {
                 dot = true;
                 scale = 0.1;
-            }
-            else if (ch == '-')
-            {
+            } else if (ch == '-') {
                 isNegative = !isNegative;
-            }
-            else if (ch == '+')
-            {
+            } else if (ch == '+') {
                 continue;
             }
 
-            if (i == handle.length() - 1)
-            {
-                if (isNegative)
-                {
+            if (i == handle.length() - 1) {
+                if (isNegative) {
                     calStack.add(-tmp);
-                }
-                else
-                {
+                } else {
                     calStack.add(tmp);
                 }
             }
         }
 
         double ret;
-        if (isE)
-        {
+        if (isE) {
             ret = calStack.remove(0) * Math.pow(10, calStack.remove(0));
-        }
-        else
-        {
+        } else {
             ret = Math.pow(calStack.remove(0), calStack.remove(0));
         }
 
-        result = result
-                .withValue(ret)
-                .withResolutionStr(NumberFormatUtility.format(ret, config.getCultureInfo()));
+
+        result.setValue(ret);
+        result.setResolutionStr(NumberFormatUtility.format(ret, config.getCultureInfo()));
 
         return result;
     }
@@ -423,18 +413,33 @@ public class BaseNumberParser implements IParser {
         return String.join("|", keys);
     }
 
-    protected double getDigitalValue(String digitStr, double power) {
+    private boolean skipNonDecimalSeparator(char ch, int distance, CultureInfo culture) {
+        int decimalLength = 3;
+
+        // Special cases for multi-language countries where decimal separators can be used interchangeably. Mostly informally.
+        // Ex: South Africa, Namibia; Puerto Rico in ES; or in Canada for EN and FR.
+        // "me pidio $5.00 prestados" and "me pidio $5,00 prestados" -> currency $5
+        Pattern cultureRegex = Pattern.compile("^(en|es|fr)(-)?\b", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
+
+        return (ch == config.getNonDecimalSeparatorChar() && !(distance <= decimalLength && cultureRegex.matcher(culture.cultureCode).matches()));
+    }
+
+    protected double getDigitalValue(String digitsStr, double power) {
         double temp = 0;
         double scale = 10;
-        boolean dot = false;
+        boolean decimalSeparator = false;
+        int strLength = digitsStr.length();
         boolean isNegative = false;
-        boolean isFrac = digitStr.contains("/");
+        boolean isFrac = digitsStr.contains("/");
 
         Stack<Double> calStack = new Stack<>();
 
-        for (int i = 0; i < digitStr.length(); i++) {
-            char ch = digitStr.charAt(i);
-            if (!isFrac && (ch == config.getNonDecimalSeparatorChar() || ch == ' ' || ch == Constants.NO_BREAK_SPACE)) {
+        for (int i = 0; i < digitsStr.length(); i++) {
+
+            char ch = digitsStr.charAt(i);
+            boolean skippableNonDecimal = skipNonDecimalSeparator(ch, strLength - i, config.getCultureInfo());
+
+            if (!isFrac && (ch == ' ' || ch == Constants.NO_BREAK_SPACE || skippableNonDecimal)) {
                 continue;
             }
 
@@ -442,14 +447,14 @@ public class BaseNumberParser implements IParser {
                 calStack.push(temp);
                 temp = 0;
             } else if (ch >= '0' && ch <= '9') {
-                if (dot) {
+                if (decimalSeparator) {
                     temp = temp + scale * (ch - '0');
                     scale *= 0.1;
                 } else {
                     temp = temp * scale + (ch - '0');
                 }
-            } else if (ch == config.getDecimalSeparatorChar()) {
-                dot = true;
+            } else if (ch == config.getDecimalSeparatorChar() || (!skippableNonDecimal && ch == config.getNonDecimalSeparatorChar())) {
+                decimalSeparator = true;
                 scale = 0.1;
             } else if (ch == '-') {
                 isNegative = true;
@@ -507,9 +512,9 @@ public class BaseNumberParser implements IParser {
                 boolean isOrdinal = config.getOrdinalNumberMap().containsKey(matchStr);
 
                 if (isCardinal || isOrdinal) {
-                    double matchValue = isCardinal
-                            ? config.getCardinalNumberMap().get(matchStr)
-                            : config.getOrdinalNumberMap().get(matchStr);
+                    double matchValue = isCardinal ?
+                            config.getCardinalNumberMap().get(matchStr) :
+                            config.getOrdinalNumberMap().get(matchStr);
 
                     //This is just for ordinal now. Not for fraction ever.
                     if (isOrdinal) {
@@ -548,7 +553,7 @@ public class BaseNumberParser implements IParser {
                 } else {
                     long complexValue = config.resolveCompositeNumber(matchStr);
                     if (complexValue != 0) {
-                        tempStack.push((double) complexValue);
+                        tempStack.push((double)complexValue);
                     }
                 }
                 oldSym = matchStr;
@@ -608,12 +613,12 @@ public class BaseNumberParser implements IParser {
     }
 
     private List<String> getMatches(String input) {
-        Matcher sMatch = textNumberRegex.matcher(input);
+        Matcher smatch = textNumberRegex.matcher(input);
         List<String> matchStrs = new ArrayList<String>();
 
         //Store all match str.
-        while (sMatch.find()) {
-            String matchStr = sMatch.group();
+        while (smatch.find()) {
+            String matchStr = smatch.group();
             matchStrs.add(matchStr);
         }
 
@@ -622,8 +627,7 @@ public class BaseNumberParser implements IParser {
 
     //Test if big and combine with small.
     //e.g. "hundred" can combine with "thirty" but "twenty" can't combine with "thirty".
-    private boolean isComposable(long big, long small)
-    {
+    private boolean isComposable(long big, long small) {
         int baseNumber = small > 10 ? 100 : 10;
         return big % baseNumber == 0 && big / baseNumber >= 1;
     }

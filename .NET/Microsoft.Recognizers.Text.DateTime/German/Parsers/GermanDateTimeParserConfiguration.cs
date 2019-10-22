@@ -1,19 +1,55 @@
 ﻿using System.Collections.Immutable;
 using System.Text.RegularExpressions;
-
-using Microsoft.Recognizers.Text.DateTime.Utilities;
 using Microsoft.Recognizers.Definitions.German;
-using Microsoft.Recognizers.Text.Number;
+using Microsoft.Recognizers.Text.DateTime.Utilities;
 
 namespace Microsoft.Recognizers.Text.DateTime.German
 {
-    public class GermanDateTimeParserConfiguration : BaseOptionsConfiguration, IDateTimeParserConfiguration
+    public class GermanDateTimeParserConfiguration : BaseDateTimeOptionsConfiguration, IDateTimeParserConfiguration
     {
+
+        private const RegexOptions RegexFlags = RegexOptions.Singleline | RegexOptions.ExplicitCapture;
+
+        public GermanDateTimeParserConfiguration(ICommonDateTimeParserConfiguration config)
+            : base(config)
+        {
+            TokenBeforeDate = DateTimeDefinitions.TokenBeforeDate;
+            TokenBeforeTime = DateTimeDefinitions.TokenBeforeTime;
+
+            DateExtractor = config.DateExtractor;
+            TimeExtractor = config.TimeExtractor;
+            DateParser = config.DateParser;
+            TimeParser = config.TimeParser;
+
+            NowRegex = GermanDateTimeExtractorConfiguration.NowRegex;
+
+            AMTimeRegex = new Regex(DateTimeDefinitions.AMTimeRegex, RegexFlags);
+            PMTimeRegex = new Regex(DateTimeDefinitions.PMTimeRegex, RegexFlags);
+
+            SimpleTimeOfTodayAfterRegex = GermanDateTimeExtractorConfiguration.SimpleTimeOfTodayAfterRegex;
+            SimpleTimeOfTodayBeforeRegex = GermanDateTimeExtractorConfiguration.SimpleTimeOfTodayBeforeRegex;
+            SpecificTimeOfDayRegex = GermanDateTimeExtractorConfiguration.SpecificTimeOfDayRegex;
+            SpecificEndOfRegex = GermanDateTimeExtractorConfiguration.SpecificEndOfRegex;
+            UnspecificEndOfRegex = GermanDateTimeExtractorConfiguration.UnspecificEndOfRegex;
+            UnitRegex = GermanTimeExtractorConfiguration.TimeUnitRegex;
+            DateNumberConnectorRegex = GermanDateTimeExtractorConfiguration.DateNumberConnectorRegex;
+            YearRegex = GermanDateTimeExtractorConfiguration.YearRegex;
+
+            Numbers = config.Numbers;
+            CardinalExtractor = config.CardinalExtractor;
+            IntegerExtractor = config.IntegerExtractor;
+            NumberParser = config.NumberParser;
+            DurationExtractor = config.DurationExtractor;
+            DurationParser = config.DurationParser;
+            UnitMap = config.UnitMap;
+            UtilityConfiguration = config.UtilityConfiguration;
+        }
+
         public string TokenBeforeDate { get; }
 
         public string TokenBeforeTime { get; }
 
-        public IDateTimeExtractor DateExtractor { get; }
+        public IDateExtractor DateExtractor { get; }
 
         public IDateTimeExtractor TimeExtractor { get; }
 
@@ -45,75 +81,49 @@ namespace Microsoft.Recognizers.Text.DateTime.German
 
         public Regex SpecificTimeOfDayRegex { get; }
 
-        public Regex TheEndOfRegex { get; }
+        public Regex SpecificEndOfRegex { get; }
+
+        public Regex UnspecificEndOfRegex { get; }
 
         public Regex UnitRegex { get; }
 
         public Regex DateNumberConnectorRegex { get; }
 
+        public Regex YearRegex { get; }
+
         public IImmutableDictionary<string, int> Numbers { get; }
 
         public IDateTimeUtilityConfiguration UtilityConfiguration { get; }
 
-        public GermanDateTimeParserConfiguration(ICommonDateTimeParserConfiguration config) : base(config)
-        {
-            TokenBeforeDate = DateTimeDefinitions.TokenBeforeDate;
-            TokenBeforeTime = DateTimeDefinitions.TokenBeforeTime;
-
-            DateExtractor = config.DateExtractor;
-            TimeExtractor = config.TimeExtractor;
-            DateParser = config.DateParser;
-            TimeParser = config.TimeParser;
-
-            NowRegex = GermanDateTimeExtractorConfiguration.NowRegex;
-
-            AMTimeRegex = new Regex(DateTimeDefinitions.AMTimeRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            PMTimeRegex = new Regex(DateTimeDefinitions.PMTimeRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-            SimpleTimeOfTodayAfterRegex = GermanDateTimeExtractorConfiguration.SimpleTimeOfTodayAfterRegex;
-            SimpleTimeOfTodayBeforeRegex = GermanDateTimeExtractorConfiguration.SimpleTimeOfTodayBeforeRegex;
-            SpecificTimeOfDayRegex = GermanDateTimeExtractorConfiguration.SpecificTimeOfDayRegex;
-            TheEndOfRegex = GermanDateTimeExtractorConfiguration.TheEndOfRegex;
-            UnitRegex = GermanTimeExtractorConfiguration.TimeUnitRegex;
-            DateNumberConnectorRegex = GermanDateTimeExtractorConfiguration.DateNumberConnectorRegex;
-
-            Numbers = config.Numbers;
-            CardinalExtractor = config.CardinalExtractor;
-            IntegerExtractor = config.IntegerExtractor;
-            NumberParser = config.NumberParser;
-            DurationExtractor = config.DurationExtractor;
-            DurationParser = config.DurationParser;
-            UnitMap = config.UnitMap;
-            UtilityConfiguration = config.UtilityConfiguration;
-        }
-
         public int GetHour(string text, int hour)
         {
-            var trimedText = text.Trim().ToLowerInvariant();
+            var trimmedText = text.Trim();
             int result = hour;
-            if ((trimedText.EndsWith("morgen") || trimedText.EndsWith("morgens")) && hour >= Constants.HalfDayHourCount)
+            if ((trimmedText.EndsWith("morgen") || trimmedText.EndsWith("morgens")) && hour >= Constants.HalfDayHourCount)
             {
                 result -= Constants.HalfDayHourCount;
             }
-            else if (!(trimedText.EndsWith("morgen") || trimedText.EndsWith("morgens")) && hour < Constants.HalfDayHourCount)
+            else if (!(trimmedText.EndsWith("morgen") || trimmedText.EndsWith("morgens")) && hour < Constants.HalfDayHourCount)
             {
                 result += Constants.HalfDayHourCount;
             }
+
             return result;
         }
 
         public bool GetMatchedNowTimex(string text, out string timex)
         {
-            var trimedText = text.Trim().ToLowerInvariant();
-            if (trimedText.EndsWith("jetzt"))
+            var trimmedText = text.Trim();
+            if (trimmedText.EndsWith("jetzt") || trimmedText.Equals("momentan") || trimmedText.Equals("gerade") || trimmedText.Equals("aktuell") ||
+                trimmedText.Equals("im moment") || trimmedText.Equals("in diesem moment") || trimmedText.Equals("derzeit"))
             {
                 timex = "PRESENT_REF";
             }
-            else if (trimedText.Equals("neulich") || trimedText.Equals("vorher") || trimedText.Equals("vorhin"))
+            else if (trimmedText.Equals("neulich") || trimmedText.Equals("vorher") || trimmedText.Equals("vorhin"))
             {
                 timex = "PAST_REF";
             }
-            else if (trimedText.Equals("so früh wie möglich") || trimedText.Equals("asap"))
+            else if (trimmedText.Equals("so früh wie möglich") || trimmedText.Equals("asap"))
             {
                 timex = "FUTURE_REF";
             }
@@ -128,14 +138,14 @@ namespace Microsoft.Recognizers.Text.DateTime.German
 
         public int GetSwiftDay(string text)
         {
-            var trimedText = text.Trim().ToLowerInvariant();
+            var trimmedText = text.Trim();
 
             var swift = 0;
-            if (trimedText.StartsWith("nächsten") || trimedText.StartsWith("nächste") || trimedText.StartsWith("nächstes") || trimedText.StartsWith("nächster"))
+            if (trimmedText.StartsWith("nächsten") || trimmedText.StartsWith("nächste") || trimmedText.StartsWith("nächstes") || trimmedText.StartsWith("nächster"))
             {
                 swift = 1;
             }
-            else if (trimedText.StartsWith("letzten") || trimedText.StartsWith("letzte") || trimedText.StartsWith("letztes") || trimedText.StartsWith("letzter"))
+            else if (trimmedText.StartsWith("letzten") || trimmedText.StartsWith("letzte") || trimmedText.StartsWith("letztes") || trimmedText.StartsWith("letzter"))
             {
                 swift = -1;
             }

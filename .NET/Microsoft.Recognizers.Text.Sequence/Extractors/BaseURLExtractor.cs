@@ -10,55 +10,67 @@ namespace Microsoft.Recognizers.Text.Sequence
 {
     public class BaseURLExtractor : BaseSequenceExtractor
     {
-        internal override ImmutableDictionary<Regex, string> Regexes { get; }
 
-        protected sealed override string ExtractType { get; } = Constants.SYS_URL;
+        private URLConfiguration config;
 
-        private static Regex UrlRegex { get; } =
-            new Regex(BaseURL.UrlRegex,
-                RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-        private StringMatcher TldMatcher { get; }
-
-        public BaseURLExtractor()
+        public BaseURLExtractor(URLConfiguration config)
         {
+            this.config = config;
+
             var regexes = new Dictionary<Regex, string>
             {
                 {
-                    new Regex(BaseURL.IpUrlRegex), Constants.URL_REGEX
-                }
+                    config.UrlRegex,
+                    Constants.URL_REGEX
+                },
+                {
+                    config.IpUrlRegex,
+                    Constants.URL_REGEX
+                },
+                {
+                    new Regex(BaseURL.UrlRegex2, RegexOptions.Compiled),
+                    Constants.URL_REGEX
+                },
             };
 
             Regexes = regexes.ToImmutableDictionary();
+            AmbiguousTimeTerm = new Regex(BaseURL.AmbiguousTimeTerm, RegexOptions.Compiled);
 
             TldMatcher = new StringMatcher();
             TldMatcher.Init(BaseURL.TldList);
         }
 
-        public override List<ExtractResult> Extract(string text)
-        {
-            var ret = base.Extract(text);
-            var urlMatches = UrlRegex.Matches(text);
+        internal override ImmutableDictionary<Regex, string> Regexes { get; }
 
-            foreach (Match urlMatch in urlMatches)
+        protected sealed override string ExtractType { get; } = Constants.SYS_URL;
+
+        private StringMatcher TldMatcher { get; }
+
+        private Regex AmbiguousTimeTerm { get; }
+
+        public override bool IsValidMatch(Match match)
+        {
+            var isValidTld = false;
+            var isIPUrl = match.Groups["IPurl"].Success;
+
+            if (!isIPUrl)
             {
-                var tldString = urlMatch.Groups["Tld"].Value;
+                var tldString = match.Groups["Tld"].Value;
                 var tldMatches = TldMatcher.Find(tldString);
 
                 if (tldMatches.Any(o => o.Start == 0 && o.End == tldString.Length))
                 {
-                    ret.Add(new ExtractResult
-                    {
-                        Start = urlMatch.Index,
-                        Length = urlMatch.Length,
-                        Text = urlMatch.Value,
-                        Type = ExtractType,
-                        Data = Constants.URL_REGEX
-                    });
+                    isValidTld = true;
                 }
             }
 
-            return ret;
+            // For cases like "7.am" or "8.pm" which are more likely time terms.
+            if (AmbiguousTimeTerm.IsMatch(match.Value))
+            {
+                return false;
+            }
+
+            return isValidTld || isIPUrl;
         }
     }
 }

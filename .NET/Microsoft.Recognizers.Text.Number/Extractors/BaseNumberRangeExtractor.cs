@@ -13,21 +13,22 @@ namespace Microsoft.Recognizers.Text.Number
 
         private readonly BaseNumberParser numberParser;
 
-        protected virtual NumberOptions Options { get; } = NumberOptions.None;
+        public BaseNumberRangeExtractor(BaseNumberExtractor numberExtractor, BaseNumberExtractor ordinalExtractor, BaseNumberParser numberParser,
+                                        INumberOptionsConfiguration config)
+        {
+            this.numberExtractor = numberExtractor;
+            this.ordinalExtractor = ordinalExtractor;
+            this.numberParser = numberParser;
+            Config = config;
+        }
 
         internal abstract System.Collections.Immutable.ImmutableDictionary<Regex, string> Regexes { get; }
 
         internal abstract Regex AmbiguousFractionConnectorsRegex { get; }
 
-        protected virtual string ExtractType { get; } = "";
+        protected virtual INumberOptionsConfiguration Config { get; }
 
-        public BaseNumberRangeExtractor(BaseNumberExtractor numberExtractor, BaseNumberExtractor ordinalExtractor, BaseNumberParser numberParser, NumberOptions options = NumberOptions.None)
-        {
-            this.numberExtractor = numberExtractor;
-            this.ordinalExtractor = ordinalExtractor;
-            this.numberParser = numberParser;
-            Options = options;
-        }
+        protected virtual string ExtractType { get; } = string.Empty;
 
         public virtual List<ExtractResult> Extract(string source)
         {
@@ -80,8 +81,9 @@ namespace Microsoft.Recognizers.Text.Number
                                 Length = length,
                                 Text = substr,
                                 Type = ExtractType,
-                                Data = matchSource.ContainsKey(srcMatch) ? matchSource[srcMatch] : null
+                                Data = matchSource.ContainsKey(srcMatch) ? matchSource[srcMatch] : null,
                             };
+
                             results.Add(er);
                         }
                     }
@@ -93,12 +95,12 @@ namespace Microsoft.Recognizers.Text.Number
             }
 
             // In ExperimentalMode, cases like "from 3 to 5" and "between 10 and 15" are set to closed at both start and end
-            if (Options == NumberOptions.ExperimentalMode)
+            if ((Config.Options & NumberOptions.ExperimentalMode) != 0)
             {
                 foreach (var result in results)
                 {
-                    if (result.Data.ToString() == NumberRangeConstants.TWONUMBETWEEN
-                        || result.Data.ToString() == NumberRangeConstants.TWONUMTILL)
+                    if (result.Data.ToString() == NumberRangeConstants.TWONUMBETWEEN ||
+                        result.Data.ToString() == NumberRangeConstants.TWONUMTILL)
                     {
                         result.Data = NumberRangeConstants.TWONUMCLOSED;
                     }
@@ -106,6 +108,45 @@ namespace Microsoft.Recognizers.Text.Number
             }
 
             return results;
+        }
+
+        private static bool ValidateMatchAndGetStartAndLength(List<ExtractResult> extractNumList, string numberStr, Match match,
+                                                              string source, ref int start, ref int length)
+        {
+            bool validNum = false;
+
+            foreach (var extractNum in extractNumList)
+            {
+                if (numberStr.Trim().EndsWith(extractNum.Text) && match.Value.StartsWith(numberStr))
+                {
+                    start = source.IndexOf(numberStr) + extractNum.Start ?? 0;
+                    length = length - extractNum.Start ?? 0;
+                    validNum = true;
+                }
+                else if (extractNum.Start == 0 && match.Value.EndsWith(numberStr))
+                {
+                    length = length - numberStr.Length + extractNum.Length ?? 0;
+                    validNum = true;
+                }
+                else if (extractNum.Start == 0 && extractNum.Length == numberStr.Trim().Length)
+                {
+                    validNum = true;
+                }
+
+                if (validNum)
+                {
+                    break;
+                }
+            }
+
+            return validNum;
+        }
+
+        // Judge whether it's special cases like "more than 30000 in 2010"
+        // For these specific cases, we will not treat "30000 in 2010" as a fraction number
+        private static bool IsAmbiguousRangeOrFraction(Match match, string type, string numberStr)
+        {
+            return (type == NumberRangeConstants.MORE || type == NumberRangeConstants.LESS) && match.Value.Trim().EndsWith(numberStr);
         }
 
         private void GetMatchedStartAndLength(Match match, string type, string source, out int start, out int length)
@@ -161,6 +202,7 @@ namespace Microsoft.Recognizers.Text.Number
             else
             {
                 var numberStr = string.IsNullOrEmpty(numberStr1) ? numberStr2 : numberStr1;
+
                 var isAmbiguousRangeOrFraction = IsAmbiguousRangeOrFraction(match, type, numberStr);
                 var extractNumList = ExtractNumberAndOrdinalFromStr(numberStr, isAmbiguousRangeOrFraction);
 
@@ -176,37 +218,6 @@ namespace Microsoft.Recognizers.Text.Number
                     }
                 }
             }
-        }
-
-        private bool ValidateMatchAndGetStartAndLength(List<ExtractResult> extractNumList, string numberStr, Match match, string source, ref int start, ref int length)
-        {
-            bool validNum = false;
-
-            foreach (var extractNum in extractNumList)
-            {
-                if (numberStr.Trim().EndsWith(extractNum.Text) && match.Value.StartsWith(numberStr))
-                {
-                    start = source.IndexOf(numberStr) + extractNum.Start ?? 0;
-                    length = length - extractNum.Start ?? 0;
-                    validNum = true;
-                }
-                else if (extractNum.Start == 0 && match.Value.EndsWith(numberStr))
-                {
-                    length = length - numberStr.Length + extractNum.Length ?? 0;
-                    validNum = true;
-                }
-                else if (extractNum.Start == 0 && extractNum.Length == numberStr.Trim().Length)
-                {
-                    validNum = true;
-                }
-
-                if (validNum)
-                {
-                    break;
-                }
-            }
-
-            return validNum;
         }
 
         // TODO: this should not be in the NumberRangeExtractor as it doesn't handle duration concepts
@@ -232,7 +243,9 @@ namespace Microsoft.Recognizers.Text.Number
                 ret = ret.OrderByDescending(num => num.Length).ThenByDescending(num => num.Start).ToList();
             }
 
-            if (ret != null && isAmbiguousRangeOrFraction)
+            var removeFractionWithInConnector = ShouldRemoveFractionWithInConnector(numberStr);
+
+            if (ret != null && (removeFractionWithInConnector || isAmbiguousRangeOrFraction))
             {
                 ret = RemoveAmbiguousFractions(ret);
             }
@@ -240,20 +253,33 @@ namespace Microsoft.Recognizers.Text.Number
             return ret;
         }
 
-        // Judge whether it's special cases like "more than 30000 in 2010"
-        // For these specific cases, we will not treat "30000 in 2010" as a fraction number
-        private bool IsAmbiguousRangeOrFraction(Match match, string type, string numberStr)
+        private bool ShouldRemoveFractionWithInConnector(string numberStr)
         {
-            return (type == NumberRangeConstants.MORE || type == NumberRangeConstants.LESS) && match.Value.Trim().EndsWith(numberStr);
+            var removeFractionWithInConnector = false;
+
+            if ((Config.Options & NumberOptions.ExperimentalMode) != 0)
+            {
+                removeFractionWithInConnector = IsFractionWithInConnector(numberStr);
+            }
+
+            return removeFractionWithInConnector;
         }
 
-        // For cases like "more than 30000 in 2010", we will not treate "30000 in 2010" as a fraction number
+        // Fraction with InConnector may lead to some ambiguous cases like "more than 30000 in 2010"
+        // In ExperimentalMode, we will remove all FractionWithInConnector numbers to avoid such cases
+        private bool IsFractionWithInConnector(string numberStr)
+        {
+            return AmbiguousFractionConnectorsRegex.Match(numberStr).Success;
+        }
+
+        // For cases like "more than 30000 in 2010", we will not treat "30000 in 2010" as a fraction number
         // In this method, "30000 in 2010" will be changed to "30000"
         private List<ExtractResult> RemoveAmbiguousFractions(List<ExtractResult> ers)
         {
             foreach (var er in ers)
             {
-                if (er.Data != null && er.Data.ToString() == RegexTagGenerator.GenerateRegexTag(Constants.FRACTION_PREFIX, Constants.ENGLISH).Name)
+                if (er.Data != null && er.Data.ToString() ==
+                    RegexTagGenerator.GenerateRegexTag(Constants.FRACTION_PREFIX, Constants.ENGLISH).Name)
                 {
                     var match = AmbiguousFractionConnectorsRegex.Match(er.Text);
 
@@ -271,27 +297,5 @@ namespace Microsoft.Recognizers.Text.Number
 
             return ers;
         }
-    }
-
-    public static class NumberRangeConstants
-    {
-        // Number range regex type
-        public const string TWONUM = "TwoNum";
-        public const string TWONUMBETWEEN = "TwoNumBetween";
-        public const string TWONUMTILL = "TwoNumTill";
-        public const string TWONUMCLOSED = "TwoNumClosed";
-        public const string MORE = "More";
-        public const string LESS = "Less";
-        public const string EQUAL = "Equal";
-
-        // Brackets and comma for number range resolution value
-        public const char LEFT_OPEN = '(';
-        public const char RIGHT_OPEN = ')';
-        public const char LEFT_CLOSED = '[';
-        public const char RIGHT_CLOSED = ']';
-        public const char INTERVAL_SEPARATOR = ',';
-
-        // Invalid number
-        public const int INVALID_NUM = -1;
     }
 }

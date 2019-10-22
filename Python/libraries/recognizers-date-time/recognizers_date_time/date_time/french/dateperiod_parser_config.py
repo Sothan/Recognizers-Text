@@ -7,6 +7,7 @@ from ..parsers import DateTimeParser
 from ..base_configs import BaseDateParserConfiguration
 from ..base_dateperiod import DatePeriodParserConfiguration
 
+
 class FrenchDatePeriodParserConfiguration(DatePeriodParserConfiguration):
     @property
     def date_extractor(self) -> DateTimeExtractor:
@@ -109,7 +110,7 @@ class FrenchDatePeriodParserConfiguration(DatePeriodParserConfiguration):
         return self._next_prefix_regex
 
     @property
-    def past_prefix_regex(self) -> Pattern:
+    def previous_prefix_regex(self) -> Pattern:
         return self._past_prefix_regex
 
     @property
@@ -127,6 +128,10 @@ class FrenchDatePeriodParserConfiguration(DatePeriodParserConfiguration):
     @property
     def week_with_week_day_range_regex(self) -> Pattern:
         return self._week_with_week_day_range_regex
+
+    @property
+    def unspecific_end_of_range_regex(self) -> Pattern:
+        return self._unspecific_end_of_range_regex
 
     @property
     def token_before_date(self) -> str:
@@ -152,6 +157,10 @@ class FrenchDatePeriodParserConfiguration(DatePeriodParserConfiguration):
     def unit_map(self) -> Dict[str, str]:
         return self._unit_map
 
+    @property
+    def now_regex(self) -> Pattern:
+        return self._now_regex
+
     def __init__(self, config: BaseDateParserConfiguration):
         self._token_before_date = FrenchDateTime.TokenBeforeDate
         self.cardianal_extractor = config.cardinal_extractor
@@ -161,33 +170,64 @@ class FrenchDatePeriodParserConfiguration(DatePeriodParserConfiguration):
         self._duration_parser = config.duration_parser
         self._date_parser = config.date_parser
 
-        self._month_front_between_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.MonthFrontBetweenRegex)
-        self._between_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.BetweenRegex)
-        self._month_front_simple_cases_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.MonthFrontSimpleCasesRegex)
-        self._simple_cases_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.SimpleCasesRegex)
-        self._one_word_period_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.OneWordPeriodRegex)
-        self._month_with_year = RegExpUtility.get_safe_reg_exp(FrenchDateTime.MonthWithYear)
-        self._month_num_with_year = RegExpUtility.get_safe_reg_exp(FrenchDateTime.MonthNumWithYear)
-        self._year_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.YearRegex)
-        self._past_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.PastSuffixRegex)
-        self._future_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.NextSuffixRegex)
-        self.number_combined_with_unit = RegExpUtility.get_safe_reg_exp(FrenchDateTime.NumberCombinedWithDurationUnit)
-        self._week_of_month_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.WeekOfMonthRegex)
-        self._week_of_year_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.WeekOfYearRegex)
-        self._quarter_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.QuarterRegex)
-        self._quarter_regex_year_front = RegExpUtility.get_safe_reg_exp(FrenchDateTime.QuarterRegexYearFront)
-        self._all_half_year_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.AllHalfYearRegex)
-        self._season_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.SeasonRegex)
-        self._which_week_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.WhichWeekRegex)
-        self._week_of_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.WeekOfRegex)
-        self._month_of_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.MonthOfRegex)
-        self._rest_of_date_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.RestOfDateRegex)
-        self._later_early_period_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.LaterEarlyPeriodRegex)
-        self._week_with_week_day_range_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.WeekWithWeekDayRangeRegex)
+        self._month_front_between_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.MonthFrontBetweenRegex)
+        self._between_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.BetweenRegex)
+        self._month_front_simple_cases_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.MonthFrontSimpleCasesRegex)
+        self._simple_cases_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.SimpleCasesRegex)
+        self._one_word_period_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.OneWordPeriodRegex)
+        self._month_with_year = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.MonthWithYear)
+        self._month_num_with_year = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.MonthNumWithYear)
+        self._year_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.YearRegex)
+        self._past_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.PastSuffixRegex)
+        self._future_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.NextSuffixRegex)
+        self.number_combined_with_unit = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.NumberCombinedWithDurationUnit)
+        self._week_of_month_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.WeekOfMonthRegex)
+        self._week_of_year_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.WeekOfYearRegex)
+        self._quarter_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.QuarterRegex)
+        self._quarter_regex_year_front = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.QuarterRegexYearFront)
+        self._all_half_year_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.AllHalfYearRegex)
+        self._season_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.SeasonRegex)
+        self._which_week_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.WhichWeekRegex)
+        self._week_of_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.WeekOfRegex)
+        self._month_of_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.MonthOfRegex)
+        self._rest_of_date_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.RestOfDateRegex)
+        self._later_early_period_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.LaterEarlyPeriodRegex)
+        self._week_with_week_day_range_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.WeekWithWeekDayRangeRegex)
+        self._unspecific_end_of_range_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.UnspecificEndOfRangeRegex)
 
-        self._next_prefix_regex = RegExpUtility.get_safe_reg_exp('(prochain|prochaine)\b')
+        self._next_prefix_regex = RegExpUtility.get_safe_reg_exp(
+            '(prochain|prochaine)\b')
         self._past_prefix_regex = RegExpUtility.get_safe_reg_exp('(dernier)\b')
-        self._this_prefix_regex = RegExpUtility.get_safe_reg_exp('(ce|cette)\b')
+        self._this_prefix_regex = RegExpUtility.get_safe_reg_exp(
+            '(ce|cette)\b')
+        self._next_suffix_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.NextSuffixRegex)
+        self._past_suffix_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.PastSuffixRegex)
 
         self._in_connector_regex = config.utility_configuration.in_connector_regex
         self._unit_map = config.unit_map
@@ -195,6 +235,8 @@ class FrenchDatePeriodParserConfiguration(DatePeriodParserConfiguration):
         self._day_of_month = config.day_of_month
         self._month_of_year = config.month_of_year
         self._season_map = config.season_map
+        self._now_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.NowRegex)
 
     def get_swift_day_or_month(self, source: str) -> int:
         trimmed_source = source.strip().lower()
@@ -204,11 +246,11 @@ class FrenchDatePeriodParserConfiguration(DatePeriodParserConfiguration):
             swift = 1
 
         if (
-                trimmed_source.endswith('dernière') or
-                trimmed_source.endswith('dernières') or
-                trimmed_source.endswith('derniere') or
-                trimmed_source.endswith('dernieres')
-            ):
+            trimmed_source.endswith('dernière') or
+            trimmed_source.endswith('dernières') or
+            trimmed_source.endswith('derniere') or
+            trimmed_source.endswith('dernieres')
+        ):
             swift = -1
 
         return swift
@@ -221,11 +263,11 @@ class FrenchDatePeriodParserConfiguration(DatePeriodParserConfiguration):
             swift = 1
 
         if (
-                trimmed_source.endswith('dernière') or
-                trimmed_source.endswith('dernières') or
-                trimmed_source.endswith('derniere') or
-                trimmed_source.endswith('dernieres')
-            ):
+            trimmed_source.endswith('dernière') or
+            trimmed_source.endswith('dernières') or
+            trimmed_source.endswith('derniere') or
+            trimmed_source.endswith('dernieres')
+        ):
             swift = -1
         elif trimmed_source.startswith('cette'):
             swift = 0
@@ -234,47 +276,38 @@ class FrenchDatePeriodParserConfiguration(DatePeriodParserConfiguration):
 
     def is_future(self, source: str) -> bool:
         trimmed_source = source.strip().lower()
-        return (
-            trimmed_source.startswith('cette') or
-            trimmed_source.endswith('prochaine') or
-            trimmed_source.endswith('prochain')
-            )
+        return any(trimmed_source.startswith(o) for o in FrenchDateTime.FutureStartTerms) or\
+            any(trimmed_source.endswith(o)
+                for o in FrenchDateTime.FutureEndTerms)
 
     def is_year_to_date(self, source: str) -> bool:
         trimmed_source = source.strip().lower()
-        return trimmed_source == 'année à ce jour' or trimmed_source == 'an à ce jour'
+        return any(trimmed_source == o for o in FrenchDateTime.YearToDateTerms)
 
     def is_month_to_date(self, source: str) -> bool:
         trimmed_source = source.strip().lower()
-        return trimmed_source == 'mois à ce jour'
+        return any(trimmed_source == o for o in FrenchDateTime.MonthToDateTerms)
 
     def is_week_only(self, source: str) -> bool:
         trimmed_source = source.strip().lower()
-        return trimmed_source.endswith('semaine') and not trimmed_source.endswith('fin de semaine')
+        return (any(trimmed_source.endswith(o) for o in FrenchDateTime.WeekTerms) or
+                (any(trimmed_source.__contains__(o) for o in FrenchDateTime.WeekTerms) and
+                 (self._next_suffix_regex.search(trimmed_source) or
+                  self._past_suffix_regex.search(trimmed_source)))) and not\
+            any(trimmed_source.endswith(o)
+                for o in FrenchDateTime.WeekendTerms)
 
     def is_weekend(self, source: str) -> bool:
         trimmed_source = source.strip().lower()
-        return trimmed_source.endswith('fin de semaine') or trimmed_source.endswith('le weekend')
+        return any(trimmed_source.endswith(o) for o in FrenchDateTime.WeekendTerms)
 
     def is_month_only(self, source: str) -> bool:
         trimmed_source = source.strip().lower()
-        return trimmed_source.endswith('mois')
+        return any(trimmed_source.endswith(o) for o in FrenchDateTime.MonthTerms)
 
     def is_year_only(self, source: str) -> bool:
         trimmed_source = source.strip().lower()
-        return (
-            trimmed_source.endswith('années') or
-            trimmed_source.endswith('ans') or
-            trimmed_source.endswith('l\'annees') or
-            trimmed_source.endswith('l\'annee')
-        )
+        return any(trimmed_source.endswith(o) for o in FrenchDateTime.YearTerms)
 
     def is_last_cardinal(self, source: str) -> bool:
         trimmed_source = source.strip().lower()
-        return (
-            trimmed_source == 'dernières' or
-            trimmed_source == 'dernière' or
-            trimmed_source == 'dernieres' or
-            trimmed_source == 'derniere' or
-            trimmed_source == 'dernier'
-        )

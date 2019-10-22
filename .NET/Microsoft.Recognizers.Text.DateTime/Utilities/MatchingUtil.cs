@@ -1,21 +1,37 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 using Microsoft.Recognizers.Text.Matcher;
+using Microsoft.Recognizers.Text.Utilities;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
-    public class MatchingUtil
+    public static class MatchingUtil
     {
         public static bool GetAgoLaterIndex(string text, Regex regex, out int index)
         {
             index = -1;
-            var match = regex.Match(text.TrimStart().ToLower());
-            if (match.Success && match.Index == 0)
+            var match = regex.MatchBegin(text, trim: true);
+
+            if (match.Success)
             {
-                index = text.ToLower().LastIndexOf(match.Value, StringComparison.Ordinal) + match.Value.Length;
+                index = match.Index + match.Length;
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool GetAgoLaterIndexInBeforeString(string text, Regex regex, out int index)
+        {
+            index = -1;
+            var match = regex.MatchEnd(text, trim: true);
+
+            if (match.Success)
+            {
+                index = match.Index;
                 return true;
             }
 
@@ -25,10 +41,10 @@ namespace Microsoft.Recognizers.Text.DateTime
         public static bool GetTermIndex(string text, Regex regex, out int index)
         {
             index = -1;
-            var match = regex.Match(text.Trim().ToLower().Split(' ').Last());
+            var match = regex.Match(text.Trim().Split(' ').Last());
             if (match.Success)
             {
-                index = text.Length - text.ToLower().LastIndexOf(match.Value, StringComparison.Ordinal);
+                index = text.Length - text.LastIndexOf(match.Value, StringComparison.Ordinal);
                 return true;
             }
 
@@ -37,20 +53,24 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         public static bool ContainsAgoLaterIndex(string text, Regex regex)
         {
-            int index = -1;
-            return GetAgoLaterIndex(text, regex, out index);
+            return GetAgoLaterIndex(text, regex, out var index);
+        }
+
+        public static bool ContainsAgoLaterIndexInBeforeString(string text, Regex regex)
+        {
+            return GetAgoLaterIndexInBeforeString(text, regex, out var index);
         }
 
         public static bool ContainsTermIndex(string text, Regex regex)
         {
-            int index = -1;
-            return GetTermIndex(text, regex, out index);
+            return GetTermIndex(text, regex, out var index);
         }
 
         // Temporary solution for remove superfluous words only under the Preview mode
         public static string PreProcessTextRemoveSuperfluousWords(string text, StringMatcher matcher, out List<MatchResult<string>> superfluousWordMatches)
         {
-            superfluousWordMatches = matcher.Find(text).ToList();
+            superfluousWordMatches = RemoveSubMatches(matcher.Find(text));
+
             var bias = 0;
 
             foreach (var match in superfluousWordMatches)
@@ -63,8 +83,7 @@ namespace Microsoft.Recognizers.Text.DateTime
         }
 
         // Temporary solution for recover superfluous words only under the Preview mode
-        public static List<ExtractResult> PosProcessExtractionRecoverSuperfluousWords(List<ExtractResult> extractResults,
-            List<MatchResult<string>> superfluousWordMatches, string originText)
+        public static List<ExtractResult> PostProcessRecoverSuperfluousWords(List<ExtractResult> extractResults, List<MatchResult<string>> superfluousWordMatches, string originText)
         {
             foreach (var match in superfluousWordMatches)
             {
@@ -91,5 +110,14 @@ namespace Microsoft.Recognizers.Text.DateTime
             return extractResults;
         }
 
+        public static List<MatchResult<string>> RemoveSubMatches(IEnumerable<MatchResult<string>> matchResults)
+        {
+            var matchList = matchResults.ToList();
+
+            return matchList.Where(item =>
+                !matchList.Any(
+                    ritem => (ritem.Start < item.Start && ritem.End >= item.End) ||
+                             (ritem.Start <= item.Start && ritem.End > item.End))).ToList();
+        }
     }
 }

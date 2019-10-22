@@ -5,6 +5,7 @@ from recognizers_number_with_unit.number_with_unit.chinese.extractors import Chi
 from ...resources.chinese_date_time import ChineseDateTime
 from ..constants import Constants
 
+
 class ChineseDurationExtractorConfiguration(ChineseNumberWithUnitExtractorConfiguration):
     @property
     def suffix_list(self) -> Dict[str, str]:
@@ -15,7 +16,7 @@ class ChineseDurationExtractorConfiguration(ChineseNumberWithUnitExtractorConfig
         return self._prefix_list
 
     @property
-    def ambiguous_unit_list(self) -> Dict[str, str]:
+    def ambiguous_unit_list(self) -> str:
         return self._ambiguous_unit_list
 
     @property

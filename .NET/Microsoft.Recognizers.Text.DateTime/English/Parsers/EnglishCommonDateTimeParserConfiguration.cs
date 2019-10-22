@@ -1,24 +1,23 @@
 ﻿using System.Collections.Immutable;
-using System.Text.RegularExpressions;
-
-using Microsoft.Recognizers.Text.DateTime.English.Utilities;
-using Microsoft.Recognizers.Definitions.English;
 using Microsoft.Recognizers.Definitions;
-using Microsoft.Recognizers.Text.Number.English;
+using Microsoft.Recognizers.Definitions.English;
+using Microsoft.Recognizers.Text.DateTime.English.Utilities;
 using Microsoft.Recognizers.Text.Number;
+using Microsoft.Recognizers.Text.Number.English;
 
 namespace Microsoft.Recognizers.Text.DateTime.English
 {
     public class EnglishCommonDateTimeParserConfiguration : BaseDateParserConfiguration, ICommonDateTimeParserConfiguration
     {
-
-        public EnglishCommonDateTimeParserConfiguration(IOptionsConfiguration config) : base(config)
+        public EnglishCommonDateTimeParserConfiguration(IDateTimeOptionsConfiguration config)
+            : base(config)
         {
             UtilityConfiguration = new EnglishDatetimeUtilityConfiguration();
 
             UnitMap = DateTimeDefinitions.UnitMap.ToImmutableDictionary();
             UnitValueMap = DateTimeDefinitions.UnitValueMap.ToImmutableDictionary();
             SeasonMap = DateTimeDefinitions.SeasonMap.ToImmutableDictionary();
+            SpecialYearPrefixesMap = DateTimeDefinitions.SpecialYearPrefixesMap.ToImmutableDictionary();
             CardinalMap = DateTimeDefinitions.CardinalMap.ToImmutableDictionary();
             DayOfWeek = DateTimeDefinitions.DayOfWeek.ToImmutableDictionary();
             MonthOfYear = DateTimeDefinitions.MonthOfYear.ToImmutableDictionary();
@@ -31,7 +30,8 @@ namespace Microsoft.Recognizers.Text.DateTime.English
             IntegerExtractor = Number.English.IntegerExtractor.GetInstance();
             OrdinalExtractor = Number.English.OrdinalExtractor.GetInstance();
 
-            NumberParser = new BaseNumberParser(new EnglishNumberParserConfiguration());
+            TimeZoneParser = new BaseTimeZoneParser();
+            NumberParser = new BaseNumberParser(new EnglishNumberParserConfiguration(new BaseNumberOptionsConfiguration(config.Culture)));
             DateExtractor = new BaseDateExtractor(new EnglishDateExtractorConfiguration(this));
             TimeExtractor = new BaseTimeExtractor(new EnglishTimeExtractorConfiguration(this));
             DateTimeExtractor = new BaseDateTimeExtractor(new EnglishDateTimeExtractorConfiguration(this));

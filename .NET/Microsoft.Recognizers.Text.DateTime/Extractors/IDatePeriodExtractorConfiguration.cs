@@ -3,9 +3,11 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
-    public interface IDatePeriodExtractorConfiguration : IOptionsConfiguration
+    public interface IDatePeriodExtractorConfiguration : IDateTimeOptionsConfiguration
     {
         IEnumerable<Regex> SimpleCasesRegexes { get; }
+
+        Regex IllegalYearRegex { get; }
 
         Regex YearRegex { get; }
 
@@ -19,7 +21,7 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         Regex NumberCombinedWithDateUnit { get; }
 
-        Regex PastRegex { get; }
+        Regex PreviousPrefixRegex { get; }
 
         Regex FutureRegex { get; }
 
@@ -53,7 +55,13 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         Regex CenturySuffixRegex { get; }
 
-        IDateTimeExtractor DatePointExtractor { get; }
+        Regex MonthNumRegex { get; }
+
+        Regex NowRegex { get; }
+
+        bool CheckBothBeforeAfter { get; }
+
+        IDateExtractor DatePointExtractor { get; }
 
         IExtractor CardinalExtractor { get; }
 
@@ -63,12 +71,12 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         IParser NumberParser { get; }
 
+        string[] DurationDateRestrictions { get; }
+
         bool GetFromTokenIndex(string text, out int index);
 
         bool HasConnectorToken(string text);
 
         bool GetBetweenTokenIndex(string text, out int index);
-
-        string[] DurationDateRestrictions { get; }
     }
 }

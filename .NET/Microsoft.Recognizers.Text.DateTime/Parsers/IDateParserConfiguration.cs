@@ -2,15 +2,12 @@
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using Microsoft.Recognizers.Text.DateTime.Utilities;
-using Microsoft.Recognizers.Text.Number;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
-    public interface IDateParserConfiguration : IOptionsConfiguration
+    public interface IDateParserConfiguration : IDateTimeOptionsConfiguration
     {
         string DateTokenPrefix { get; }
-
-        #region internalParsers
 
         IExtractor IntegerExtractor { get; }
 
@@ -22,48 +19,84 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         IDateTimeExtractor DurationExtractor { get; }
 
-        IDateTimeExtractor DateExtractor { get; }
+        IDateExtractor DateExtractor { get; }
 
         IDateTimeParser DurationParser { get; }
 
-        #endregion
-
-        #region Regexes
-
         IEnumerable<Regex> DateRegexes { get; }
+
         Regex OnRegex { get; }
+
         Regex SpecialDayRegex { get; }
+
         Regex SpecialDayWithNumRegex { get; }
+
         Regex NextRegex { get; }
+
         Regex ThisRegex { get; }
+
         Regex LastRegex { get; }
+
         Regex UnitRegex { get; }
+
+        Regex UpcomingPrefixRegex { get; }
+
+        Regex PastPrefixRegex { get; }
+
         Regex WeekDayRegex { get; }
+
         Regex MonthRegex { get; }
+
         Regex WeekDayOfMonthRegex { get; }
+
         Regex ForTheRegex { get; }
+
         Regex WeekDayAndDayOfMothRegex { get; }
+
+        Regex WeekDayAndDayRegex { get; }
+
         Regex RelativeMonthRegex { get; }
+
+        Regex StrictRelativeRegex { get; }
+
         Regex YearSuffix { get; }
+
         Regex RelativeWeekDayRegex { get; }
 
-        #endregion
+        Regex RelativeDayRegex { get; }
 
-        #region Dictionaries
+        Regex NextPrefixRegex { get; }
+
+        Regex PreviousPrefixRegex { get; }
+
         IImmutableDictionary<string, string> UnitMap { get; }
+
         IImmutableDictionary<string, int> DayOfMonth { get; }
+
         IImmutableDictionary<string, int> DayOfWeek { get; }
+
         IImmutableDictionary<string, int> MonthOfYear { get; }
+
         IImmutableDictionary<string, int> CardinalMap { get; }
 
-        #endregion
+        IImmutableList<string> SameDayTerms { get; }
 
-        int GetSwiftDay(string text);
+        IImmutableList<string> PlusOneDayTerms { get; }
 
-        int GetSwiftMonth(string text);
+        IImmutableList<string> MinusOneDayTerms { get; }
+
+        IImmutableList<string> PlusTwoDayTerms { get; }
+
+        IImmutableList<string> MinusTwoDayTerms { get; }
+
+        bool CheckBothBeforeAfter { get; }
+
+        IDateTimeUtilityConfiguration UtilityConfiguration { get; }
+
+        int GetSwiftMonthOrYear(string text);
 
         bool IsCardinalLast(string text);
 
-        IDateTimeUtilityConfiguration UtilityConfiguration { get; }
+        string Normalize(string text);
     }
 }

@@ -22,34 +22,58 @@ clone_depth: 1
 branches:
   only:
   - master
-  - feature/*
+  - /[Ff]eature\/.+/
+  - /[Ff]ix\/.+/
+  - /[Hh]otfix\/.+/
 
 build:
   parallel: true
 
 build_script:
 - cmd: >-
+    CALL wmic os get caption, version, osarchitecture
+    
+    CALL node -v
+    
+    CALL npm -v
+    
+    CALL node -e "console.log(process.versions.v8);"
+    
     cd .NET\
-
+    
     build.ci.cmd
+    
+    cd ..\JavaScript\
+    
+    build.ci.cmd
+    
+    cd ..\Python\
+    
+    build.ci.cmd
+    
+    cd ..\java\
+    
+    build.ci.cmd
+    
+test:
+          
+test_script:
+    cd ..\.NET\
+    
+    tests.ci.cmd
 
     cd ..\JavaScript\
-
-    build.cmd
-
-    cd ..\Python\
-
-    build.cmd
-
+    
+    tests.ci.cmd
+    
     cd ..\java\
-
-    mvn package
-
-# disable automatic tests
-test: off
+    
+    tests.ci.cmd
 
 artifacts:
     - path: '**\*Microsoft.Recognizers*.nupkg'
       name: NuGets
     - path: 'Java\libraries\**\recognizers-text*.jar'
       name: JARs
+    - path: 'Python\libraries\dist\*'
+      name: Wheels

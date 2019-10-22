@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Microsoft.Recognizers.Text.DataDrivenTests;
+﻿using Microsoft.Recognizers.Text.DataDrivenTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Recognizers.Text.Number.Tests
@@ -7,40 +6,32 @@ namespace Microsoft.Recognizers.Text.Number.Tests
     [TestClass]
     public class TestNumber_German : TestBase
     {
-        public static TestResources TestResources { get; protected set; }
-
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            TestResources = new TestResources();
-            TestResources.InitFromTestContext(context);
-        }
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            base.TestSpecInitialize(TestResources);
-        }
-
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "NumberModel-German.csv", "NumberModel-German#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void NumberModel()
+        public void NumberModel(TestModel testSpec)
         {
-            base.TestNumber();
+            TestNumber(testSpec);
         }
 
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "OrdinalModel-German.csv", "OrdinalModel-German#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void OrdinalModel()
+        public void OrdinalModel(TestModel testSpec)
         {
-            base.TestNumber();
+            TestNumber(testSpec);
         }
 
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "PercentModel-German.csv", "PercentModel-German#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void PercentModel()
+        public void OrdinalModelEnablePreview(TestModel testSpec)
         {
-            base.TestNumber();
+            TestNumber(testSpec);
+        }
+
+        [NetCoreTestDataSource]
+        [TestMethod]
+        public void PercentModel(TestModel testSpec)
+        {
+            TestNumber(testSpec);
         }
     }
 }

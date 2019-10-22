@@ -6,14 +6,14 @@ using DateObject = System.DateTime;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
-    public interface IHolidayParserConfiguration : IOptionsConfiguration
+    public interface IHolidayParserConfiguration : IDateTimeOptionsConfiguration
     {
         IImmutableDictionary<string, string> VariableHolidaysTimexDictionary { get; }
 
         IImmutableDictionary<string, Func<int, DateObject>> HolidayFuncDictionary { get; }
 
         IImmutableDictionary<string, IEnumerable<string>> HolidayNames { get; }
-        
+
         IEnumerable<Regex> HolidayRegexList { get; }
 
         int GetSwiftYear(string text);

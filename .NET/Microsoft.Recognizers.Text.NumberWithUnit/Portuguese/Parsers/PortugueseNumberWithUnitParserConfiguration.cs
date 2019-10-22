@@ -8,10 +8,12 @@ namespace Microsoft.Recognizers.Text.NumberWithUnit.Portuguese
 {
     public class PortugueseNumberWithUnitParserConfiguration : BaseNumberWithUnitParserConfiguration
     {
-        public PortugueseNumberWithUnitParserConfiguration(CultureInfo ci) : base(ci)
+        public PortugueseNumberWithUnitParserConfiguration(CultureInfo ci)
+               : base(ci)
         {
-            this.InternalNumberExtractor = new NumberExtractor(NumberMode.Default);
-            this.InternalNumberParser = AgnosticNumberParserFactory.GetParser(AgnosticNumberParserType.Number, new PortugueseNumberParserConfiguration());
+            this.InternalNumberExtractor = NumberExtractor.GetInstance();
+            this.InternalNumberParser = AgnosticNumberParserFactory.GetParser(AgnosticNumberParserType.Number, new PortugueseNumberParserConfiguration(
+                                                                                  new BaseNumberOptionsConfiguration(ci.Name)));
             this.ConnectorToken = NumbersWithUnitDefinitions.ConnectorToken;
         }
 

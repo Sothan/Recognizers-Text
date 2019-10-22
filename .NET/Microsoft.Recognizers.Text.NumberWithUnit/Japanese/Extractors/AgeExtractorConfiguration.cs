@@ -1,14 +1,21 @@
 ﻿using System.Collections.Immutable;
 using System.Globalization;
+
 using Microsoft.Recognizers.Definitions.Japanese;
 
 namespace Microsoft.Recognizers.Text.NumberWithUnit.Japanese
 {
     public class AgeExtractorConfiguration : JapaneseNumberWithUnitExtractorConfiguration
     {
-        public AgeExtractorConfiguration() : this(new CultureInfo(Culture.Japanese)) { }
+        public AgeExtractorConfiguration()
+            : this(new CultureInfo(Culture.Japanese))
+        {
+        }
 
-        public AgeExtractorConfiguration(CultureInfo ci) : base(ci) { }
+        public AgeExtractorConfiguration(CultureInfo ci)
+            : base(ci)
+        {
+        }
 
         public override ImmutableDictionary<string, string> SuffixList => NumbersWithUnitDefinitions.AgeSuffixList.ToImmutableDictionary();
 

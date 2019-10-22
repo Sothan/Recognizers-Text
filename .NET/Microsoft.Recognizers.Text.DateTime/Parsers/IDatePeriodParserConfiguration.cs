@@ -1,15 +1,11 @@
 ﻿using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
-using Microsoft.Recognizers.Text.Number;
-
 namespace Microsoft.Recognizers.Text.DateTime
 {
-    public interface IDatePeriodParserConfiguration : IOptionsConfiguration
+    public interface IDatePeriodParserConfiguration : ISimpleDatePeriodParserConfiguration, IDateTimeOptionsConfiguration
     {
         string TokenBeforeDate { get; }
-
-        IDateTimeExtractor DateExtractor { get; }
 
         IExtractor CardinalExtractor { get; }
 
@@ -38,8 +34,6 @@ namespace Microsoft.Recognizers.Text.DateTime
         Regex MonthWithYear { get; }
 
         Regex MonthNumWithYear { get; }
-
-        Regex YearRegex { get; }
 
         Regex PastRegex { get; }
 
@@ -73,7 +67,7 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         Regex NextPrefixRegex { get; }
 
-        Regex PastPrefixRegex { get; }
+        Regex PreviousPrefixRegex { get; }
 
         Regex ThisPrefixRegex { get; }
 
@@ -105,6 +99,10 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         Regex CenturySuffixRegex { get; }
 
+        Regex UnspecificEndOfRangeRegex { get; }
+
+        Regex NowRegex { get; }
+
         IImmutableDictionary<string, string> UnitMap { get; }
 
         IImmutableDictionary<string, int> CardinalMap { get; }
@@ -115,11 +113,15 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         IImmutableDictionary<string, string> SeasonMap { get; }
 
+        IImmutableDictionary<string, string> SpecialYearPrefixesMap { get; }
+
         IImmutableDictionary<string, int> WrittenDecades { get; }
 
         IImmutableDictionary<string, int> Numbers { get; }
 
         IImmutableDictionary<string, int> SpecialDecadeCases { get; }
+
+        bool CheckBothBeforeAfter { get; }
 
         bool IsFuture(string text);
 

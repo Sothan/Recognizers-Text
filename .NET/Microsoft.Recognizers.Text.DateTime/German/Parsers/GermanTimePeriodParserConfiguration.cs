@@ -1,18 +1,40 @@
 ﻿using System.Collections.Immutable;
+using System.Linq;
 using System.Text.RegularExpressions;
-
+using Microsoft.Recognizers.Definitions.German;
 using Microsoft.Recognizers.Text.DateTime.Utilities;
-using Microsoft.Recognizers.Text.Number;
 
 namespace Microsoft.Recognizers.Text.DateTime.German
 {
-    public class GermanTimePeriodParserConfiguration : BaseOptionsConfiguration, ITimePeriodParserConfiguration
+    public class GermanTimePeriodParserConfiguration : BaseDateTimeOptionsConfiguration, ITimePeriodParserConfiguration
     {
+        public GermanTimePeriodParserConfiguration(ICommonDateTimeParserConfiguration config)
+            : base(config)
+        {
+            TimeExtractor = config.TimeExtractor;
+            IntegerExtractor = config.IntegerExtractor;
+            TimeParser = config.TimeParser;
+            TimeZoneParser = config.TimeZoneParser;
+
+            PureNumberFromToRegex = GermanTimePeriodExtractorConfiguration.PureNumFromTo;
+            PureNumberBetweenAndRegex = GermanTimePeriodExtractorConfiguration.PureNumBetweenAnd;
+            SpecificTimeFromToRegex = GermanTimePeriodExtractorConfiguration.SpecificTimeFromTo;
+            SpecificTimeBetweenAndRegex = GermanTimePeriodExtractorConfiguration.SpecificTimeBetweenAnd;
+            TimeOfDayRegex = GermanTimePeriodExtractorConfiguration.TimeOfDayRegex;
+            GeneralEndingRegex = GermanTimePeriodExtractorConfiguration.GeneralEndingRegex;
+            TillRegex = GermanTimePeriodExtractorConfiguration.TillRegex;
+
+            Numbers = config.Numbers;
+            UtilityConfiguration = config.UtilityConfiguration;
+        }
+
         public IDateTimeExtractor TimeExtractor { get; }
 
         public IDateTimeParser TimeParser { get; }
 
         public IExtractor IntegerExtractor { get; }
+
+        public IDateTimeParser TimeZoneParser { get; }
 
         public Regex PureNumberFromToRegex { get; }
 
@@ -32,69 +54,50 @@ namespace Microsoft.Recognizers.Text.DateTime.German
 
         public IDateTimeUtilityConfiguration UtilityConfiguration { get; }
 
-        public GermanTimePeriodParserConfiguration(ICommonDateTimeParserConfiguration config) : base(config)
-        {
-            TimeExtractor = config.TimeExtractor;
-            IntegerExtractor = config.IntegerExtractor;
-            TimeParser = config.TimeParser;
-            PureNumberFromToRegex = GermanTimePeriodExtractorConfiguration.PureNumFromTo;
-            PureNumberBetweenAndRegex = GermanTimePeriodExtractorConfiguration.PureNumBetweenAnd;
-            SpecificTimeFromToRegex = GermanTimePeriodExtractorConfiguration.SpecificTimeFromTo;
-            SpecificTimeBetweenAndRegex = GermanTimePeriodExtractorConfiguration.SpecificTimeBetweenAnd;
-            TimeOfDayRegex = GermanTimePeriodExtractorConfiguration.TimeOfDayRegex;
-            GeneralEndingRegex = GermanTimePeriodExtractorConfiguration.GeneralEndingRegex;
-            TillRegex = GermanTimePeriodExtractorConfiguration.TillRegex;
-            Numbers = config.Numbers;
-            UtilityConfiguration = config.UtilityConfiguration;
-        }
-
         public bool GetMatchedTimexRange(string text, out string timex, out int beginHour, out int endHour, out int endMin)
         {
-            var trimedText = text.Trim().ToLowerInvariant();
-            if (trimedText.EndsWith("s"))
+            var trimmedText = text.Trim();
+            if (trimmedText.EndsWith("s"))
             {
-                trimedText = trimedText.Substring(0, trimedText.Length - 1);
+                trimmedText = trimmedText.Substring(0, trimmedText.Length - 1);
             }
 
             beginHour = 0;
             endHour = 0;
             endMin = 0;
-            if (trimedText.EndsWith("morgen"))
+
+            var timeOfDay = string.Empty;
+            if (DateTimeDefinitions.MorningTermList.Any(o => trimmedText.EndsWith(o)))
             {
-                timex = "TMO";
-                beginHour = 8;
-                endHour = Constants.HalfDayHourCount;
+                timeOfDay = Constants.Morning;
             }
-            else if (trimedText.EndsWith("nachmittag"))
+            else if (DateTimeDefinitions.AfternoonTermList.Any(o => trimmedText.EndsWith(o)))
             {
-                timex = "TAF";
-                beginHour = Constants.HalfDayHourCount;
-                endHour = 16;
+                timeOfDay = Constants.Afternoon;
             }
-            else if (trimedText.EndsWith("abend"))
+            else if (DateTimeDefinitions.EveningTermList.Any(o => trimmedText.EndsWith(o)))
             {
-                timex = "TEV";
-                beginHour = 16;
-                endHour = 20;
+                timeOfDay = Constants.Evening;
             }
-            else if (trimedText.Equals("tag"))
+            else if (DateTimeDefinitions.DaytimeTermList.Any(o => trimmedText.Equals(o)))
             {
-                timex = "TDT";
-                beginHour = 8;
-                endHour = 18;
+                timeOfDay = Constants.Daytime;
             }
-            else if (trimedText.EndsWith("nacht"))
+            else if (DateTimeDefinitions.NightTermList.Any(o => trimmedText.EndsWith(o)))
             {
-                timex = "TNI";
-                beginHour = 20;
-                endHour = 23;
-                endMin = 59;
+                timeOfDay = Constants.Night;
             }
             else
             {
                 timex = null;
                 return false;
             }
+
+            var parseResult = TimexUtility.ParseTimeOfDay(timeOfDay);
+            timex = parseResult.Timex;
+            beginHour = parseResult.BeginHour;
+            endHour = parseResult.EndHour;
+            endMin = parseResult.EndMin;
 
             return true;
         }

@@ -6,6 +6,7 @@ from ...resources.english_date_time import EnglishDateTime
 from ..base_time import TimeParserConfiguration, AdjustParams
 from ..base_configs import BaseDateParserConfiguration, DateTimeUtilityConfiguration
 
+
 class EnglishTimeParserConfiguration(TimeParserConfiguration):
     @property
     def time_token_prefix(self) -> str:
@@ -29,7 +30,8 @@ class EnglishTimeParserConfiguration(TimeParserConfiguration):
 
     def __init__(self, config: BaseDateParserConfiguration):
         self._time_token_prefix: str = EnglishDateTime.TimeTokenPrefix
-        self._at_regex: Pattern = RegExpUtility.get_safe_reg_exp(EnglishDateTime.AtRegex)
+        self._at_regex: Pattern = RegExpUtility.get_safe_reg_exp(
+            EnglishDateTime.AtRegex)
         self._time_regexes: List[Pattern] = [
             RegExpUtility.get_safe_reg_exp(EnglishDateTime.TimeRegex1),
             RegExpUtility.get_safe_reg_exp(EnglishDateTime.TimeRegex2),
@@ -44,11 +46,16 @@ class EnglishTimeParserConfiguration(TimeParserConfiguration):
         ]
         self._numbers: Dict[str, int] = EnglishDateTime.Numbers
         self._utility_configuration = config.utility_configuration
-        self.less_than_one_hour = RegExpUtility.get_safe_reg_exp(EnglishDateTime.LessThanOneHour)
-        self.time_suffix_full = RegExpUtility.get_safe_reg_exp(EnglishDateTime.TimeSuffixFull)
-        self.lunch_regex = RegExpUtility.get_safe_reg_exp(EnglishDateTime.LunchRegex)
-        self.night_regex = RegExpUtility.get_safe_reg_exp(EnglishDateTime.NightRegex)
-        self.ish_regex = RegExpUtility.get_safe_reg_exp(EnglishDateTime.IshRegex)
+        self.less_than_one_hour = RegExpUtility.get_safe_reg_exp(
+            EnglishDateTime.LessThanOneHour)
+        self.time_suffix_full = RegExpUtility.get_safe_reg_exp(
+            EnglishDateTime.TimeSuffixFull)
+        self.lunch_regex = RegExpUtility.get_safe_reg_exp(
+            EnglishDateTime.LunchRegex)
+        self.night_regex = RegExpUtility.get_safe_reg_exp(
+            EnglishDateTime.NightRegex)
+        self.ish_regex = RegExpUtility.get_safe_reg_exp(
+            EnglishDateTime.IshRegex)
 
     def adjust_by_prefix(self, prefix: str, adjust: AdjustParams):
         delta_min = 0
@@ -94,7 +101,7 @@ class EnglishTimeParserConfiguration(TimeParserConfiguration):
                         delta_hour = 12
                     if regex.search(self.lunch_regex, pm_str):
                         # for hour >= 10 and < 12
-                        if adjust.hour >= 10 and adjust.hour <= 12:
+                        if 10 <= adjust.hour <= 12:
                             delta_hour = 0
                             if adjust.hour == 12:
                                 adjust.has_pm = True

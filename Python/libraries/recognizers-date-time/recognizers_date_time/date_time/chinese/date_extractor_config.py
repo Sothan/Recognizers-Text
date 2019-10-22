@@ -7,8 +7,50 @@ from ..constants import Constants
 from ..extractors import DateTimeExtractor
 from ..base_date import DateTimeUtilityConfiguration
 from ..base_date import DateExtractorConfiguration
+from ...resources.base_date_time import BaseDateTime
+
 
 class ChineseDateExtractorConfiguration(DateExtractorConfiguration):
+    @property
+    def week_day_end(self) -> Pattern:
+        pass
+
+    @property
+    def week_day_and_day_regex(self) -> Pattern:
+        pass
+
+    @property
+    def prefix_article_regex(self) -> Pattern:
+        pass
+
+    @property
+    def month_of_year(self) -> Dict[str, int]:
+        pass
+
+    @property
+    def year_suffix(self) -> Pattern:
+        pass
+
+    @property
+    def more_than_regex(self) -> Pattern:
+        pass
+
+    @property
+    def less_than_regex(self) -> Pattern:
+        pass
+
+    @property
+    def in_connector_regex(self) -> Pattern:
+        pass
+
+    @property
+    def range_unit_regex(self) -> Pattern:
+        pass
+
+    @property
+    def since_year_suffix_regex(self) -> Pattern:
+        pass
+
     @property
     def date_regex_list(self) -> List[Pattern]:
         return self._date_regex_list
@@ -66,6 +108,14 @@ class ChineseDateExtractorConfiguration(DateExtractorConfiguration):
         return None
 
     @property
+    def strict_relative_regex(self) -> Pattern:
+        return None
+
+    @property
+    def range_connector_symbol_regex(self) -> Pattern:
+        return self._range_connector_symbol_regex
+
+    @property
     def utility_configuration(self) -> DateTimeUtilityConfiguration:
         return None
 
@@ -79,13 +129,18 @@ class ChineseDateExtractorConfiguration(DateExtractorConfiguration):
         ]
 
         if ChineseDateTime.DefaultLanguageFallback == Constants.DEFAULT_LANGUAGE_FALLBACK_DMY:
-            self._date_regex_list.append(RegExpUtility.get_safe_reg_exp(ChineseDateTime.DateRegexList7))
-            self._date_regex_list.append(RegExpUtility.get_safe_reg_exp(ChineseDateTime.DateRegexList6))
+            self._date_regex_list.append(
+                RegExpUtility.get_safe_reg_exp(ChineseDateTime.DateRegexList7))
+            self._date_regex_list.append(
+                RegExpUtility.get_safe_reg_exp(ChineseDateTime.DateRegexList6))
         else:
-            self._date_regex_list.append(RegExpUtility.get_safe_reg_exp(ChineseDateTime.DateRegexList6))
-            self._date_regex_list.append(RegExpUtility.get_safe_reg_exp(ChineseDateTime.DateRegexList7))
+            self._date_regex_list.append(
+                RegExpUtility.get_safe_reg_exp(ChineseDateTime.DateRegexList6))
+            self._date_regex_list.append(
+                RegExpUtility.get_safe_reg_exp(ChineseDateTime.DateRegexList7))
 
-        self._date_regex_list.append(RegExpUtility.get_safe_reg_exp(ChineseDateTime.DateRegexList8))
+        self._date_regex_list.append(
+            RegExpUtility.get_safe_reg_exp(ChineseDateTime.DateRegexList8))
 
         self._implicit_date_list = [
             RegExpUtility.get_safe_reg_exp(ChineseDateTime.LunarRegex),
@@ -94,6 +149,10 @@ class ChineseDateExtractorConfiguration(DateExtractorConfiguration):
             RegExpUtility.get_safe_reg_exp(ChineseDateTime.DateLastRegex),
             RegExpUtility.get_safe_reg_exp(ChineseDateTime.DateNextRegex),
             RegExpUtility.get_safe_reg_exp(ChineseDateTime.WeekDayRegex),
-            RegExpUtility.get_safe_reg_exp(ChineseDateTime.WeekDayOfMonthRegex),
+            RegExpUtility.get_safe_reg_exp(
+                ChineseDateTime.WeekDayOfMonthRegex),
             RegExpUtility.get_safe_reg_exp(ChineseDateTime.SpecialDate)
         ]
+        self._range_connector_symbol_regex = RegExpUtility.get_safe_reg_exp(
+            BaseDateTime.RangeConnectorSymbolRegex
+        )

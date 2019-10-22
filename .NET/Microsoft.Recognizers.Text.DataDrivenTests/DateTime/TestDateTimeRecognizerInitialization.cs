@@ -1,8 +1,8 @@
-﻿using Microsoft.Recognizers.Text.DateTime.English;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Recognizers.Text.DateTime.English;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Recognizers.Text.DateTime.Tests
 {
@@ -21,16 +21,16 @@ namespace Microsoft.Recognizers.Text.DateTime.Tests
 
         public TestDateTimeRecognizerInitialization()
         {
-            var config = new BaseOptionsConfiguration();
-            var configEnableDmy = new BaseOptionsConfiguration(DateTimeOptions.None, true);
+            var defaultConfig = new BaseDateTimeOptionsConfiguration(Culture.English, DateTimeOptions.None, false);
+            var dmyConfig = new BaseDateTimeOptionsConfiguration(Culture.EnglishOthers, DateTimeOptions.None, true);
 
             defaultEnglishControlModel = new DateTimeModel(
-                    new BaseMergedDateTimeParser(new EnglishMergedParserConfiguration(config)),
-                    new BaseMergedDateTimeExtractor(new EnglishMergedExtractorConfiguration(config)));
+                    new BaseMergedDateTimeParser(new EnglishMergedParserConfiguration(defaultConfig)),
+                    new BaseMergedDateTimeExtractor(new EnglishMergedExtractorConfiguration(defaultConfig)));
 
             otherEnglishControlModel = new DateTimeModel(
-                    new BaseMergedDateTimeParser(new EnglishMergedParserConfiguration(configEnableDmy)),
-                    new BaseMergedDateTimeExtractor(new EnglishMergedExtractorConfiguration(configEnableDmy)));
+                    new BaseMergedDateTimeParser(new EnglishMergedParserConfiguration(dmyConfig)),
+                    new BaseMergedDateTimeExtractor(new EnglishMergedExtractorConfiguration(dmyConfig)));
         }
 
         [TestMethod]
@@ -129,13 +129,21 @@ namespace Microsoft.Recognizers.Text.DateTime.Tests
 
                 Assert.AreEqual(expected.TypeName, actual.TypeName, source);
                 Assert.AreEqual(expected.Text, actual.Text, source);
-                if (expected.Start != 0) Assert.AreEqual(expected.Start, actual.Start, source);
-                if (expected.End != 0) Assert.AreEqual(expected.End, actual.End, source);
+                if (expected.Start != 0)
+                {
+                    Assert.AreEqual(expected.Start, actual.Start, source);
+                }
 
-                var listValues = actual.Resolution[ResolutionKey.ValueSet] as IList<Dictionary<string, object>>;
+                if (expected.End != 0)
+                {
+                    Assert.AreEqual(expected.End, actual.End, source);
+                }
+
+                // Actual ValueSet types should not be modified as that's considered a breaking API change
+                var listValues = actual.Resolution[ResolutionKey.ValueSet] as IList<Dictionary<string, string>>;
                 var actualValues = listValues.FirstOrDefault();
 
-                var expectedObj = expected.Resolution[ResolutionKey.ValueSet] as IList<Dictionary<string, object>>;
+                var expectedObj = expected.Resolution[ResolutionKey.ValueSet] as IList<Dictionary<string, string>>;
                 var expectedValues = expectedObj.FirstOrDefault();
 
                 CollectionAssert.AreEqual(expectedValues, actualValues, source);

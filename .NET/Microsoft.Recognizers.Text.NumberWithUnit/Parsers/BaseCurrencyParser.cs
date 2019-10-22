@@ -1,19 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Microsoft.Recognizers.Text.NumberWithUnit.Utilities;
 
 namespace Microsoft.Recognizers.Text.NumberWithUnit
 {
-    class BaseCurrencyParser : IParser
+    public class BaseCurrencyParser : IParser
     {
-        protected readonly BaseNumberWithUnitParserConfiguration config;
         private readonly NumberWithUnitParser numberWithUnitParser;
 
         public BaseCurrencyParser(BaseNumberWithUnitParserConfiguration config)
         {
-            this.config = config;
+            this.Config = config;
             numberWithUnitParser = new NumberWithUnitParser(config);
         }
+
+        protected BaseNumberWithUnitParserConfiguration Config { get; }
 
         public ParseResult Parse(ExtractResult extResult)
         {
@@ -28,13 +30,13 @@ namespace Microsoft.Recognizers.Text.NumberWithUnit
                 pr = numberWithUnitParser.Parse(extResult);
                 var value = pr.Value as UnitValue;
 
-                config.CurrencyNameToIsoCodeMap.TryGetValue(value?.Unit, out var mainUnitIsoCode);
-                if (string.IsNullOrEmpty(mainUnitIsoCode) || mainUnitIsoCode.StartsWith(Constants.FAKE_ISO_CODE_PREFIX))
+                Config.CurrencyNameToIsoCodeMap.TryGetValue(value?.Unit, out var mainUnitIsoCode);
+                if (string.IsNullOrEmpty(mainUnitIsoCode) || mainUnitIsoCode.StartsWith(Constants.FAKE_ISO_CODE_PREFIX, StringComparison.Ordinal))
                 {
                     pr.Value = new UnitValue
                     {
                         Unit = value?.Unit,
-                        Number = value?.Number
+                        Number = value?.Number,
                     };
                 }
                 else
@@ -43,7 +45,7 @@ namespace Microsoft.Recognizers.Text.NumberWithUnit
                     {
                         Unit = value?.Unit,
                         Number = value?.Number,
-                        IsoCurrency = mainUnitIsoCode
+                        IsoCurrency = mainUnitIsoCode,
                     };
                 }
             }
@@ -51,17 +53,72 @@ namespace Microsoft.Recognizers.Text.NumberWithUnit
             return pr;
         }
 
+        private static void ResolveText(List<ParseResult> prs, string source, int bias)
+        {
+            foreach (var parseResult in prs)
+            {
+                if (parseResult.Start != null && parseResult.Length != null)
+                {
+                    parseResult.Text = source.Substring((int)parseResult.Start - bias, (int)parseResult.Length);
+                }
+            }
+        }
+
+        private static bool CheckUnitsStringContains(string fractionUnitCode, string fractionUnitsString)
+        {
+            var unitsMap = new Dictionary<string, string>();
+            DictionaryUtils.BindUnitsString(unitsMap, string.Empty, fractionUnitsString);
+            return unitsMap.ContainsKey(fractionUnitCode);
+        }
+
+        private string GetResolutionStr(object value)
+        {
+            // Nothing to resolve. This happens when the entity is a currency name only (no numerical value).
+            if (value == null)
+            {
+                return null;
+            }
+
+            return Config.CultureInfo != null ?
+                ((double)value).ToString(Config.CultureInfo) :
+                value.ToString();
+        }
+
+        private ParseResult CreateCurrencyResult(ParseResult result, string mainUnitIsoCode, object numberValue, string mainUnitValue)
+        {
+            if (string.IsNullOrEmpty(mainUnitIsoCode) ||
+                mainUnitIsoCode.StartsWith(Constants.FAKE_ISO_CODE_PREFIX, StringComparison.Ordinal))
+            {
+                result.Value = new UnitValue
+                {
+                    Number = GetResolutionStr(numberValue),
+                    Unit = mainUnitValue,
+                };
+            }
+            else
+            {
+                result.Value = new CurrencyUnitValue
+                {
+                    Number = GetResolutionStr(numberValue),
+                    Unit = mainUnitValue,
+                    IsoCurrency = mainUnitIsoCode,
+                };
+            }
+
+            return result;
+        }
+
         private ParseResult MergeCompoundUnit(ExtractResult compoundResult)
         {
             var results = new List<ParseResult>();
-            var compoundUnit = (List<ExtractResult>) compoundResult.Data;
+            var compoundUnit = (List<ExtractResult>)compoundResult.Data;
 
             var count = 0;
             ParseResult result = null;
-            var numberValue = 0.0;
-            var mainUnitValue = "";
-            string mainUnitIsoCode = "";
-            string fractionUnitsString = "";
+            double? numberValue = null;
+            var mainUnitValue = string.Empty;
+            string mainUnitIsoCode = string.Empty;
+            string fractionUnitsString = string.Empty;
 
             for (var idx = 0; idx < compoundUnit.Count; idx++)
             {
@@ -73,7 +130,7 @@ namespace Microsoft.Recognizers.Text.NumberWithUnit
                 // Process a new group
                 if (count == 0)
                 {
-                    if (!extractResult.Type.Equals(Constants.SYS_UNIT_CURRENCY))
+                    if (!extractResult.Type.Equals(Constants.SYS_UNIT_CURRENCY, StringComparison.Ordinal))
                     {
                         continue;
                     }
@@ -84,43 +141,49 @@ namespace Microsoft.Recognizers.Text.NumberWithUnit
                         Start = extractResult.Start,
                         Length = extractResult.Length,
                         Text = extractResult.Text,
-                        Type = extractResult.Type
+                        Type = extractResult.Type,
                     };
 
                     mainUnitValue = unitValue;
-                    numberValue = double.Parse(parseResultValue?.Number);
+
+                    if (parseResultValue?.Number != null)
+                    {
+                        numberValue = double.Parse(parseResultValue.Number);
+                    }
+
                     result.ResolutionStr = parseResult.ResolutionStr;
 
-                    config.CurrencyNameToIsoCodeMap.TryGetValue(unitValue, out mainUnitIsoCode);
+                    Config.CurrencyNameToIsoCodeMap.TryGetValue(unitValue, out mainUnitIsoCode);
+
                     // If the main unit can't be recognized, finish process this group.
                     if (string.IsNullOrEmpty(mainUnitIsoCode))
                     {
                         result.Value = new UnitValue
                         {
-                            Number = numberValue.ToString(),
-                            Unit = mainUnitValue
+                            Number = GetResolutionStr(numberValue),
+                            Unit = mainUnitValue,
                         };
                         results.Add(result);
                         result = null;
                         continue;
                     }
 
-                    config.CurrencyFractionMapping.TryGetValue(mainUnitIsoCode, out fractionUnitsString);
+                    Config.CurrencyFractionMapping.TryGetValue(mainUnitIsoCode, out fractionUnitsString);
                 }
                 else
                 {
                     // Match pure number as fraction unit.
-                    if (extractResult.Type.Equals(Constants.SYS_NUM))
+                    if (extractResult.Type.Equals(Constants.SYS_NUM, StringComparison.Ordinal))
                     {
-                        numberValue += (double) parseResult.Value * (1.0 / 100);
+                        numberValue += (double)parseResult.Value * (1.0 / 100);
                         result.ResolutionStr += ' ' + parseResult.ResolutionStr;
                         result.Length = parseResult.Start + parseResult.Length - result.Start;
                         count++;
                         continue;
                     }
 
-                    config.CurrencyFractionCodeList.TryGetValue(unitValue, out var fractionUnitCode);
-                    config.CurrencyFractionNumMap.TryGetValue(parseResultValue?.Unit, out var fractionNumValue);
+                    Config.CurrencyFractionCodeList.TryGetValue(unitValue, out var fractionUnitCode);
+                    Config.CurrencyFractionNumMap.TryGetValue(parseResultValue?.Unit, out var fractionNumValue);
 
                     if (!string.IsNullOrEmpty(fractionUnitCode) && fractionNumValue != 0 &&
                         CheckUnitsStringContains(fractionUnitCode, fractionUnitsString))
@@ -135,31 +198,14 @@ namespace Microsoft.Recognizers.Text.NumberWithUnit
                         // If the fraction unit doesn't match the main unit, finish process this group.
                         if (result != null)
                         {
-                            if (string.IsNullOrEmpty(mainUnitIsoCode) ||
-                                mainUnitIsoCode.StartsWith(Constants.FAKE_ISO_CODE_PREFIX))
-                            {
-                                result.Value = new UnitValue
-                                {
-                                    Number = numberValue.ToString(),
-                                    Unit = mainUnitValue
-                                };
-                            }
-                            else
-                            {
-                                result.Value = new CurrencyUnitValue
-                                {
-                                    Number = numberValue.ToString(),
-                                    Unit = mainUnitValue,
-                                    IsoCurrency = mainUnitIsoCode
-                                };
-                            }
-
+                            result = CreateCurrencyResult(result, mainUnitIsoCode, numberValue, mainUnitValue);
                             results.Add(result);
                             result = null;
                         }
 
                         count = 0;
                         idx -= 1;
+                        numberValue = null;
                         continue;
                     }
                 }
@@ -169,59 +215,16 @@ namespace Microsoft.Recognizers.Text.NumberWithUnit
 
             if (result != null)
             {
-                if (string.IsNullOrEmpty(mainUnitIsoCode) ||
-                    mainUnitIsoCode.StartsWith(Constants.FAKE_ISO_CODE_PREFIX))
-                {
-                    result.Value = new UnitValue
-                    {
-                        Number = numberValue.ToString(),
-                        Unit = mainUnitValue
-                    };
-                }
-                else
-                {
-                    result.Value = new CurrencyUnitValue
-                    {
-                        Number = numberValue.ToString(),
-                        Unit = mainUnitValue,
-                        IsoCurrency = mainUnitIsoCode
-                    };
-                }
-
+                result = CreateCurrencyResult(result, mainUnitIsoCode, numberValue, mainUnitValue);
                 results.Add(result);
             }
 
-            ResolveText(results, compoundResult.Text, (int) compoundResult.Start);
+            ResolveText(results, compoundResult.Text, (int)compoundResult.Start);
 
             return new ParseResult
             {
-                Value = results
+                Value = results,
             };
         }
-
-        private bool CheckUnitsStringContains(string fractionUnitCode, string fractionUnitsString)
-        {
-            var unitsMap = new Dictionary<string, string>();
-            DictionaryUtils.BindUnitsString(unitsMap, "", fractionUnitsString);
-            return unitsMap.ContainsKey(fractionUnitCode);
-        }
-
-        private static void ResolveText(List<ParseResult> prs, string source, int bias)
-        {
-            foreach (var parseResult in prs)
-            {
-                if (parseResult.Start != null && parseResult.Length != null)
-                {
-                    parseResult.Text = source.Substring((int) parseResult.Start - bias, (int) parseResult.Length);
-                }
-            }
-        }
-    }
-
-    public class CurrencyUnitValue
-    {
-        public string Number = "";
-        public string Unit = "";
-        public string IsoCurrency = "";
     }
 }

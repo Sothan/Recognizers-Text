@@ -8,50 +8,43 @@ using Microsoft.Recognizers.Text.Utilities;
 
 namespace Microsoft.Recognizers.Text.DateTime.English
 {
-    public class EnglishTimeZoneExtractorConfiguration : BaseOptionsConfiguration, ITimeZoneExtractorConfiguration
+    public class EnglishTimeZoneExtractorConfiguration : BaseDateTimeOptionsConfiguration, ITimeZoneExtractorConfiguration
     {
         public static readonly Regex DirectUtcRegex =
-            new Regex(
-                TimeZoneDefinitions.DirectUtcRegex,
-                RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(TimeZoneDefinitions.DirectUtcRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
-        public static readonly Regex AbbreviationRegex =
-            new Regex(
-                TimeZoneDefinitions.AbbreviationsRegex,
-                RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly List<string> AbbreviationsList =
+            new List<string>(TimeZoneDefinitions.AbbreviationsList);
 
-        public static readonly Regex StandardTimeRegex =
-            new Regex(
-                TimeZoneDefinitions.FullNameRegex,
-                RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly List<string> FullNameList =
+            new List<string>(TimeZoneDefinitions.FullNameList);
 
-        public static readonly Regex[] TimeZoneRegexList =
-        {
-            DirectUtcRegex,
-            AbbreviationRegex,
-            StandardTimeRegex
-        };
+        public static readonly StringMatcher TimeZoneMatcher =
+            TimeZoneUtility.BuildMatcherFromLists(FullNameList, AbbreviationsList);
 
-        public static readonly Regex LocationTimeSuffixRegex = new Regex(TimeZoneDefinitions.LocationTimeSuffixRegex,
-            RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex LocationTimeSuffixRegex =
+            new Regex(TimeZoneDefinitions.LocationTimeSuffixRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
-        public static readonly StringMatcher CityMatcher = new StringMatcher();
+        public static readonly StringMatcher LocationMatcher = new StringMatcher();
 
         public static readonly List<string> AmbiguousTimezoneList = TimeZoneDefinitions.AmbiguousTimezoneList.ToList();
 
-        public EnglishTimeZoneExtractorConfiguration(IOptionsConfiguration config) : base(config)
+        public EnglishTimeZoneExtractorConfiguration(IDateTimeOptionsConfiguration config)
+            : base(config)
         {
             if ((Options & DateTimeOptions.EnablePreview) != 0)
             {
-                CityMatcher.Init(TimeZoneDefinitions.MajorLocations.Select(o => FormatUtility.RemoveDiacritics(o.ToLowerInvariant())));
+                LocationMatcher.Init(TimeZoneDefinitions.MajorLocations.Select(o => QueryProcessor.RemoveDiacritics(o.ToLowerInvariant())));
             }
         }
 
-        IEnumerable<Regex> ITimeZoneExtractorConfiguration.TimeZoneRegexes => TimeZoneRegexList;
+        Regex ITimeZoneExtractorConfiguration.DirectUtcRegex => DirectUtcRegex;
 
         Regex ITimeZoneExtractorConfiguration.LocationTimeSuffixRegex => LocationTimeSuffixRegex;
 
-        StringMatcher ITimeZoneExtractorConfiguration.CityMatcher => CityMatcher;
+        StringMatcher ITimeZoneExtractorConfiguration.LocationMatcher => LocationMatcher;
+
+        StringMatcher ITimeZoneExtractorConfiguration.TimeZoneMatcher => TimeZoneMatcher;
 
         List<string> ITimeZoneExtractorConfiguration.AmbiguousTimezoneList => AmbiguousTimezoneList;
     }

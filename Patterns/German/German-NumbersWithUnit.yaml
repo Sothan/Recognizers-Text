@@ -7,6 +7,18 @@ AgeSuffixList: !dictionary
     Month: monat alt|monate alt|monaten|monate
     Week: woche alt|wochen alt|wochen|woche
     Day: tag alt|tage alt|tagen|tage
+# @TODO: This is a workaround. A redesign of Age is necessary to properly address the issue.
+AmbiguousAgeUnitList: !list
+  types: [ string ]
+  entries:
+    - jahren
+    - jahre
+    - monaten
+    - monate
+    - wochen
+    - woche
+    - tagen
+    - tage
 #AreaExtractorConfiguration
 AreaSuffixList: !dictionary
   types: [ string, string ]
@@ -35,7 +47,7 @@ CurrencySuffixList: !dictionary
     Pul: pul
 #Euro
     Euro: euro|€|eur
-    Cent: cent|-cent|sen
+    Cent: cent|-cent
 #Albanian lek
 #No use of "ALL" "L"
     Albanian lek: albaninischer Lek|albanische Lek|albanischen Lek
@@ -80,7 +92,7 @@ CurrencySuffixList: !dictionary
     Croatian kuna: kroatischer kuna|kroatische kuna|kroatischen kuna|kn|hrk|kuna
     Lipa: lipa
 #Czech koruna
-    Czech koruna: tschechische krone|tschechischen kronen|tschechischer kronen|czk|kč|krone|kronen
+    Czech koruna: tschechische krone|tschechischen kronen|tschechischer kronen|czk|kč
     Haléř: haléř
 #Eritrean nakfa
     Eritrean nakfa: eritreischer nakfa|eritreische nakfa|eritreischen nakfa|nfk|ern|nakfa
@@ -117,7 +129,7 @@ CurrencySuffixList: !dictionary
 #Kazakhstani tenge
     Kazakhstani tenge: kasachischer tenge|kasachische tenge|kasachischen tenge|kzt
 #Kenyan shilling
-    Kenyan shilling: kenia-schilling|sh|kes
+    Kenyan shilling: kenia-schilling|kes
 #North Korean won
     North Korean won: nordkoreanischer won|nordkoreanische won|nordkoreanischen won|kpw
     South Korean won: südkoreanischer won|südkoreanische won|südkoreanischen won|krw
@@ -171,7 +183,7 @@ CurrencySuffixList: !dictionary
     Omani rial: omanischer rial|omanische rial|omanischen rial|omr|ر.ع.
 #Panamanian balboa
     Panamanian balboa: panamaischer balboa|panamaische balboa|panamaischen balboa|b/.|pab
-    Centesimo: centesimo|céntimo
+    Centesimo: centesimo
 #Papua New Guinean kina
     Papua New Guinean kina: papua-neuguinea-kina|kina|pgk
     Toea: toea
@@ -198,7 +210,7 @@ CurrencySuffixList: !dictionary
 #Spain
     Peseta: pesetas|peseta
 #Netherlands guilder
-    Netherlands guilder: florin|antillen-gulden|niederländische-antillen-gulden|antillen gulden|ang|ƒ|niederländischer gulden|niederländische gulden|niederländischen gulden|gulden|fl
+    Netherlands guilder: florin|antillen-gulden|niederländische-antillen-gulden|antillen gulden|ang|niederländischer gulden|niederländische gulden|niederländischen gulden|gulden|fl
 #Swazi lilangeni
     Swazi lilangeni: swazi-lilangeni|swazi lilangeni|lilangeni|szl|swazi-emalangeni|swazi emalangeni
 #Tajikistani somoni
@@ -208,7 +220,7 @@ CurrencySuffixList: !dictionary
     Thai baht: thailändischer baht|thailändische baht|thailändischen baht|thailaendischer baht|thailaendische baht|thailaendischen baht|thai baht|thai-baht|฿|thb
     Satang: satang|satangs
 #Tongan paʻanga
-    Tongan paʻanga: tongaischer paʻanga|tongaische paʻanga|tongaischen paʻanga|paʻanga|tonga paʻanga|tongaischer pa'anga|tongaische pa'anga|tongaischen pa'anga|pa'anga|tonga pa'anga|
+    Tongan paʻanga: tongaischer paʻanga|tongaische paʻanga|tongaischen paʻanga|paʻanga|tonga paʻanga|tongaischer pa'anga|tongaische pa'anga|tongaischen pa'anga|pa'anga|tonga pa'anga
     Seniti: seniti
 #Ukrainian hryvnia
     Ukrainian hryvnia: ukrainischer hrywnja|ukrainische hrywnja|ukrainischen hrywnja|hrywnja|uah|₴
@@ -232,7 +244,7 @@ CurrencySuffixList: !dictionary
     Somali shilling: somalia-schilling|sh.so.|sos
     Somaliland shilling: somaliland-schilling
     Tanzanian shilling: tansania-schilling|tsh|tzs
-    Ugandan shilling: uganda-schilling|sh|ugx
+    Ugandan shilling: uganda-schilling|ugx
 #Leu
     Romanian leu: rumänischer leu|rumänische leu|rumänischen leu|rumaenischer leu|rumaenische leu|rumaenischen leu|lei|ron
     Moldovan leu: moldauischer leu|moldauische leu|moldauischen leu|mdl|moldau leu
@@ -244,12 +256,12 @@ CurrencySuffixList: !dictionary
     Indian rupee: indischer rupie|indische rupie|indischen rupie|indischer rupien|indische rupien|indischen rupien|inr|₹
     Seychellois rupee: seychellen-rupie|seychellen-rupien|scr|sr|sre
     Mauritian rupee: mauritius-rupie|mauritius-rupien|mur
-    Maldivian rufiyaa: maledivischer rufiyaa|maledivische rufiyaa|maledivischen rufiyaa|rf|mvr|.ރ
+    Maldivian rufiyaa: maledivischer rufiyaa|maledivische rufiyaa|maledivischen rufiyaa|mvr|.ރ
     Sri Lankan rupee: sri-lanka-rupie|sri-lanka-rupien|lkr|රු|ரூ
     Indonesian rupiah: indonesischer rupiah|indonesische rupiah|indonesischen rupiah|rupiah|perak|rp|idr
     Rupee: rupie|rs
 #Krone
-    Danish krone: dänische krone|Dänischen krone|dänischer kronen|dänische kronen|dänischen kronen|daenische krone|daenischen krone|daenischer kronen|daenische kronen|daenischen kronen|dkk
+    Danish krone: dänische krone|dänischen krone|dänischer kronen|dänische kronen|dänischen kronen|daenische krone|daenischen krone|daenischer kronen|daenische kronen|daenischen kronen|dkk
     Norwegian krone: norwegische krone|norwegischen krone|norwegischer kronen|norwegische kronen|norwegischen kronen|nok
     Faroese króna: färöische króna|färöische krone|färöischen krone|färöischer kronen|färöische kronen|färöischen kronen
     Icelandic króna: isländische krone|isländischen krone|isländischer kronen|isländische kronen|isländischen kronen|isk
@@ -282,7 +294,7 @@ CurrencySuffixList: !dictionary
     Ruble: rubel|br
 #Dinar
     Algerian dinar: algerischer dinar|algerische dinar|algerischen dinar|د.ج|dzd
-    Bahraini dinar: bahrain-dinar||bhd|.د.ب
+    Bahraini dinar: bahrain-dinar|bhd|.د.ب
     Santeem: santeem|santeeme
     Iraqi dinar: irakischer dinar|irakische dinar|irakischen dinar|iqd|ع.د
     Jordanian dinar: jordanischer dinar|jordanische dinar|jordanischen dinar|د.ا|jod
@@ -326,7 +338,7 @@ CurrencySuffixList: !dictionary
     Tristan da Cunha pound: tristan-da-cunha-pfund|tristan-da-cunha-£
     Pound: pfund|£
     Pence: pence
-    Shilling: shillings|shilling|shilingi
+    Shilling: shillings|shilling|shilingi|sh
     Penny: pennies|penny
 #Dollar
     United States dollar: us-dollar|us$|usd|amerikanischer dollar|amerikanische dollar|amerikanischen dollar
@@ -501,7 +513,7 @@ AmbiguousDimensionUnitList: !list
     - fps
     - pts
     - in
-    - \"
+    - '"'
 #GermanNumberWithUnitExtractorConfiguration
 BuildPrefix: !simpleRegex
   def: (?<=(\s|^))
@@ -523,7 +535,7 @@ LengthSuffixList: !dictionary
     Picometer: pm|pikometer|picometer|pikometern|picometern
     Mile: meile|meilen
     Yard: yard|yards
-    Inch: zoll|inch|in|\"
+    Inch: zoll|inch|in|"
     Foot: fuß|ft
     Light year: lichtjahr|lichtjahre|lichtjahren
     Pt: pt|pts
@@ -555,10 +567,10 @@ TemperatureSuffixList: !dictionary
   types: [ string, string ]
   entries:
     F: grad fahrenheit|°fahrenheit|°f|fahrenheit
-    K: k|kelvin
+    K: k|K|kelvin|grad kelvin|°kelvin|°k|°K
     R: rankine|°r
     D: delisle|°de
-    C: grad celsius|°celsius|°c
+    C: grad celsius|°celsius|°c|celsius
     Degree: grad|°
 AmbiguousTemperatureUnitList: !list
   types: [ string ]

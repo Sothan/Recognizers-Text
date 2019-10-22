@@ -4,7 +4,7 @@ import { StringUtility } from "./utilities";
 
 export interface IModel {
     readonly modelTypeName: string
-    parse(query: string): Array<ModelResult>
+    parse(query: string): ModelResult[]
 }
 
 export class ModelResult {
@@ -19,7 +19,7 @@ export class ExtendedModelResult extends ModelResult {
     parentText: string
 
     constructor(source: ModelResult = null) {
-        super()
+        super();
         if (source) {
             this.text = source.text;
             this.start = source.start;
@@ -71,8 +71,11 @@ export class ModelFactory<TModelOptions> {
     }
 
     tryGetModel(modelTypeName: string, culture: string, options: TModelOptions): { containsModel: boolean; model?: IModel } {
+        culture = Culture.mapToNearestLanguage(culture);
         let cacheResult = this.getModelFromCache(modelTypeName, culture, options);
-        if (cacheResult) return { containsModel: true, model: cacheResult };
+        if (cacheResult) {
+            return { containsModel: true, model: cacheResult };
+        }
 
         let key = this.generateKey(modelTypeName, culture);
         if (this.modelFactories.has(key)) {
@@ -97,7 +100,7 @@ export class ModelFactory<TModelOptions> {
         this.modelFactories.forEach((value, key) => {
             let modelFactoryKey = ModelFactoryKey.fromString<TModelOptions>(key);
             if (StringUtility.isNullOrEmpty(targetCulture) || modelFactoryKey.culture === targetCulture) {
-                this.tryGetModel(modelFactoryKey.modelType, modelFactoryKey.culture, modelFactoryKey.options)
+                this.tryGetModel(modelFactoryKey.modelType, modelFactoryKey.culture, modelFactoryKey.options);
             }
         });
     }

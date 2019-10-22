@@ -1,5 +1,11 @@
 /.vs/Microsoft.Recognizers.Text/v15
 /.vs/Microsoft.Recognizers.Text/v14
+/.vs/slnx.sqlite
 /TestResults
 /packages
 /.idea
+Python/.cache/v/cache/lastfailed
+/.vs
+/.vscode
+/JavaScript/*.lerna_backup
+.DS_Store

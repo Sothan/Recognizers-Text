@@ -4,6 +4,9 @@
 //     Changes to this file may cause incorrect behavior and will be lost if
 //     the code is regenerated.
 // </auto-generated>
+//
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 // ------------------------------------------------------------------------------
 
 package com.microsoft.recognizers.text.numberwithunit.resources;
@@ -16,14 +19,14 @@ import com.google.common.collect.ImmutableMap;
 
 public class FrenchNumericWithUnit {
 
-    public static final Map<String, String> AgeSuffixList = ImmutableMap.<String, String>builder()
+    public static final ImmutableMap<String, String> AgeSuffixList = ImmutableMap.<String, String>builder()
         .put("Ans", "ans")
         .put("Mois", "mois d'âge|mois d'age|mois")
         .put("Semaines", "semaine|semaines|semaines d'âge|semaines d'age")
         .put("Jour", "jours|jour")
         .build();
 
-    public static final Map<String, String> AreaSuffixList = ImmutableMap.<String, String>builder()
+    public static final ImmutableMap<String, String> AreaSuffixList = ImmutableMap.<String, String>builder()
         .put("Kilomètre carré", "km2|km^2|km²|kilomètres carrés|kilomètre carré")
         .put("Hectomètre carré", "hm2|hm^2|hm²|hectomètre carré|hectomètres carrés")
         .put("Décamètre carré", "dam2|dam^2|dam²|décamètre carré|décamètres carrés")
@@ -37,12 +40,12 @@ public class FrenchNumericWithUnit {
         .put("Acre", "acre|acres")
         .build();
 
-    public static final Map<String, String> CurrencySuffixList = ImmutableMap.<String, String>builder()
+    public static final ImmutableMap<String, String> CurrencySuffixList = ImmutableMap.<String, String>builder()
         .put("Abkhazie apsar", "abkhazie apsar|apsars")
         .put("Afghan afghani", "afghan afghani|؋|afn|afghanis|afghani")
         .put("Pul", "pul")
         .put("Euro", "euros|euro|€|eur|d'euros")
-        .put("Cent", "cents|cent|-cents|-cent|sen")
+        .put("Cent", "cents|cent|-cents|-cent")
         .put("lek Albanais", "lek albanais|leks|lek")
         .put("Qindarkë", "qindarkë|qindarkës|qindarke|qindarkes")
         .put("Kwanza angolais", "kwanza angolais|kz|aoa|kwanza|kwanzas")
@@ -85,7 +88,7 @@ public class FrenchNumericWithUnit {
         .put("Litas lituanien", "litas lituanien|ltl|lit lithuanien|litas lithuanie")
         .put("Yen Japonais", "yen japonais|yen japon|yens|jpy|yen|¥|-yen")
         .put("Tenge kazakh", "tenge kazakh|kzt")
-        .put("Shilling kényan", "shilling kényan|sh|kes|shillings kényans")
+        .put("Shilling kényan", "shilling kényan|kes|shillings kényans")
         .put("Won coréen", "won coréen|won coréens|₩")
         .put("Won sud-coréen", "won sud-coréen|won sud coréen|won sud-coréens|krw")
         .put("Corée du nord won", "corée du nord won|corée nord won|kpw")
@@ -124,7 +127,7 @@ public class FrenchNumericWithUnit {
         .put("Złoty polonais", "złoty polonais|złoty|zł|pln|zloty|zloty polonais")
         .put("Groxz", "groszy|grosz|grosze")
         .put("Riyal qatari", "riyal qatari|qar|riyals qatari")
-        .put("Riayl saudi", "riyal saudi|sar|riyals saudi")
+        .put("Riyal saudi", "riyal saudi|sar|riyals saudi")
         .put("Riyal", "riyal|riyals|rial|﷼")
         .put("Dirham", "dirham|dirhem|dirhm")
         .put("Halala", "halalas|halala")
@@ -132,7 +135,7 @@ public class FrenchNumericWithUnit {
         .put("Sene", "sene")
         .put("Dobra", "dobra|db|std")
         .put("Leone", "leone|sll")
-        .put("Florins Néerlandais", "florins hollandais|florins néerlandais|florins|ang|ƒ|florin|fl |")
+        .put("Florins Néerlandais", "florins hollandais|florins néerlandais|florins|ang|florin|fl")
         .put("Lilangeni", "lilangeni|szl")
         .put("Somoni tadjikistan", "somoni tadjikistan|tjs|somoni")
         .put("Diram", "dirams|diram")
@@ -152,7 +155,7 @@ public class FrenchNumericWithUnit {
         .put("Qəpik", "qəpik")
         .put("Shilling somalien", "shilling somalien|shillings somalien|sos")
         .put("Shilling tanzanien", "shilling tanzanien|shillings tanzanien|tzs|tsh|shilling tanzanienne|shillings tanzanienne")
-        .put("Shilling ougandais", "shilling ougandais|shillings ougandais|sh|ugx")
+        .put("Shilling ougandais", "shilling ougandais|shillings ougandais|ugx")
         .put("Leu roumain", "leu roumain|lei|leu roumaine|ron")
         .put("Leu moldave", "leu meoldave|mdl")
         .put("Leu", "leu")
@@ -233,20 +236,20 @@ public class FrenchNumericWithUnit {
         .put("Livre syrienne", "livre syrienne|ل.س|syp|livre syrie|livres syrie|£ syrie")
         .put("Livre", "livre|livres|-livre|-livres|£")
         .put("Pence", "pence")
-        .put("Shilling", "shilling|shillings")
-        .put("Penny", "penny|sou|centime")
-        .put("Dollar Américain", "dollar américain|$ américain|$ americain|usd|$usd|$ usd|dollar americain|dollar États-Unis|dollar des États-Unis|dollar États Unis|dollar etats unis|dollar etats-unis|$ etats-unis|$ États-Unis")
+        .put("Shilling", "shilling|shillings|sh")
+        .put("Penny", "penny|sou")
+        .put("Dollar États-Unis", "dollar américain|$ américain|$ americain|usd|$usd|$ usd|dollar americain|dollar États-Unis|dollar des États-Unis|dollar États Unis|dollar etats unis|dollar etats-unis|$ etats-unis|$ États-Unis")
         .put("Dollar des Caraïbes orientales", "dollar des caraïbes orientales|dollar des caraibes orientales|xcd|$ caraibes orientales|$ caraïbes orientales")
         .put("Dollar Australien", "dollar australien|dollars australiens|$ australien|aud|$australien|australien $|$ australie|dollar australie")
         .put("Dollar des bahamas", "dollar des bahamas|dollar bahamas|$ bahamas|bsd|bahama $|dollar bahama|$ bahamas")
-        .put("Dollar bermudes", "dollar des bermudes|dollar bermude|dollar bermudes|$ bermudes|bmd")
-        .put("Dollar belize", "dollar de Belize|dollar belizien|bzd|$ belize")
+        .put("Dollar des bermudes", "dollar des bermudes|dollar bermude|dollar bermudes|$ bermudes|bmd")
+        .put("Dollar de belize", "dollar de Belize|dollar belizien|bzd|$ belize")
         .put("Dollar îles Vierges britanniques", "dollar îles vierges britanniques|dollar iles vierges britanniques|$ iles vierges britanniques")
-        .put("Dollar brunei", "dollar de brunei|$ brunei|bnd|dollar brunei")
+        .put("Dollar de brunei", "dollar de brunei|$ brunei|bnd|dollar brunei")
         .put("Sen", "sen")
-        .put("Dollar singapour", "dollar de singapour|dollar singapour|$ sinapour|sgd|$s")
+        .put("Dollar de Singapour", "dollar de singapour|dollar singapour|$ sinapour|sgd|$s")
         .put("Dollar Canadien", "dollar canadien|dollars canadien|$ canadien|cad|$can|$c|$ c|dollar canada|dollar canadienne|$ canada|$cad|cad$")
-        .put("Dollar iles caimanes", "dollars des îles caïmanes|dollar des îles caïmanes|dollars des iles caimanes|dollar iles caimanes|kyd|$ci")
+        .put("Dollar des îles Caïmans", "dollars des îles caïmanes|dollar des îles caïmanes|dollars des iles caimanes|dollar iles caimanes|kyd|$ci")
         .put("Dollar néo-zélandais", "dollar néo-zélandais|dollar néo zélandais|dollar neo-zelandais|dollar neo zelandais|$nz|$ néo-zélandais|$ neo zelandais")
         .put("Dollar îles cook", "dollar îles cook|dollar iles cook|$ iles cook")
         .put("Dollar des fidji", "dollar des fidji|$ fidji|dollar fidji|dollar de fidji|dollars des fidji|dollars de fidji")
@@ -255,7 +258,7 @@ public class FrenchNumericWithUnit {
         .put("Dollar jamaïcain", "dollar jamaïcain|dollars jamaïcain|dollar jamaicain|dollars jamaicain|$j|$ jamaïque|dollar jamaïque|jmd")
         .put("Dollar libérien", "dollar libérien|dollars libérien|dollar liberien|dollars liberien|lrd|$ libérien|$ liberia|$ liberien")
         .put("Dollar namibien", "dollar namibien|dollars namibien|$ namibien|nad|$n|dollar namibie|dollars namibie|$ namibie")
-        .put("Dollar des îles salomon", "dollar des îles Salomon|dollar des iles salomon|$si|sbd|$ iles salomon|$ îles salomon")
+        .put("Dollar des îles Salomon", "dollar des îles Salomon|dollar des iles salomon|$si|sbd|$ iles salomon|$ îles salomon")
         .put("Dollar du suriname", "dollar du suriname|srd|$ du suriname|$ suriname|dollar suriname|dollars suriname|dollars du suriname")
         .put("Nouveau dollar de Taïwan", "nouveau dollar de taïwan|nouveau dollar de taiwan|twd|ntd|$nt")
         .put("Dollar trinidadien", "dollar trinidadien|dollars trinidadien|ttd|$ trinidadien")
@@ -268,12 +271,12 @@ public class FrenchNumericWithUnit {
 
     public static final String CompoundUnitConnectorRegex = "(?<spacer>[^.])";
 
-    public static final Map<String, String> CurrencyPrefixList = ImmutableMap.<String, String>builder()
+    public static final ImmutableMap<String, String> CurrencyPrefixList = ImmutableMap.<String, String>builder()
         .put("Dollar", "$")
         .put("Dollar États-Unis", "$us|usd|us$")
-        .put("Dollar Caraïbes orientales", "xcd|$ec")
-        .put("Dollar australien", "a$|$a|aud")
-        .put("Dollar bahamas", "bsd|b$")
+        .put("Dollar des Caraïbes orientales", "xcd|$ec")
+        .put("Dollar Australien", "a$|$a|aud")
+        .put("Dollar des bahamas", "bsd|b$")
         .put("Dollar barbadien", "bbd|bds$")
         .put("Dollar de belize", "bz$|bzd")
         .put("Dollar des bermudes", "bd$|bmd")
@@ -283,7 +286,7 @@ public class FrenchNumericWithUnit {
         .put("Dollar des îles Caïmans", "ci$|kyd")
         .put("Dollar néo-zélandais", "nz$|nzd")
         .put("Dollar de Fidji", "$fj|fjd")
-        .put("Dolar guyanien", "g$|gyd")
+        .put("Dollar guyanien", "g$|gyd")
         .put("Dollar de Hong Kong", "hkd|hk$")
         .put("Dollar jamaïcain", "j$|jmd")
         .put("Dollar libérien", "lrd|l$")
@@ -293,17 +296,15 @@ public class FrenchNumericWithUnit {
         .put("Réal brésilien", "r$|brl|reais")
         .put("Guaraní paraguayen", "₲|gs.|pyg")
         .put("Dollar trinidadien", "ttd|titis")
-        .put("Yuan renminbi", "cny|rmb|¥|元")
-        .put("Yen", "¥|jpy")
+        .put("Yuan Chinois", "cny|rmb|￥|元")
+        .put("Yen Japonais", "¥|jpy")
         .put("Euro", "€|eur")
-        .put("Pound", "£")
-        .put("Florín", "ƒ")
-        .put("Livre", "£|gbp")
+        .put("Livre", "£")
         .build();
 
     public static final List<String> AmbiguousCurrencyUnitList = Arrays.asList("din.", "kina", "lari", "taka", "tala", "vatu", "yuan", "bob", "btn", "cop", "cup", "dop", "gip", "jod", "kgs", "lak", "mga", "mop", "nad", "omr", "sar", "sbd", "scr", "sdg", "sek", "sos", "std", "try", "yer");
 
-    public static final Map<String, String> InformationSuffixList = ImmutableMap.<String, String>builder()
+    public static final ImmutableMap<String, String> InformationSuffixList = ImmutableMap.<String, String>builder()
         .put("Bit", "-bit|bit|bits")
         .put("Kilobit", "kilobit|kilobits|kb|kbit|kbits")
         .put("Megabit", "megabit|megabits|Mb|Mbit|mégabit|mégabits")
@@ -326,7 +327,7 @@ public class FrenchNumericWithUnit {
 
     public static final String ConnectorToken = "de";
 
-    public static final Map<String, String> LengthSuffixList = ImmutableMap.<String, String>builder()
+    public static final ImmutableMap<String, String> LengthSuffixList = ImmutableMap.<String, String>builder()
         .put("Kilomètres", "km|kilomètres|kilomètre|kilometres|kilometre|-km")
         .put("Hectomètre", "hm|hectomètre|hectomètres|hectometre|hectometres|-hm")
         .put("Décamètre", "dam|décamètre|décamètres|decametre|decametres|-dm")
@@ -347,7 +348,7 @@ public class FrenchNumericWithUnit {
 
     public static final List<String> AmbuguousLengthUnitList = Arrays.asList("m", "pouce", "pm");
 
-    public static final Map<String, String> SpeedSuffixList = ImmutableMap.<String, String>builder()
+    public static final ImmutableMap<String, String> SpeedSuffixList = ImmutableMap.<String, String>builder()
         .put("Mètre par seconde", "m/s|metres/seconde|metres par seconde|metre par seconde|metres par secondes|mètre par seconde|mètres par seconde|mètres par secondes")
         .put("Kilomètre par heure", "km/h|kilomètre par heure|kilomètres par heure|kilomètres par heures|kilometres par heure|kilometre par heure")
         .put("Kilomètre par minute", "km/m|kilomètre par minute|kilomètres par minute|kilomètres par minutes|kilometre par minute|kilometre par minutes")
@@ -358,7 +359,7 @@ public class FrenchNumericWithUnit {
         .put("Pied par minute", "pieds/minute|pied/minute|ft/minute|ft/min|pied/min")
         .build();
 
-    public static final Map<String, String> TemperatureSuffixList = ImmutableMap.<String, String>builder()
+    public static final ImmutableMap<String, String> TemperatureSuffixList = ImmutableMap.<String, String>builder()
         .put("Kelvin", "k|K|kelvin")
         .put("F", "°f|degres f|degrés f|deg f|° f|degrés fahrenheit|degres fahrenheit|fahrenheit")
         .put("R", "rankine|°r|° r")
@@ -366,7 +367,7 @@ public class FrenchNumericWithUnit {
         .put("Degré", "degrés|degres|deg.|°| °|degré|degre|deg")
         .build();
 
-    public static final Map<String, String> VolumeSuffixList = ImmutableMap.<String, String>builder()
+    public static final ImmutableMap<String, String> VolumeSuffixList = ImmutableMap.<String, String>builder()
         .put("Mètre cube", "m3|m^3|m³|mètre cube|mètres cube|metre cube|metres cube")
         .put("Centimètre cube", "cm3|cm^3|cm³|centimètre cube|centimètres cube|centimetre cube|centimetres cube")
         .put("Millimètre cube", "mm3|mm^3|mm³|millimètre cube|millimètres cube|millimetre cube|millimetres cube")
@@ -385,7 +386,7 @@ public class FrenchNumericWithUnit {
 
     public static final List<String> AmbiguousVolumeUnitList = Arrays.asList("ounce", "oz", "l", "cup", "peck", "cord", "gill");
 
-    public static final Map<String, String> WeightSuffixList = ImmutableMap.<String, String>builder()
+    public static final ImmutableMap<String, String> WeightSuffixList = ImmutableMap.<String, String>builder()
         .put("Kilogramme", "kg|kilogramme|kilogrammes|kilo|kilos")
         .put("Gram", "g|gramme|grammes")
         .put("Milligramme", "mg|milligramme|milligrammes")
@@ -395,4 +396,8 @@ public class FrenchNumericWithUnit {
         .build();
 
     public static final List<String> AmbiguousWeightUnitList = Arrays.asList("g", "oz", "stone", "dram");
+
+    public static final ImmutableMap<String, String> AmbiguityFiltersDict = ImmutableMap.<String, String>builder()
+        .put("\\bcent\\b", "\\bpour\\s+cent\\b")
+        .build();
 }

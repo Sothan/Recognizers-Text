@@ -1253,7 +1253,11 @@
   },
   {
     "Input": "I'll leave for two decades.",
+<<<<<<< HEAD
     "NotSupported": "javascript, python, java",
+=======
+    "NotSupported": "javascript, python",
+>>>>>>> ff5558b2d0cc3f1f45f518ef9f946cb8987b0fb9
     "Results": [
       {
         "Text": "two decades",
@@ -1271,5 +1275,29 @@
         "Length": 11
       }
     ]
+<<<<<<< HEAD
+=======
+  },
+  {
+    "Input": "I'll leave for a fortnight.",
+    "NotSupported": "javascript, python",
+    "Results": [
+      {
+        "Text": "a fortnight",
+        "Type": "duration",
+        "Value": {
+          "Timex": "P2W",
+          "FutureResolution": {
+            "duration": "1209600"
+          },
+          "PastResolution": {
+            "duration": "1209600"
+          }
+        },
+        "Start": 15,
+        "Length": 11
+      }
+    ]
+>>>>>>> ff5558b2d0cc3f1f45f518ef9f946cb8987b0fb9
   }
 ]

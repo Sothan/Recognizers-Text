@@ -1,12 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Recognizers.Text.Utilities;
 using DateObject = System.DateTime;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
     public class BaseTimePeriodExtractor : IDateTimeExtractor
     {
-        public static readonly string ExtractorName = Constants.SYS_DATETIME_TIMEPERIOD; //"TimePeriod";
+        public static readonly string ExtractorName = Constants.SYS_DATETIME_TIMEPERIOD; // "TimePeriod";
 
         private readonly ITimePeriodExtractorConfiguration config;
 
@@ -27,7 +29,38 @@ namespace Microsoft.Recognizers.Text.DateTime
             tokens.AddRange(MergeTwoTimePoints(text, reference));
             tokens.AddRange(MatchTimeOfDay(text));
 
-            return Token.MergeAllTokens(tokens, text, ExtractorName);
+            // Handle pure number cases like "from 6 to 7" cannot be extracted as time ranges under Calendar Mode
+            if ((this.config.Options & DateTimeOptions.CalendarMode) != 0)
+            {
+                tokens.AddRange(MatchPureNumberCases(text));
+            }
+
+            var timePeriodErs = Token.MergeAllTokens(tokens, text, ExtractorName);
+
+            if ((this.config.Options & DateTimeOptions.EnablePreview) != 0)
+            {
+                timePeriodErs = TimeZoneUtility.MergeTimeZones(timePeriodErs, config.TimeZoneExtractor.Extract(text, reference), text);
+            }
+
+            // TODO: Fix to solve german morgen (morning) / morgen (tomorrow) ambiguity. To be removed after the first version of DateTimeV2 in German is in production.
+            timePeriodErs = GermanMorgenWorkaround(text, timePeriodErs);
+
+            return timePeriodErs;
+        }
+
+        // For German there is a problem with cases like "Morgen Abend" which is parsed as "Morning Evening" as "Morgen" can mean both "tomorrow" and "morning".
+        // When the extractor extracts "Abend" in this example it will take the string before that to look for a relative shift to another day like "yesterday", "tomorrow" etc.
+        // When trying to do this on the string "morgen" it will be extracted as a time period ("morning") by the TimePeriodExtractor, and not as "tomorrow".
+        // Filtering out the string "morgen" from the TimePeriodExtractor will fix the problem as only in the case where "morgen" is NOT a time period the string "morgen" will be passed to this extractor.
+        // It should also be solvable through the config but we do not want to introduce changes to the interface and configs for all other languages.
+        private List<ExtractResult> GermanMorgenWorkaround(string text, List<ExtractResult> timePeriodErs)
+        {
+            if (text.Equals("morgen"))
+            {
+                timePeriodErs.Clear();
+            }
+
+            return timePeriodErs;
         }
 
         // Cases like "from 3 to 5am" or "between 3:30 and 5" are extracted here
@@ -60,10 +93,16 @@ namespace Microsoft.Recognizers.Text.DateTime
                             var afterStr = text.Substring(match.Index + match.Length);
 
                             // "End with general ending tokens or "TokenBeforeDate" (like "on")
-                            var endingMatch = this.config.GeneralEndingRegex.Match(afterStr);
-                            if (endingMatch.Success || afterStr.TrimStart().StartsWith(this.config.TokenBeforeDate))
+                            var endWithGeneralEndings = this.config.GeneralEndingRegex.Match(afterStr).Success;
+                            var endWithAmPm = match.Groups[Constants.RightAmPmGroupName].Success;
+
+                            if (endWithGeneralEndings || endWithAmPm || afterStr.TrimStart().StartsWith(this.config.TokenBeforeDate))
                             {
                                 endWithValidToken = true;
+                            }
+                            else if ((this.config.Options & DateTimeOptions.EnablePreview) != 0)
+                            {
+                                endWithValidToken = StartsWithTimeZone(afterStr);
                             }
                         }
 
@@ -75,20 +114,49 @@ namespace Microsoft.Recognizers.Text.DateTime
                     else
                     {
                         // Is there "pm" or "am"?
-                        var pmStr = match.Groups[Constants.PmGroupName].Value;
-                        var amStr = match.Groups[Constants.AmGroupName].Value;
+                        var matchPmStr = match.Groups[Constants.PmGroupName].Value;
+                        var matchAmStr = match.Groups[Constants.AmGroupName].Value;
                         var descStr = match.Groups[Constants.DescGroupName].Value;
 
-                        // Check "pm", "am" 
-                        if (!string.IsNullOrEmpty(pmStr) || !string.IsNullOrEmpty(amStr) || !string.IsNullOrEmpty(descStr))
+                        // Check "pm", "am"
+                        if (!string.IsNullOrEmpty(matchPmStr) || !string.IsNullOrEmpty(matchAmStr) || !string.IsNullOrEmpty(descStr))
                         {
                             ret.Add(new Token(match.Index, match.Index + match.Length));
+                        }
+                        else
+                        {
+                            var afterStr = text.Substring(match.Index + match.Length);
+
+                            if ((this.config.Options & DateTimeOptions.EnablePreview) != 0 && StartsWithTimeZone(afterStr))
+                            {
+                                ret.Add(new Token(match.Index, match.Index + match.Length));
+                            }
                         }
                     }
                 }
             }
 
             return ret;
+        }
+
+        private bool StartsWithTimeZone(string afterText)
+        {
+            var startsWithTimeZone = false;
+
+            var timeZoneErs = config.TimeZoneExtractor.Extract(afterText);
+            var firstTimeZone = timeZoneErs.OrderBy(t => t.Start).FirstOrDefault();
+
+            if (firstTimeZone != null)
+            {
+                var beforeText = afterText.Substring(0, firstTimeZone.Start ?? 0);
+
+                if (string.IsNullOrWhiteSpace(beforeText))
+                {
+                    startsWithTimeZone = true;
+                }
+            }
+
+            return startsWithTimeZone;
         }
 
         private List<Token> MergeTwoTimePoints(string text, DateObject reference)
@@ -145,9 +213,9 @@ namespace Microsoft.Recognizers.Text.DateTime
                     }
 
                     // check connector string
-                    var midStr = text.Substring(numEndPoint?? 0, ers[j].Start-numEndPoint?? 0);
-                    var match = this.config.TillRegex.Match(midStr);
-                    if (match.Success && match.Length == midStr.Trim().Length || config.IsConnectorToken(midStr.Trim()))
+                    var midStr = text.Substring(numEndPoint ?? 0, ers[j].Start - numEndPoint ?? 0);
+
+                    if (config.TillRegex.IsExactMatch(midStr, trim: true) || config.IsConnectorToken(midStr.Trim()))
                     {
                         timeNumbers.Add(numErs[i]);
                     }
@@ -188,17 +256,17 @@ namespace Microsoft.Recognizers.Text.DateTime
                     continue;
                 }
 
-                var middleStr = text.Substring(middleBegin, middleEnd - middleBegin).Trim().ToLowerInvariant();
-                var match = this.config.TillRegex.Match(middleStr);
-                
+                var middleStr = text.Substring(middleBegin, middleEnd - middleBegin).Trim();
+
                 // Handle "{TimePoint} to {TimePoint}"
-                if (match.Success && match.Index == 0 && match.Length == middleStr.Length)
+                if (config.TillRegex.IsExactMatch(middleStr, trim: true))
                 {
                     var periodBegin = ers[idx].Start ?? 0;
                     var periodEnd = (ers[idx + 1].Start ?? 0) + (ers[idx + 1].Length ?? 0);
 
                     // Handle "from"
-                    var beforeStr = text.Substring(0, periodBegin).Trim().ToLowerInvariant();
+                    var beforeStr = text.Substring(0, periodBegin).TrimEnd();
+                    var afterStr = text.Substring(periodEnd, text.Length - periodEnd);
                     if (this.config.GetFromTokenIndex(beforeStr, out var fromIndex))
                     {
                         // Handle "from"
@@ -208,6 +276,11 @@ namespace Microsoft.Recognizers.Text.DateTime
                     {
                         // Handle "between"
                         periodBegin = betweenIndex;
+                    }
+                    else if (this.config.CheckBothBeforeAfter && this.config.GetBetweenTokenIndex(afterStr, out var afterIndex))
+                    {
+                        // Handle "between" in afterStr
+                        periodEnd += afterIndex;
                     }
 
                     ret.Add(new Token(periodBegin, periodEnd));
@@ -222,11 +295,23 @@ namespace Microsoft.Recognizers.Text.DateTime
                     var periodEnd = (ers[idx + 1].Start ?? 0) + (ers[idx + 1].Length ?? 0);
 
                     // Handle "between"
-                    var beforeStr = text.Substring(0, periodBegin).Trim().ToLowerInvariant();
+                    var beforeStr = text.Substring(0, periodBegin).Trim();
                     if (this.config.GetBetweenTokenIndex(beforeStr, out int betweenIndex))
                     {
                         periodBegin = betweenIndex;
                         ret.Add(new Token(periodBegin, periodEnd));
+                        idx += 2;
+                        continue;
+                    }
+
+                    // handle "between...and..." case when "between" follows the datepoints
+                    var afterStr = text.Substring(periodEnd, text.Length - periodEnd);
+                    if (this.config.CheckBothBeforeAfter && this.config.GetBetweenTokenIndex(afterStr, out int afterIndex))
+                    {
+                        periodEnd += afterIndex;
+                        ret.Add(new Token(periodBegin, periodEnd));
+
+                        // merge two tokens here, increase the index by two
                         idx += 2;
                         continue;
                     }
@@ -244,7 +329,41 @@ namespace Microsoft.Recognizers.Text.DateTime
             var matches = this.config.TimeOfDayRegex.Matches(text);
             foreach (Match match in matches)
             {
-                ret.Add(new Token(match.Index, match.Index + match.Length));
+                Metadata metadata = null;
+
+                if (match.Groups[Constants.MealTimeGroupName].Success)
+                {
+                    metadata = new Metadata
+                    {
+                        IsMealtime = true,
+                    };
+                }
+
+                var token = new Token(match.Index, match.Index + match.Length, metadata);
+
+                ret.Add(token);
+            }
+
+            return ret;
+        }
+
+        // Support cases like "from 6 to 7" which are pure number ranges
+        // Only when the number range is at the end of a sentence, it will be considered as a time range
+        private List<Token> MatchPureNumberCases(string text)
+        {
+            var ret = new List<Token>();
+            foreach (var regex in this.config.PureNumberRegex)
+            {
+                var matches = regex.Matches(text);
+                foreach (Match match in matches)
+                {
+                    var afterStr = text.Substring(match.Index + match.Length);
+                    var endingMatch = this.config.GeneralEndingRegex.Match(afterStr);
+                    if (endingMatch.Success)
+                    {
+                        ret.Add(new Token(match.Index, match.Index + match.Length));
+                    }
+                }
             }
 
             return ret;

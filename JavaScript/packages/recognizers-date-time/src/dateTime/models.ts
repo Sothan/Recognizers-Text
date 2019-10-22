@@ -1,4 +1,4 @@
-import { IModel, ModelResult, IExtractor, ParseResult, FormatUtility } from "@microsoft/recognizers-text";
+import { IModel, ModelResult, IExtractor, ParseResult, QueryProcessor } from "@microsoft/recognizers-text";
 import { IDateTimeParser, DateTimeParseResult } from "./parsers";
 import { IDateTimeExtractor } from "./baseDateTime";
 
@@ -22,24 +22,35 @@ export class DateTimeModel implements IDateTimeModel {
     }
 
     parse(query: string, referenceDate: Date = new Date()): ModelResult[] {
-        query = FormatUtility.preProcess(query);
 
-        let extractResults = this.extractor.extract(query, referenceDate);
+        query = QueryProcessor.preProcess(query);
         let parseDates = new Array<DateTimeParseResult>();
-        for (let result of extractResults) {
-            let parseResult = this.parser.parse(result, referenceDate);
-            if (Array.isArray(parseResult.value)) {
-                parseDates.push(...parseResult.value);
-            } else { parseDates.push(parseResult); }
-        }
 
-        return parseDates
-            .map(o => ({
-                start: o.start,
-                end: o.start + o.length - 1,
-                resolution: o.value, // TODO: convert to proper resolution
-                text: o.text,
-                typeName: o.type
-            }));
+        try {
+            let extractResults = this.extractor.extract(query, referenceDate);
+            for (let result of extractResults) {
+                let parseResult = this.parser.parse(result, referenceDate);
+                if (Array.isArray(parseResult.value)) {
+                    parseDates.push(...parseResult.value);
+                }
+                else {
+                    parseDates.push(parseResult);
+                }
+            }
+        }
+        catch (err) {
+            // Nothing to do. Exceptions in parse should not break users of recognizers.
+            // No result.
+        }
+        finally {
+            return parseDates
+                .map(o => ({
+                    start: o.start,
+                    end: o.start + o.length - 1,
+                    resolution: o.value, // TODO: convert to proper resolution
+                    text: o.text,
+                    typeName: o.type
+                }));
+        }
     }
 }

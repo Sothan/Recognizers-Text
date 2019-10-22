@@ -27,6 +27,8 @@ public class FrenchNumberParserConfiguration extends BaseNumberParserConfigurati
         super(
                 FrenchNumeric.LangMarker,
                 cultureInfo,
+                FrenchNumeric.CompoundNumberLanguage,
+                FrenchNumeric.MultiDecimalSeparatorCulture,
                 options,
                 FrenchNumeric.NonDecimalSeparatorChar,
                 FrenchNumeric.DecimalSeparatorChar,
@@ -40,15 +42,16 @@ public class FrenchNumberParserConfiguration extends BaseNumberParserConfigurati
                 FrenchNumeric.CardinalNumberMap,
                 buildOrdinalNumberMap(),
                 FrenchNumeric.RoundNumberMap,
-                Pattern.compile(FrenchNumeric.HalfADozenRegex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS),
-                Pattern.compile(FrenchNumeric.DigitalNumberRegex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS),
-                Pattern.compile(FrenchNumeric.NegativeNumberSignRegex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS),
-                Pattern.compile(FrenchNumeric.FractionPrepositionRegex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS));
+
+                Pattern.compile(FrenchNumeric.HalfADozenRegex, Pattern.UNICODE_CHARACTER_CLASS),
+                Pattern.compile(FrenchNumeric.DigitalNumberRegex, Pattern.UNICODE_CHARACTER_CLASS),
+                Pattern.compile(FrenchNumeric.NegativeNumberSignRegex, Pattern.UNICODE_CHARACTER_CLASS),
+                Pattern.compile(FrenchNumeric.FractionPrepositionRegex, Pattern.UNICODE_CHARACTER_CLASS));
     }
 
     @Override
     public List<String> normalizeTokenSet(List<String> tokens, ParseResult context) {
-        return new ArrayList(tokens);
+        return new ArrayList<String>(tokens);
     }
 
     @Override
@@ -90,12 +93,12 @@ public class FrenchNumberParserConfiguration extends BaseNumberParserConfigurati
     }
 
     private static Map<String, Long> buildOrdinalNumberMap() {
-        ImmutableMap.Builder builder = new ImmutableMap.Builder()
+        ImmutableMap.Builder<String, Long> builder = new ImmutableMap.Builder<String, Long>()
                 .putAll(FrenchNumeric.OrdinalNumberMap);
 
-        FrenchNumeric.SufixOrdinalDictionary.forEach((sufixKey, sufixValue) ->
-                FrenchNumeric.PrefixCardinalDictionary.forEach((prefixKey, prefixValue) ->
-                        builder.put(prefixKey + sufixKey, prefixValue * sufixValue)));
+        FrenchNumeric.SuffixOrdinalMap.forEach((suffixKey, suffixValue) ->
+                FrenchNumeric.PrefixCardinalMap.forEach((prefixKey, prefixValue) ->
+                        builder.put(prefixKey + suffixKey, prefixValue * suffixValue)));
 
         return builder.build();
     }

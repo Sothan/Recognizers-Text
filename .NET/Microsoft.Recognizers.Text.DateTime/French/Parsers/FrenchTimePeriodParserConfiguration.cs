@@ -1,17 +1,38 @@
 ﻿using System.Collections.Immutable;
+using System.Linq;
 using System.Text.RegularExpressions;
-
+using Microsoft.Recognizers.Definitions.French;
 using Microsoft.Recognizers.Text.DateTime.Utilities;
 
 namespace Microsoft.Recognizers.Text.DateTime.French
 {
-    public class FrenchTimePeriodParserConfiguration : BaseOptionsConfiguration, ITimePeriodParserConfiguration
+    public class FrenchTimePeriodParserConfiguration : BaseDateTimeOptionsConfiguration, ITimePeriodParserConfiguration
     {
+        public FrenchTimePeriodParserConfiguration(ICommonDateTimeParserConfiguration config)
+           : base(config)
+        {
+            TimeExtractor = config.TimeExtractor;
+            IntegerExtractor = config.IntegerExtractor;
+            TimeParser = config.TimeParser;
+            TimeZoneParser = config.TimeZoneParser;
+            PureNumberFromToRegex = FrenchTimePeriodExtractorConfiguration.PureNumFromTo;
+            PureNumberBetweenAndRegex = FrenchTimePeriodExtractorConfiguration.PureNumBetweenAnd;
+            SpecificTimeFromToRegex = FrenchTimePeriodExtractorConfiguration.SpecificTimeFromTo;
+            SpecificTimeBetweenAndRegex = FrenchTimePeriodExtractorConfiguration.SpecificTimeBetweenAnd;
+            TimeOfDayRegex = FrenchTimePeriodExtractorConfiguration.TimeOfDayRegex;
+            GeneralEndingRegex = FrenchTimePeriodExtractorConfiguration.GeneralEndingRegex;
+            TillRegex = FrenchTimePeriodExtractorConfiguration.TillRegex;
+            Numbers = config.Numbers;
+            UtilityConfiguration = config.UtilityConfiguration;
+        }
+
         public IDateTimeExtractor TimeExtractor { get; }
 
         public IDateTimeParser TimeParser { get; }
 
         public IExtractor IntegerExtractor { get; }
+
+        public IDateTimeParser TimeZoneParser { get; }
 
         public Regex PureNumberFromToRegex { get; }
 
@@ -31,65 +52,38 @@ namespace Microsoft.Recognizers.Text.DateTime.French
 
         public IDateTimeUtilityConfiguration UtilityConfiguration { get; }
 
-        public FrenchTimePeriodParserConfiguration(ICommonDateTimeParserConfiguration config) : base(config)
-        {
-            TimeExtractor = config.TimeExtractor;
-            IntegerExtractor = config.IntegerExtractor;
-            TimeParser = config.TimeParser;
-            PureNumberFromToRegex = FrenchTimePeriodExtractorConfiguration.PureNumFromTo; 
-            PureNumberBetweenAndRegex = FrenchTimePeriodExtractorConfiguration.PureNumBetweenAnd;
-            SpecificTimeFromToRegex = FrenchTimePeriodExtractorConfiguration.SpecificTimeFromTo;
-            SpecificTimeBetweenAndRegex = FrenchTimePeriodExtractorConfiguration.SpecificTimeBetweenAnd;
-            TimeOfDayRegex = FrenchTimePeriodExtractorConfiguration.TimeOfDayRegex;
-            GeneralEndingRegex = FrenchTimePeriodExtractorConfiguration.GeneralEndingRegex;
-            TillRegex = FrenchTimePeriodExtractorConfiguration.TillRegex;
-            Numbers = config.Numbers;
-            UtilityConfiguration = config.UtilityConfiguration;
-        }
-
         public bool GetMatchedTimexRange(string text, out string timex, out int beginHour, out int endHour, out int endMin)
         {
-            var trimedText = text.Trim().ToLowerInvariant();
-            if (trimedText.EndsWith("s"))
+            var trimmedText = text.Trim();
+            if (trimmedText.EndsWith("s"))
             {
-                trimedText = trimedText.Substring(0, trimedText.Length - 1);
+                trimmedText = trimmedText.Substring(0, trimmedText.Length - 1);
             }
 
             beginHour = 0;
             endHour = 0;
             endMin = 0;
 
-            if (trimedText.EndsWith("matinee") || trimedText.EndsWith("matin") || trimedText.EndsWith("matinée"))
+            var timeOfDay = string.Empty;
+            if (DateTimeDefinitions.MorningTermList.Any(o => trimmedText.EndsWith(o)))
             {
-                timex = "TMO";
-                beginHour = 8;
-                endHour = Constants.HalfDayHourCount;
+                timeOfDay = Constants.Morning;
             }
-            else if (trimedText.EndsWith("apres-midi")||trimedText.EndsWith("apres midi") 
-                || trimedText.EndsWith("après midi") || trimedText.EndsWith("après-midi"))
+            else if (DateTimeDefinitions.AfternoonTermList.Any(o => trimmedText.EndsWith(o)))
             {
-                timex = "TAF";
-                beginHour = Constants.HalfDayHourCount;
-                endHour = 16;
-            } 
-            else if (trimedText.EndsWith("soir") || trimedText.EndsWith("soiree") || trimedText.EndsWith("soirée"))
-            {
-                timex = "TEV";
-                beginHour = 16;
-                endHour = 20;
+                timeOfDay = Constants.Afternoon;
             }
-            else if (trimedText.Equals("jour") || trimedText.EndsWith("journee") || trimedText.EndsWith("journée"))
+            else if (DateTimeDefinitions.EveningTermList.Any(o => trimmedText.EndsWith(o)))
             {
-                timex = "TDT";
-                beginHour = 8;
-                endHour = 18;
+                timeOfDay = Constants.Evening;
             }
-            else if (trimedText.EndsWith("nuit"))
+            else if (DateTimeDefinitions.DaytimeTermList.Any(o => trimmedText.Equals(o)))
             {
-                timex = "TNI";
-                beginHour = 20;
-                endHour = 23;
-                endMin = 59;
+                timeOfDay = Constants.Daytime;
+            }
+            else if (DateTimeDefinitions.NightTermList.Any(o => trimmedText.EndsWith(o)))
+            {
+                timeOfDay = Constants.Night;
             }
             else
             {
@@ -97,8 +91,13 @@ namespace Microsoft.Recognizers.Text.DateTime.French
                 return false;
             }
 
+            var parseResult = TimexUtility.ParseTimeOfDay(timeOfDay);
+            timex = parseResult.Timex;
+            beginHour = parseResult.BeginHour;
+            endHour = parseResult.EndHour;
+            endMin = parseResult.EndMin;
+
             return true;
         }
-
     }
 }

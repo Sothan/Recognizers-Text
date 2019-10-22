@@ -1,11 +1,9 @@
-﻿using System.Text.RegularExpressions;
-
-using Microsoft.Recognizers.Text.Number;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
-    public interface IDurationExtractorConfiguration : IOptionsConfiguration
+    public interface IDurationExtractorConfiguration : IDateTimeOptionsConfiguration
     {
         Regex FollowedUnit { get; }
 
@@ -37,10 +35,15 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         Regex MoreThanRegex { get; }
 
+        Regex SpecialNumberUnitRegex { get; }
+
+        bool CheckBothBeforeAfter { get; }
+
         IExtractor CardinalExtractor { get; }
 
         IImmutableDictionary<string, string> UnitMap { get; }
 
         IImmutableDictionary<string, long> UnitValueMap { get; }
+
     }
 }

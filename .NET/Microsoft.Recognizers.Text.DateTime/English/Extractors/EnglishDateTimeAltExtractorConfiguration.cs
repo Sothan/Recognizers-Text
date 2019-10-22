@@ -1,45 +1,32 @@
-﻿using System.Text.RegularExpressions;
-
+﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Microsoft.Recognizers.Definitions.English;
-using System.Collections.Generic;
 
 namespace Microsoft.Recognizers.Text.DateTime.English
 {
-    public class EnglishDateTimeAltExtractorConfiguration : BaseOptionsConfiguration, IDateTimeAltExtractorConfiguration
+    public class EnglishDateTimeAltExtractorConfiguration : BaseDateTimeOptionsConfiguration, IDateTimeAltExtractorConfiguration
     {
-        public EnglishDateTimeAltExtractorConfiguration(IOptionsConfiguration config) : base(config)
-        {
-            DateExtractor = new BaseDateExtractor(new EnglishDateExtractorConfiguration(this));
-            DatePeriodExtractor = new BaseDatePeriodExtractor(new EnglishDatePeriodExtractorConfiguration(this));
-        }
-
-        public IDateTimeExtractor DateExtractor { get; }
-        public IDateTimeExtractor DatePeriodExtractor { get; }
-
-        private static readonly Regex OrRegex =
-            new Regex(DateTimeDefinitions.OrRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-        private static readonly Regex DayRegex =
-            new Regex(DateTimeDefinitions.DayRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
         public static readonly Regex ThisPrefixRegex =
-            new Regex(DateTimeDefinitions.ThisPrefixRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.ThisPrefixRegex, RegexFlags);
 
-        public static readonly Regex PastPrefixRegex =
-            new Regex(DateTimeDefinitions.PastPrefixRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex PreviousPrefixRegex =
+            new Regex(DateTimeDefinitions.PreviousPrefixRegex, RegexFlags);
 
         public static readonly Regex NextPrefixRegex =
-            new Regex(DateTimeDefinitions.NextPrefixRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.NextPrefixRegex, RegexFlags);
 
         public static readonly Regex AmRegex =
-            new Regex(DateTimeDefinitions.AmRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.AmRegex, RegexFlags);
 
         public static readonly Regex PmRegex =
-            new Regex(DateTimeDefinitions.PmRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.PmRegex, RegexFlags);
+
+        public static readonly Regex RangePrefixRegex =
+            new Regex(DateTimeDefinitions.RangePrefixRegex, RegexFlags);
 
         public static readonly Regex[] RelativePrefixList =
         {
-            ThisPrefixRegex, PastPrefixRegex, NextPrefixRegex,
+            ThisPrefixRegex, PreviousPrefixRegex, NextPrefixRegex,
         };
 
         public static readonly Regex[] AmPmRegexList =
@@ -47,12 +34,35 @@ namespace Microsoft.Recognizers.Text.DateTime.English
             AmRegex, PmRegex,
         };
 
+        private const RegexOptions RegexFlags = RegexOptions.Singleline | RegexOptions.ExplicitCapture;
+
+        private static readonly Regex OrRegex =
+            new Regex(DateTimeDefinitions.OrRegex, RegexFlags);
+
+        private static readonly Regex DayRegex =
+            new Regex(DateTimeDefinitions.DayRegex, RegexFlags);
+
+        public EnglishDateTimeAltExtractorConfiguration(IDateTimeOptionsConfiguration config)
+            : base(config)
+        {
+            DateExtractor = new BaseDateExtractor(new EnglishDateExtractorConfiguration(this));
+            DatePeriodExtractor = new BaseDatePeriodExtractor(new EnglishDatePeriodExtractorConfiguration(this));
+        }
+
         IEnumerable<Regex> IDateTimeAltExtractorConfiguration.RelativePrefixList => RelativePrefixList;
 
         IEnumerable<Regex> IDateTimeAltExtractorConfiguration.AmPmRegexList => AmPmRegexList;
 
         Regex IDateTimeAltExtractorConfiguration.OrRegex => OrRegex;
 
+        Regex IDateTimeAltExtractorConfiguration.ThisPrefixRegex => ThisPrefixRegex;
+
         Regex IDateTimeAltExtractorConfiguration.DayRegex => DayRegex;
+
+        Regex IDateTimeAltExtractorConfiguration.RangePrefixRegex => RangePrefixRegex;
+
+        public IDateExtractor DateExtractor { get; }
+
+        public IDateTimeExtractor DatePeriodExtractor { get; }
     }
 }

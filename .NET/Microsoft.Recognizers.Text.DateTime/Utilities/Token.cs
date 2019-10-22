@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-
-using Microsoft.Recognizers.Text.Number;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
     public class Token
     {
+
         public Token(int s, int e, Metadata metadata = null)
         {
             Start = s;
@@ -15,9 +15,10 @@ namespace Microsoft.Recognizers.Text.DateTime
         }
 
         public int Start { get; }
-        public int End { get; }
-        public Metadata Metadata { get; }
 
+        public int End { get; }
+
+        public Metadata Metadata { get; }
 
         public int Length
         {
@@ -27,8 +28,27 @@ namespace Microsoft.Recognizers.Text.DateTime
                 {
                     return 0;
                 }
+
                 return End - Start;
             }
+        }
+
+        public static List<Token> GetTokenFromRegex(Regex regex, string text)
+        {
+            var ret = new List<Token>();
+
+            if (regex == null)
+            {
+                return ret;
+            }
+
+            var matches = regex.Matches(text);
+            foreach (Match match in matches)
+            {
+                ret.Add(new Token(match.Index, match.Index + match.Length));
+            }
+
+            return ret;
         }
 
         public static List<ExtractResult> MergeAllTokens(List<Token> tokens, string text, string extractorName)
@@ -41,30 +61,30 @@ namespace Microsoft.Recognizers.Text.DateTime
             {
                 if (token != null)
                 {
-                    var bAdd = true;
-                    for (var index = 0; index < mergedTokens.Count && bAdd; index++)
+                    bool shouldAdd = true;
+                    for (var index = 0; index < mergedTokens.Count && shouldAdd; index++)
                     {
                         // It is included in one of the current tokens
                         if (token.Start >= mergedTokens[index].Start && token.End <= mergedTokens[index].End)
                         {
-                            bAdd = false;
+                            shouldAdd = false;
                         }
 
                         // If it contains overlaps
                         if (token.Start > mergedTokens[index].Start && token.Start < mergedTokens[index].End)
                         {
-                            bAdd = false;
+                            shouldAdd = false;
                         }
 
                         // It includes one of the tokens and should replace the included one
                         if (token.Start <= mergedTokens[index].Start && token.End >= mergedTokens[index].End)
                         {
-                            bAdd = false;
+                            shouldAdd = false;
                             mergedTokens[index] = token;
                         }
                     }
 
-                    if (bAdd)
+                    if (shouldAdd)
                     {
                         mergedTokens.Add(token);
                     }
@@ -84,7 +104,7 @@ namespace Microsoft.Recognizers.Text.DateTime
                     Text = substr,
                     Type = extractorName,
                     Data = null,
-                    Metadata = token.Metadata
+                    Metadata = token.Metadata,
                 };
 
                 ret.Add(er);

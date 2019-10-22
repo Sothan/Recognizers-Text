@@ -3,17 +3,51 @@ using System.Text.RegularExpressions;
 
 using Microsoft.Recognizers.Definitions.Portuguese;
 using Microsoft.Recognizers.Text.DateTime.Utilities;
-using Microsoft.Recognizers.Text.Number;
 
 namespace Microsoft.Recognizers.Text.DateTime.Portuguese
 {
-    public class PortugueseDateTimeParserConfiguration : BaseOptionsConfiguration, IDateTimeParserConfiguration
+    public class PortugueseDateTimeParserConfiguration : BaseDateTimeOptionsConfiguration, IDateTimeParserConfiguration
     {
+
+        private const RegexOptions RegexFlags = RegexOptions.Singleline | RegexOptions.ExplicitCapture;
+
+        public PortugueseDateTimeParserConfiguration(ICommonDateTimeParserConfiguration config)
+            : base(config)
+        {
+            TokenBeforeDate = DateTimeDefinitions.TokenBeforeDate;
+            TokenBeforeTime = DateTimeDefinitions.TokenBeforeTime;
+            DateExtractor = config.DateExtractor;
+            TimeExtractor = config.TimeExtractor;
+            DateParser = config.DateParser;
+            TimeParser = config.TimeParser;
+
+            NowRegex = PortugueseDateTimeExtractorConfiguration.NowRegex;
+            AMTimeRegex = new Regex(DateTimeDefinitions.AmTimeRegex, RegexFlags);
+            PMTimeRegex = new Regex(DateTimeDefinitions.PmTimeRegex, RegexFlags);
+            SimpleTimeOfTodayAfterRegex = PortugueseDateTimeExtractorConfiguration.SimpleTimeOfTodayAfterRegex;
+            SimpleTimeOfTodayBeforeRegex = PortugueseDateTimeExtractorConfiguration.SimpleTimeOfTodayBeforeRegex;
+            SpecificTimeOfDayRegex = PortugueseDateTimeExtractorConfiguration.SpecificTimeOfDayRegex;
+            SpecificEndOfRegex = PortugueseDateTimeExtractorConfiguration.SpecificEndOfRegex;
+            UnspecificEndOfRegex = PortugueseDateTimeExtractorConfiguration.UnspecificEndOfRegex;
+            UnitRegex = PortugueseDateTimeExtractorConfiguration.UnitRegex;
+            DateNumberConnectorRegex = PortugueseDateTimeExtractorConfiguration.DateNumberConnectorRegex;
+            YearRegex = PortugueseDateTimeExtractorConfiguration.YearRegex;
+
+            Numbers = config.Numbers;
+            CardinalExtractor = config.CardinalExtractor;
+            IntegerExtractor = config.IntegerExtractor;
+            NumberParser = config.NumberParser;
+            DurationExtractor = config.DurationExtractor;
+            DurationParser = config.DurationParser;
+            UnitMap = config.UnitMap;
+            UtilityConfiguration = config.UtilityConfiguration;
+        }
+
         public string TokenBeforeDate { get; }
 
         public string TokenBeforeTime { get; }
 
-        public IDateTimeExtractor DateExtractor { get; }
+        public IDateExtractor DateExtractor { get; }
 
         public IDateTimeExtractor TimeExtractor { get; }
 
@@ -45,74 +79,52 @@ namespace Microsoft.Recognizers.Text.DateTime.Portuguese
 
         public Regex SpecificTimeOfDayRegex { get; }
 
-        public Regex TheEndOfRegex { get; }
+        public Regex SpecificEndOfRegex { get; }
+
+        public Regex UnspecificEndOfRegex { get; }
 
         public Regex UnitRegex { get; }
 
         public Regex DateNumberConnectorRegex { get; }
 
+        public Regex YearRegex { get; }
+
         public IImmutableDictionary<string, int> Numbers { get; }
 
         public IDateTimeUtilityConfiguration UtilityConfiguration { get; }
 
-        public PortugueseDateTimeParserConfiguration(ICommonDateTimeParserConfiguration config) : base(config)
-        {
-            TokenBeforeDate = DateTimeDefinitions.TokenBeforeDate;
-            TokenBeforeTime = DateTimeDefinitions.TokenBeforeTime;
-            DateExtractor = config.DateExtractor;
-            TimeExtractor = config.TimeExtractor;
-            DateParser = config.DateParser;
-            TimeParser = config.TimeParser;
-            NowRegex = PortugueseDateTimeExtractorConfiguration.NowRegex;
-            AMTimeRegex = new Regex(DateTimeDefinitions.AmTimeRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            PMTimeRegex = new Regex(DateTimeDefinitions.PmTimeRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            SimpleTimeOfTodayAfterRegex = PortugueseDateTimeExtractorConfiguration.SimpleTimeOfTodayAfterRegex;
-            SimpleTimeOfTodayBeforeRegex = PortugueseDateTimeExtractorConfiguration.SimpleTimeOfTodayBeforeRegex;
-            SpecificTimeOfDayRegex = PortugueseDateTimeExtractorConfiguration.SpecificTimeOfDayRegex;
-            TheEndOfRegex = PortugueseDateTimeExtractorConfiguration.TheEndOfRegex;
-            UnitRegex = PortugueseDateTimeExtractorConfiguration.UnitRegex;
-            DateNumberConnectorRegex = PortugueseDateTimeExtractorConfiguration.DateNumberConnectorRegex;
-            Numbers = config.Numbers;
-            CardinalExtractor = config.CardinalExtractor;
-            IntegerExtractor = config.IntegerExtractor;
-            NumberParser = config.NumberParser;
-            DurationExtractor = config.DurationExtractor;
-            DurationParser = config.DurationParser;
-            UnitMap = config.UnitMap;
-            UtilityConfiguration = config.UtilityConfiguration;
-        }
-
         public int GetHour(string text, int hour)
         {
-            var trimedText = text.Trim().ToLowerInvariant().Normalized();
+            var trimmedText = text.Trim().Normalized(DateTimeDefinitions.SpecialCharactersEquivalent);
             int result = hour;
 
-            //TODO: Replace with a regex
-            if ((trimedText.EndsWith("manha") || trimedText.EndsWith("madrugada")) && hour >= Constants.HalfDayHourCount)
+            // TODO: Replace with a regex
+            if ((trimmedText.EndsWith("manha") || trimmedText.EndsWith("madrugada")) && hour >= Constants.HalfDayHourCount)
             {
                 result -= Constants.HalfDayHourCount;
             }
-            else if (!(trimedText.EndsWith("manha") || trimedText.EndsWith("madrugada")) && hour < Constants.HalfDayHourCount)
+            else if (!(trimmedText.EndsWith("manha") || trimmedText.EndsWith("madrugada")) && hour < Constants.HalfDayHourCount)
             {
                 result += Constants.HalfDayHourCount;
             }
+
             return result;
         }
 
         public bool GetMatchedNowTimex(string text, out string timex)
         {
-            var trimedText = text.Trim().ToLowerInvariant().Normalized();
+            var trimmedText = text.Trim().Normalized(DateTimeDefinitions.SpecialCharactersEquivalent);
 
-            if (trimedText.EndsWith("agora") || trimedText.EndsWith("mesmo") || trimedText.EndsWith("momento"))
+            if (trimmedText.EndsWith("agora") || trimmedText.EndsWith("mesmo") || trimmedText.EndsWith("momento"))
             {
                 timex = "PRESENT_REF";
             }
-            else if (trimedText.EndsWith("possivel") || trimedText.EndsWith("possa") ||
-                     trimedText.EndsWith("possas") || trimedText.EndsWith("possamos") || trimedText.EndsWith("possam"))
+            else if (trimmedText.EndsWith("possivel") || trimmedText.EndsWith("possa") ||
+                     trimmedText.EndsWith("possas") || trimmedText.EndsWith("possamos") || trimmedText.EndsWith("possam"))
             {
                 timex = "FUTURE_REF";
             }
-            else if (trimedText.EndsWith("mente"))
+            else if (trimmedText.EndsWith("mente"))
             {
                 timex = "PAST_REF";
             }
@@ -127,14 +139,14 @@ namespace Microsoft.Recognizers.Text.DateTime.Portuguese
 
         public int GetSwiftDay(string text)
         {
-            var trimedText = text.Trim().ToLowerInvariant();
+            var trimmedText = text.Trim();
             var swift = 0;
 
-            if (PortugueseDatePeriodParserConfiguration.PastPrefixRegex.IsMatch(trimedText))
+            if (PortugueseDatePeriodParserConfiguration.PreviousPrefixRegex.IsMatch(trimmedText))
             {
                 swift = -1;
             }
-            else if (PortugueseDatePeriodParserConfiguration.NextPrefixRegex.IsMatch(trimedText))
+            else if (PortugueseDatePeriodParserConfiguration.NextPrefixRegex.IsMatch(trimmedText))
             {
                 swift = 1;
             }

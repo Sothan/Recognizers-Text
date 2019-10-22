@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
-    public interface IFullDateTimeParserConfiguration : IOptionsConfiguration
+    public interface IFullDateTimeParserConfiguration : ISimpleDatePeriodParserConfiguration, IDateTimeOptionsConfiguration
     {
         int TwoNumYear { get; }
 
@@ -15,8 +15,6 @@ namespace Microsoft.Recognizers.Text.DateTime
         string LastMonthToken { get; }
 
         string DatePrefix { get; }
-
-        #region Regexes
 
         IEnumerable<Regex> DateRegexList { get; }
 
@@ -40,9 +38,7 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         Regex SinceSuffixRegex { get; }
 
-        #endregion
-
-        #region Dictionaries
+        Regex EqualRegex { get; }
 
         ImmutableDictionary<string, string> UnitMap { get; }
 
@@ -60,24 +56,25 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         ImmutableDictionary<string, int> MonthOfYear { get; }
 
-        //TODO we need to use number parser
+        // TODO we need to use number parser
         ImmutableDictionary<string, int> Numbers { get; }
 
-        #endregion
-
-        #region internalParsers
-
         IDateTimeParser DateParser { get; }
+
         IDateTimeParser TimeParser { get; }
+
         IDateTimeParser DateTimeParser { get; }
+
         IDateTimeParser DatePeriodParser { get; }
+
         IDateTimeParser TimePeriodParser { get; }
+
         IDateTimeParser DateTimePeriodParser { get; }
+
         IDateTimeParser DurationParser { get; }
+
         IDateTimeParser GetParser { get; }
+
         IDateTimeParser HolidayParser { get; }
-
-        #endregion
-
     }
 }

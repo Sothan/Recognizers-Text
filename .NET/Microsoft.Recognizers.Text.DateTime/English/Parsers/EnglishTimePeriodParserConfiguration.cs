@@ -1,20 +1,40 @@
 ﻿using System.Collections.Immutable;
 using System.Linq;
 using System.Text.RegularExpressions;
-
 using Microsoft.Recognizers.Definitions.English;
 using Microsoft.Recognizers.Text.DateTime.Utilities;
-using Microsoft.Recognizers.Text.Number;
 
 namespace Microsoft.Recognizers.Text.DateTime.English
 {
-    public class EnglishTimePeriodParserConfiguration : BaseOptionsConfiguration, ITimePeriodParserConfiguration
+    public class EnglishTimePeriodParserConfiguration : BaseDateTimeOptionsConfiguration, ITimePeriodParserConfiguration
     {
+        public EnglishTimePeriodParserConfiguration(ICommonDateTimeParserConfiguration config)
+            : base(config)
+        {
+            TimeExtractor = config.TimeExtractor;
+            IntegerExtractor = config.IntegerExtractor;
+            TimeParser = config.TimeParser;
+            TimeZoneParser = config.TimeZoneParser;
+
+            PureNumberFromToRegex = EnglishTimePeriodExtractorConfiguration.PureNumFromTo;
+            PureNumberBetweenAndRegex = EnglishTimePeriodExtractorConfiguration.PureNumBetweenAnd;
+            SpecificTimeFromToRegex = EnglishTimePeriodExtractorConfiguration.SpecificTimeFromTo;
+            SpecificTimeBetweenAndRegex = EnglishTimePeriodExtractorConfiguration.SpecificTimeBetweenAnd;
+            TimeOfDayRegex = EnglishTimePeriodExtractorConfiguration.TimeOfDayRegex;
+            GeneralEndingRegex = EnglishTimePeriodExtractorConfiguration.GeneralEndingRegex;
+            TillRegex = EnglishTimePeriodExtractorConfiguration.TillRegex;
+
+            Numbers = config.Numbers;
+            UtilityConfiguration = config.UtilityConfiguration;
+        }
+
         public IDateTimeExtractor TimeExtractor { get; }
 
         public IDateTimeParser TimeParser { get; }
 
         public IExtractor IntegerExtractor { get; }
+
+        public IDateTimeParser TimeZoneParser { get; }
 
         public Regex SpecificTimeFromToRegex { get; }
 
@@ -34,75 +54,70 @@ namespace Microsoft.Recognizers.Text.DateTime.English
 
         public IDateTimeUtilityConfiguration UtilityConfiguration { get; }
 
-        public EnglishTimePeriodParserConfiguration(ICommonDateTimeParserConfiguration config) : base(config)
-        {
-            TimeExtractor = config.TimeExtractor;
-            IntegerExtractor = config.IntegerExtractor;
-            TimeParser = config.TimeParser;
-            PureNumberFromToRegex = EnglishTimePeriodExtractorConfiguration.PureNumFromTo;
-            PureNumberBetweenAndRegex = EnglishTimePeriodExtractorConfiguration.PureNumBetweenAnd;
-            SpecificTimeFromToRegex = EnglishTimePeriodExtractorConfiguration.SpecificTimeFromTo;
-            SpecificTimeBetweenAndRegex = EnglishTimePeriodExtractorConfiguration.SpecificTimeBetweenAnd;
-            TimeOfDayRegex = EnglishTimePeriodExtractorConfiguration.TimeOfDayRegex;
-            GeneralEndingRegex = EnglishTimePeriodExtractorConfiguration.GeneralEndingRegex;
-            TillRegex = EnglishTimePeriodExtractorConfiguration.TillRegex;
-            Numbers = config.Numbers;
-            UtilityConfiguration = config.UtilityConfiguration;
-        }
-
         public bool GetMatchedTimexRange(string text, out string timex, out int beginHour, out int endHour, out int endMin)
         {
-            var trimedText = text.Trim().ToLowerInvariant();
-            if (trimedText.EndsWith("s"))
+            var trimmedText = text.Trim();
+            if (trimmedText.EndsWith("s"))
             {
-                trimedText = trimedText.Substring(0, trimedText.Length - 1);
+                trimmedText = trimmedText.Substring(0, trimmedText.Length - 1);
             }
 
             beginHour = 0;
             endHour = 0;
             endMin = 0;
-            if (trimedText.EndsWith("morning"))
+
+            var timeOfDay = string.Empty;
+            if (DateTimeDefinitions.MorningTermList.Any(o => trimmedText.EndsWith(o)))
             {
-                timex = "TMO";
-                beginHour = 8;
-                endHour = Constants.HalfDayHourCount;
+                timeOfDay = Constants.Morning;
             }
-            else if (trimedText.EndsWith("afternoon"))
+            else if (DateTimeDefinitions.AfternoonTermList.Any(o => trimmedText.EndsWith(o)))
             {
-                timex = "TAF";
-                beginHour = Constants.HalfDayHourCount;
-                endHour = 16;
+                timeOfDay = Constants.Afternoon;
             }
-            else if (trimedText.EndsWith("evening"))
+            else if (DateTimeDefinitions.EveningTermList.Any(o => trimmedText.EndsWith(o)))
             {
-                timex = "TEV";
-                beginHour = 16;
-                endHour = 20;
+                timeOfDay = Constants.Evening;
             }
-            else if (trimedText.Equals("daytime"))
+            else if (DateTimeDefinitions.DaytimeTermList.Any(o => trimmedText.Equals(o)))
             {
-                timex = "TDT";
-                beginHour = 8;
-                endHour = 18;
+                timeOfDay = Constants.Daytime;
             }
-            else if (trimedText.EndsWith("night"))
+            else if (DateTimeDefinitions.NightTermList.Any(o => trimmedText.EndsWith(o)))
             {
-                timex = "TNI";
-                beginHour = 20;
-                endHour = 23;
-                endMin = 59;
+                timeOfDay = Constants.Night;
             }
-            else if (DateTimeDefinitions.BusinessHourSplitStrings.All(o => trimedText.Contains(o)))
+            else if (DateTimeDefinitions.BusinessHourSplitStrings.All(o => trimmedText.Contains(o)))
             {
-                timex = "TBH";
-                beginHour = 8;
-                endHour = 18;
+                timeOfDay = Constants.BusinessHour;
+            }
+            else if (DateTimeDefinitions.MealtimeBreakfastTermList.Any(o => trimmedText.Contains(o)))
+            {
+                timeOfDay = Constants.MealtimeBreakfast;
+            }
+            else if (DateTimeDefinitions.MealtimeBrunchTermList.Any(o => trimmedText.Contains(o)))
+            {
+                timeOfDay = Constants.MealtimeBrunch;
+            }
+            else if (DateTimeDefinitions.MealtimeLunchTermList.Any(o => trimmedText.Contains(o)))
+            {
+                timeOfDay = Constants.MealtimeLunch;
+            }
+            else if (DateTimeDefinitions.MealtimeDinnerTermList.Any(o => trimmedText.Contains(o)))
+            {
+                timeOfDay = Constants.MealtimeDinner;
             }
             else
             {
                 timex = null;
                 return false;
             }
+
+            var parseResult = TimexUtility.ParseTimeOfDay(timeOfDay);
+            timex = parseResult.Timex;
+            beginHour = parseResult.BeginHour;
+            endHour = parseResult.EndHour;
+            endMin = parseResult.EndMin;
 
             return true;
         }

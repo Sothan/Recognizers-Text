@@ -1,4 +1,6 @@
 import { BaseDateTime } from "../resources/baseDateTime";
+import { EnglishDateTime } from "../resources/englishDateTime";
+import { ChineseDateTime } from "../resources/chineseDateTime";
 
 export class Constants {
     static readonly SYS_DATETIME_DATE: string = "date";
@@ -10,9 +12,13 @@ export class Constants {
     static readonly SYS_DATETIME_DURATION: string = "duration";
     static readonly SYS_DATETIME_SET: string = "set";
 
+    // SourceEntity Types
+    static readonly SYS_DATETIME_DATETIMEPOINT = "datetimepoint";
+
     // key
     static readonly TimexKey: string = "timex";
     static readonly ModKey: string = "Mod";
+    static readonly SourceEntity: string = "sourceEntity";
     static readonly TypeKey: string = "type";
     static readonly IsLunarKey: string = "isLunar";
     static readonly ResolveKey: string = "resolve";
@@ -24,6 +30,10 @@ export class Constants {
 
     static readonly SemesterMonthCount: number = 6;
     static readonly TrimesterMonthCount: number = 3;
+    static readonly QuarterCount: number = 4;
+    static readonly FourDigitsYearLength: number = 4;
+    static readonly MaxMonth: number = 11;
+    static readonly MinMonth: number = 0;
 
     static readonly DefaultLanguageFallback_MDY: string = 'MDY';
     static readonly DefaultLanguageFallback_DMY: string = 'DMY';
@@ -55,6 +65,24 @@ export class Constants {
     static readonly LESS_THAN_MOD: string = 'less';
 
     static readonly REF_UNDEF_MOD: string = 'ref_undef';
+
+    // Timex of TimeOfDay
+    static readonly EarlyMorning: string = "TDA";
+    static readonly Morning: string = "TMO";
+    static readonly MidDay: string = "TMI";
+    static readonly Afternoon: string = "TAF";
+    static readonly Evening: string = "TEV";
+    static readonly Daytime: string = "TDT";
+    static readonly Night: string = "TNI";
+    static readonly BusinessHour: string = "TBH";
+
+    // Invalid year
+    public readonly InvalidYear: number = Number.MIN_VALUE;
+    public readonly InvalidMonth: number = Number.MIN_VALUE;
+    public readonly InvalidDay: number = Number.MIN_VALUE;
+    public readonly InvalidHour: number = Number.MIN_VALUE;
+    public readonly InvalidMinute: number = Number.MIN_VALUE;
+    public readonly InvalidSecond: number = Number.MIN_VALUE;
 }
 
 export class TimeTypeConstants {

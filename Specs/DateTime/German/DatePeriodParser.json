@@ -160,13 +160,14 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
+    "NotSupportedByDesign": "java",
     "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "der letzten Woche im Juli",
         "Type": "daterange",
         "Value": {
-          "Timex": "XXXX-07-W04",
+          "Timex": "XXXX-07-W05",
           "FutureResolution": {
             "startDate": "2017-07-24",
             "endDate": "2017-07-31"
@@ -182,40 +183,14 @@
     ]
   },
   {
-    "Input": "diese Woche",
+    "Input": "Ich bin vom 1. Januar bis Mittwoch den 22. Januar weg",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
     "NotSupported": "javascript, python",
     "Results": [
       {
-        "Text": "diese Woche",
-        "Type": "daterange",
-        "Value": {
-          "Timex": "2016-W45",
-          "FutureResolution": {
-            "startDate": "2016-11-07",
-            "endDate": "2016-11-14"
-          },
-          "PastResolution": {
-            "startDate": "2016-11-07",
-            "endDate": "2016-11-14"
-          }
-        },
-        "Start": 0,
-        "Length": 11
-      }
-    ]
-  },
-  {
-    "Input": "Ich bin vom 1. Januar bis Mittwoch dem 22. Januar weg",
-    "Context": {
-      "ReferenceDateTime": "2016-11-07T00:00:00"
-    },
-    "NotSupported": "javascript, python",
-    "Results": [
-      {
-        "Text": "vom 1. Januar bis Mittwoch dem 22. Januar",
+        "Text": "vom 1. Januar bis Mittwoch den 22. Januar",
         "Type": "daterange",
         "Value": {
           "Timex": "(XXXX-01-01,XXXX-01-22,P21D)",
@@ -498,7 +473,8 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "python",
+    "NotSupportedByDesign": "java",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "der dritten Woche des Monats",
@@ -506,12 +482,12 @@
         "Value": {
           "Timex": "2016-11-W03",
           "FutureResolution": {
-            "startDate": "2016-11-21",
-            "endDate": "2016-11-28"
+            "startDate": "2016-11-14",
+            "endDate": "2016-11-21"
           },
           "PastResolution": {
-            "startDate": "2016-11-21",
-            "endDate": "2016-11-28"
+            "startDate": "2016-11-14",
+            "endDate": "2016-11-21"
           }
         },
         "Start": 19,
@@ -524,13 +500,14 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "python",
+    "NotSupportedByDesign": "java",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "der letzten Woche im Juli",
         "Type": "daterange",
         "Value": {
-          "Timex": "XXXX-07-W04",
+          "Timex": "XXXX-07-W05",
           "FutureResolution": {
             "startDate": "2017-07-24",
             "endDate": "2017-07-31"
@@ -546,7 +523,7 @@
     ]
   },
   {
-    "Input": "In zwei Wochen fahr ich in Urlaub.",
+    "Input": "In zwei Wochen fahr ich in den Urlaub.",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
@@ -743,7 +720,7 @@
     "NotSupported": "python",
     "Results": [
       {
-        "Text": "Wochenende",
+        "Text": "am Wochenende",
         "Type": "daterange",
         "Value": {
           "Timex": "2016-W45-WE",
@@ -756,8 +733,8 @@
             "endDate": "2016-11-14"
           }
         },
-        "Start": 3,
-        "Length": 10
+        "Start": 0,
+        "Length": 13
       }
     ]
   },
@@ -925,7 +902,7 @@
     "NotSupported": "javascript, python",
     "Results": [
       {
-        "Text": "zweitausender",
+        "Text": "Die zweitausender",
         "Type": "daterange",
         "Value": {
           "Timex": "(2000-01-01,2010-01-01,P10Y)",
@@ -938,8 +915,8 @@
             "endDate": "2010-01-01"
           }
         },
-        "Start": 4,
-        "Length": 13
+        "Start": 0,
+        "Length": 17
       }
     ]
   },
@@ -1022,6 +999,58 @@
     ]
   },
   {
+    "Input": "Ich würde 2016.05 nicht hier",
+    "Context": {
+      "ReferenceDateTime": "2016-11-07T00:00:00"
+    },
+    "NotSupported": "javascript, python",
+    "Results": [
+      {
+        "Text": "2016.05",
+        "Type": "daterange",
+        "Value": {
+          "Timex": "2016-05",
+          "FutureResolution": {
+            "startDate": "2016-05-01",
+            "endDate": "2016-06-01"
+          },
+          "PastResolution": {
+            "startDate": "2016-05-01",
+            "endDate": "2016-06-01"
+          }
+        },
+        "Start": 10,
+        "Length": 7
+      }
+    ]
+  },
+  {
+    "Input": "Ich würde 05.2016 nicht hier",
+    "Context": {
+      "ReferenceDateTime": "2016-11-07T00:00:00"
+    },
+    "NotSupported": "javascript, python",
+    "Results": [
+      {
+        "Text": "05.2016",
+        "Type": "daterange",
+        "Value": {
+          "Timex": "2016-05",
+          "FutureResolution": {
+            "startDate": "2016-05-01",
+            "endDate": "2016-06-01"
+          },
+          "PastResolution": {
+            "startDate": "2016-05-01",
+            "endDate": "2016-06-01"
+          }
+        },
+        "Start": 10,
+        "Length": 7
+      }
+    ]
+  },
+  {
     "Input": "Ich würde 05-2016 nicht hier",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
@@ -1048,40 +1077,14 @@
     ]
   },
   {
-    "Input": "Ich würde 2016 -  05 nicht hier",
+    "Input": "Ich würde 2016 - 05 nicht hier",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
     "NotSupported": "javascript, python",
     "Results": [
       {
-        "Text": "2016 -  05",
-        "Type": "daterange",
-        "Value": {
-          "Timex": "2016-05",
-          "FutureResolution": {
-            "startDate": "2016-05-01",
-            "endDate": "2016-06-01"
-          },
-          "PastResolution": {
-            "startDate": "2016-05-01",
-            "endDate": "2016-06-01"
-          }
-        },
-        "Start": 10,
-        "Length": 10
-      }
-    ]
-  },
-  {
-    "Input": "Ich würde 2016  /05 nicht hier",
-    "Context": {
-      "ReferenceDateTime": "2016-11-07T00:00:00"
-    },
-    "NotSupported": "javascript, python",
-    "Results": [
-      {
-        "Text": "2016  /05",
+        "Text": "2016 - 05",
         "Type": "daterange",
         "Value": {
           "Timex": "2016-05",
@@ -1100,14 +1103,14 @@
     ]
   },
   {
-    "Input": "Ich würde 05/  2016 nicht hier",
+    "Input": "Ich würde 2016 . 05 nicht hier",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
     "NotSupported": "javascript, python",
     "Results": [
       {
-        "Text": "05/  2016",
+        "Text": "2016 . 05",
         "Type": "daterange",
         "Value": {
           "Timex": "2016-05",
@@ -1126,14 +1129,14 @@
     ]
   },
   {
-    "Input": "Ich würde 05 -  2016 nicht hier",
+    "Input": "Ich würde 2016 /05 nicht hier",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
     "NotSupported": "javascript, python",
     "Results": [
       {
-        "Text": "05 -  2016",
+        "Text": "2016 /05",
         "Type": "daterange",
         "Value": {
           "Timex": "2016-05",
@@ -1147,7 +1150,85 @@
           }
         },
         "Start": 10,
-        "Length": 10
+        "Length": 8
+      }
+    ]
+  },
+  {
+    "Input": "Ich würde 05/ 2016 nicht hier",
+    "Context": {
+      "ReferenceDateTime": "2016-11-07T00:00:00"
+    },
+    "NotSupported": "javascript, python",
+    "Results": [
+      {
+        "Text": "05/ 2016",
+        "Type": "daterange",
+        "Value": {
+          "Timex": "2016-05",
+          "FutureResolution": {
+            "startDate": "2016-05-01",
+            "endDate": "2016-06-01"
+          },
+          "PastResolution": {
+            "startDate": "2016-05-01",
+            "endDate": "2016-06-01"
+          }
+        },
+        "Start": 10,
+        "Length": 8
+      }
+    ]
+  },
+  {
+    "Input": "Ich würde 05.  2016 nicht hier",
+    "Context": {
+      "ReferenceDateTime": "2016-11-07T00:00:00"
+    },
+    "NotSupported": "javascript, python",
+    "Results": [
+      {
+        "Text": "05.  2016",
+        "Type": "daterange",
+        "Value": {
+          "Timex": "2016-05",
+          "FutureResolution": {
+            "startDate": "2016-05-01",
+            "endDate": "2016-06-01"
+          },
+          "PastResolution": {
+            "startDate": "2016-05-01",
+            "endDate": "2016-06-01"
+          }
+        },
+        "Start": 10,
+        "Length": 9
+      }
+    ]
+  },
+  {
+    "Input": "Ich würde 05 - 2016 nicht hier",
+    "Context": {
+      "ReferenceDateTime": "2016-11-07T00:00:00"
+    },
+    "NotSupported": "javascript, python",
+    "Results": [
+      {
+        "Text": "05 - 2016",
+        "Type": "daterange",
+        "Value": {
+          "Timex": "2016-05",
+          "FutureResolution": {
+            "startDate": "2016-05-01",
+            "endDate": "2016-06-01"
+          },
+          "PastResolution": {
+            "startDate": "2016-05-01",
+            "endDate": "2016-06-01"
+          }
+        },
+        "Start": 10,
+        "Length": 9
       }
     ]
   }

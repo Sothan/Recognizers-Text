@@ -1,22 +1,23 @@
 ﻿using System.Collections.Immutable;
-
 using Microsoft.Recognizers.Definitions;
-using Microsoft.Recognizers.Text.DateTime.French.Utilities;
 using Microsoft.Recognizers.Definitions.French;
-using Microsoft.Recognizers.Text.Number.French;
+using Microsoft.Recognizers.Text.DateTime.French.Utilities;
 using Microsoft.Recognizers.Text.Number;
+using Microsoft.Recognizers.Text.Number.French;
 
 namespace Microsoft.Recognizers.Text.DateTime.French
 {
     public class FrenchCommonDateTimeParserConfiguration : BaseDateParserConfiguration
     {
-        public FrenchCommonDateTimeParserConfiguration(IOptionsConfiguration config) : base(config)
+        public FrenchCommonDateTimeParserConfiguration(IDateTimeOptionsConfiguration config)
+            : base(config)
         {
             UtilityConfiguration = new FrenchDatetimeUtilityConfiguration();
 
             UnitMap = DateTimeDefinitions.UnitMap.ToImmutableDictionary();
             UnitValueMap = DateTimeDefinitions.UnitValueMap.ToImmutableDictionary();
             SeasonMap = DateTimeDefinitions.SeasonMap.ToImmutableDictionary();
+            SpecialYearPrefixesMap = DateTimeDefinitions.SpecialYearPrefixesMap.ToImmutableDictionary();
             CardinalMap = DateTimeDefinitions.CardinalMap.ToImmutableDictionary();
             DayOfWeek = DateTimeDefinitions.DayOfWeek.ToImmutableDictionary();
             MonthOfYear = DateTimeDefinitions.MonthOfYear.ToImmutableDictionary();
@@ -25,11 +26,11 @@ namespace Microsoft.Recognizers.Text.DateTime.French
             WrittenDecades = DateTimeDefinitions.WrittenDecades.ToImmutableDictionary();
             SpecialDecadeCases = DateTimeDefinitions.SpecialDecadeCases.ToImmutableDictionary();
 
-            CardinalExtractor = new CardinalExtractor();
-            IntegerExtractor = new IntegerExtractor();
-            OrdinalExtractor = new OrdinalExtractor();
+            CardinalExtractor = Number.French.CardinalExtractor.GetInstance();
+            IntegerExtractor = Number.French.IntegerExtractor.GetInstance();
+            OrdinalExtractor = Number.French.OrdinalExtractor.GetInstance();
 
-            NumberParser = new BaseNumberParser(new FrenchNumberParserConfiguration());
+            NumberParser = new BaseNumberParser(new FrenchNumberParserConfiguration(new BaseNumberOptionsConfiguration(config.Culture)));
             DateExtractor = new BaseDateExtractor(new FrenchDateExtractorConfiguration(this));
             TimeExtractor = new BaseTimeExtractor(new FrenchTimeExtractorConfiguration(this));
             DateTimeExtractor = new BaseDateTimeExtractor(new FrenchDateTimeExtractorConfiguration(this));
@@ -37,6 +38,7 @@ namespace Microsoft.Recognizers.Text.DateTime.French
             DatePeriodExtractor = new BaseDatePeriodExtractor(new FrenchDatePeriodExtractorConfiguration(this));
             TimePeriodExtractor = new BaseTimePeriodExtractor(new FrenchTimePeriodExtractorConfiguration(this));
             DateTimePeriodExtractor = new BaseDateTimePeriodExtractor(new FrenchDateTimePeriodExtractorConfiguration(this));
+
             // DurationParser should be assigned first, as DateParser would reference the DurationParser
             DurationParser = new BaseDurationParser(new FrenchDurationParserConfiguration(this));
             DateParser = new BaseDateParser(new FrenchDateParserConfiguration(this));
@@ -47,6 +49,7 @@ namespace Microsoft.Recognizers.Text.DateTime.French
             DateTimePeriodParser = new BaseDateTimePeriodParser(new FrenchDateTimePeriodParserConfiguration(this));
             DateTimeAltParser = new BaseDateTimeAltParser(new FrenchDateTimeAltParserConfiguration(this));
         }
+
         public override IImmutableDictionary<string, int> DayOfMonth => BaseDateTime.DayOfMonthDictionary.ToImmutableDictionary().AddRange(DateTimeDefinitions.DayOfMonth);
     }
 }

@@ -5,8 +5,9 @@ from recognizers_text.extractor import ExtractResult
 from ..base_datetime import BaseDateTimeParser
 from ..parsers import DateTimeParseResult
 from ..constants import TimeTypeConstants
-from ..utilities import FormatUtil, DateTimeResolutionResult, DateUtils
+from ..utilities import DateTimeFormatUtil, DateTimeResolutionResult, DateUtils
 from .datetime_parser_config import ChineseDateTimeParserConfiguration
+
 
 class ChineseDateTimeParser(BaseDateTimeParser):
     def __init__(self):
@@ -24,11 +25,14 @@ class ChineseDateTimeParser(BaseDateTimeParser):
                 inner_result = self.parse_basic_regex(source.text, reference)
 
             if not inner_result.success:
-                inner_result = self._parse_time_of_today(source.text, reference)
+                inner_result = self._parse_time_of_today(
+                    source.text, reference)
 
             if inner_result.success:
-                inner_result.future_resolution = {TimeTypeConstants.DATETIME: FormatUtil.format_date_time(inner_result.future_value)}
-                inner_result.past_resolution = {TimeTypeConstants.DATETIME: FormatUtil.format_date_time(inner_result.past_value)}
+                inner_result.future_resolution = {
+                    TimeTypeConstants.DATETIME: DateTimeFormatUtil.format_date_time(inner_result.future_value)}
+                inner_result.past_resolution = {
+                    TimeTypeConstants.DATETIME: DateTimeFormatUtil.format_date_time(inner_result.past_value)}
                 value = inner_result
 
         ret = DateTimeParseResult(source)
@@ -72,15 +76,17 @@ class ChineseDateTimeParser(BaseDateTimeParser):
         if time_str.endswith('ampm'):
             time_str = time_str[0:len(time_str)-4]
 
-        time_str = 'T' + FormatUtil.to_str(hour, 2) + time_str[3:]
+        time_str = 'T' + DateTimeFormatUtil.to_str(hour, 2) + time_str[3:]
         ret.timex = pr1.timex_str + time_str
 
         val = pr2.value
         if hour <= 12 and not self.config.pm_time_regex.search(source) and not self.config.am_time_regex.search(source) and val.comment:
             ret.comment = 'ampm'
 
-        ret.future_value = datetime(future_date.year, future_date.month, future_date.day, hour, minute, second)
-        ret.past_value = datetime(past_date.year, past_date.month, past_date.day, hour, minute, second)
+        ret.future_value = datetime(
+            future_date.year, future_date.month, future_date.day, hour, minute, second)
+        ret.past_value = datetime(
+            past_date.year, past_date.month, past_date.day, hour, minute, second)
         ret.success = True
 
         return ret
@@ -117,10 +123,11 @@ class ChineseDateTimeParser(BaseDateTimeParser):
             if time_str.endswith('ampm'):
                 time_str = time_str[0, len(time_str) - 4]
 
-            time_str = 'T' + FormatUtil.to_str(hour, 2) + time_str[3:]
+            time_str = 'T' + DateTimeFormatUtil.to_str(hour, 2) + time_str[3:]
 
-            ret.timex = FormatUtil.format_date(date) + time_str
-            ret.future_value = datetime(date.year, date.month, date.day, hour, minute, second)
+            ret.timex = DateTimeFormatUtil.format_date(date) + time_str
+            ret.future_value = datetime(
+                date.year, date.month, date.day, hour, minute, second)
             ret.past_value = ret.future_value
             ret.success = True
             return ret

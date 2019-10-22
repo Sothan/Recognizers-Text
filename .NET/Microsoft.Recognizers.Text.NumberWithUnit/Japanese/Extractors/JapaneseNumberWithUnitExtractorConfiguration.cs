@@ -1,21 +1,33 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using Microsoft.Recognizers.Text.Number.Japanese;
+
+using Microsoft.Recognizers.Definitions;
 using Microsoft.Recognizers.Definitions.Japanese;
+using Microsoft.Recognizers.Text.Number.Config;
+using Microsoft.Recognizers.Text.Number.Japanese;
 
 namespace Microsoft.Recognizers.Text.NumberWithUnit.Japanese
 {
     public abstract class JapaneseNumberWithUnitExtractorConfiguration : INumberWithUnitExtractorConfiguration
     {
+
+        private const RegexOptions RegexFlags = RegexOptions.Singleline | RegexOptions.ExplicitCapture;
+
+        private static readonly Regex CompoundUnitConnRegex =
+            new Regex(NumbersWithUnitDefinitions.CompoundUnitConnectorRegex, RegexFlags);
+
+        private static readonly Regex NonUnitsRegex =
+            new Regex(BaseUnits.PmNonUnitRegex, RegexFlags);
+
         protected JapaneseNumberWithUnitExtractorConfiguration(CultureInfo ci)
         {
             this.CultureInfo = ci;
-            this.UnitNumExtractor = new NumberExtractor(JapaneseNumberExtractorMode.ExtractAll);
+            this.UnitNumExtractor = new NumberExtractor(CJKNumberExtractorMode.ExtractAll);
             this.BuildPrefix = NumbersWithUnitDefinitions.BuildPrefix;
             this.BuildSuffix = NumbersWithUnitDefinitions.BuildSuffix;
             this.ConnectorToken = NumbersWithUnitDefinitions.ConnectorToken;
-            this.CompoundUnitConnectorRegex = new Regex(NumbersWithUnitDefinitions.CompoundUnitConnectorRegex, RegexOptions.IgnoreCase);
         }
 
         public abstract string ExtractType { get; }
@@ -30,9 +42,15 @@ namespace Microsoft.Recognizers.Text.NumberWithUnit.Japanese
 
         public string ConnectorToken { get; }
 
-        public Regex CompoundUnitConnectorRegex { get; }
+        public Regex CompoundUnitConnectorRegex => CompoundUnitConnRegex;
+
+        public Regex NonUnitRegex => NonUnitsRegex;
+
+        public virtual Regex AmbiguousUnitNumberMultiplierRegex => null;
 
         public IExtractor IntegerExtractor { get; }
+
+        public Dictionary<Regex, Regex> AmbiguityFiltersDict { get; } = null;
 
         public abstract ImmutableDictionary<string, string> SuffixList { get; }
 

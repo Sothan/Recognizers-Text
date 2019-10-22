@@ -813,30 +813,6 @@
     ]
   },
   {
-    "Input": "I'll be out 11 -2016",
-    "NotSupported": "javascript",
-    "Results": [
-      {
-        "Text": "11 -2016",
-        "Type": "daterange",
-        "Start": 12,
-        "Length": 8
-      }
-    ]
-  },
-  {
-    "Input": "I'll be out 11- 2016",
-    "NotSupported": "javascript",
-    "Results": [
-      {
-        "Text": "11- 2016",
-        "Type": "daterange",
-        "Start": 12,
-        "Length": 8
-      }
-    ]
-  },
-  {
     "Input": "I'll be out 11 - 2016",
     "NotSupported": "javascript",
     "Results": [
@@ -1060,17 +1036,6 @@
     ]
   },
   {
-    "Input": "You can't leave earlier than or in 2016",
-    "Results": [
-      {
-        "Text": "earlier than or in 2016",
-        "Type": "daterange",
-        "Start": 16,
-        "Length": 23
-      }
-    ]
-  },
-  {
     "Input": "You can leave office at or after 6:30PM today",
     "Results": [
       {
@@ -1227,10 +1192,10 @@
         "Length": 9
       },
       {
-        "Text": "today",
+        "Text": "from today",
         "Type": "date",
-        "Start": 27,
-        "Length": 5
+        "Start": 22,
+        "Length": 10
       }
     ]
   }

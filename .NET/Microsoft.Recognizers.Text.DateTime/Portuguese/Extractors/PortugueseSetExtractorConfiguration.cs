@@ -1,22 +1,40 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 using Microsoft.Recognizers.Definitions.Portuguese;
+using Microsoft.Recognizers.Text.DateTime.Utilities;
 
 namespace Microsoft.Recognizers.Text.DateTime.Portuguese
 {
-    public class PortugueseSetExtractorConfiguration : BaseOptionsConfiguration, ISetExtractorConfiguration
+    public class PortugueseSetExtractorConfiguration : BaseDateTimeOptionsConfiguration, ISetExtractorConfiguration
     {
         public static readonly string ExtractorName = Constants.SYS_DATETIME_SET;
 
-        public static readonly Regex PeriodicRegex = new Regex(DateTimeDefinitions.PeriodicRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        public static readonly Regex EachUnitRegex = new Regex(DateTimeDefinitions.EachUnitRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        public static readonly Regex EachPrefixRegex = new Regex(DateTimeDefinitions.EachPrefixRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        public static readonly Regex EachDayRegex = new Regex(DateTimeDefinitions.EachDayRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        public static readonly Regex BeforeEachDayRegex = new Regex(DateTimeDefinitions.BeforeEachDayRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        public static readonly Regex SetWeekDayRegex = new Regex(DateTimeDefinitions.SetWeekDayRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        public static readonly Regex SetEachRegex = new Regex(DateTimeDefinitions.SetEachRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex PeriodicRegex =
+            new Regex(DateTimeDefinitions.PeriodicRegex, RegexFlags);
 
-        public PortugueseSetExtractorConfiguration(IOptionsConfiguration config) : base(config)
+        public static readonly Regex EachUnitRegex =
+            new Regex(DateTimeDefinitions.EachUnitRegex, RegexFlags);
+
+        public static readonly Regex EachPrefixRegex =
+            new Regex(DateTimeDefinitions.EachPrefixRegex, RegexFlags);
+
+        public static readonly Regex EachDayRegex =
+            new Regex(DateTimeDefinitions.EachDayRegex, RegexFlags);
+
+        public static readonly Regex BeforeEachDayRegex =
+            new Regex(DateTimeDefinitions.BeforeEachDayRegex, RegexFlags);
+
+        public static readonly Regex SetWeekDayRegex =
+            new Regex(DateTimeDefinitions.SetWeekDayRegex, RegexFlags);
+
+        public static readonly Regex SetEachRegex =
+            new Regex(DateTimeDefinitions.SetEachRegex, RegexFlags);
+
+        private const RegexOptions RegexFlags = RegexOptions.Singleline | RegexOptions.ExplicitCapture;
+
+        public PortugueseSetExtractorConfiguration(IDateTimeOptionsConfiguration config)
+            : base(config)
         {
             DurationExtractor = new BaseDurationExtractor(new PortugueseDurationExtractorConfiguration(this));
             TimeExtractor = new BaseTimeExtractor(new PortugueseTimeExtractorConfiguration(this));
@@ -31,7 +49,7 @@ namespace Microsoft.Recognizers.Text.DateTime.Portuguese
 
         public IDateTimeExtractor TimeExtractor { get; }
 
-        public IDateTimeExtractor DateExtractor { get; }
+        public IDateExtractor DateExtractor { get; }
 
         public IDateTimeExtractor DateTimeExtractor { get; }
 
@@ -56,5 +74,7 @@ namespace Microsoft.Recognizers.Text.DateTime.Portuguese
         Regex ISetExtractorConfiguration.SetWeekDayRegex => SetWeekDayRegex;
 
         Regex ISetExtractorConfiguration.SetEachRegex => SetEachRegex;
+
+        public Tuple<string, int> WeekDayGroupMatchTuple(Match match) => SetHandler.WeekDayGroupMatchTuple(match);
     }
 }

@@ -1,10 +1,14 @@
-﻿using DateObject = System.DateTime;
+﻿using Microsoft.Recognizers.Text.Utilities;
+using DateObject = System.DateTime;
 
 namespace Microsoft.Recognizers.Text.DateTime.Italian
-{ 
+{
     public class TimeParser : BaseTimeParser
     {
-        public TimeParser(ITimeParserConfiguration configuration) : base(configuration) { }
+        public TimeParser(ITimeParserConfiguration configuration)
+            : base(configuration)
+        {
+        }
 
         protected override DateTimeResolutionResult InternalParse(string text, DateObject referenceTime)
         {
@@ -13,6 +17,7 @@ namespace Microsoft.Recognizers.Text.DateTime.Italian
             {
                 innerResult = ParseIsh(text, referenceTime);
             }
+
             return innerResult;
         }
 
@@ -21,10 +26,11 @@ namespace Microsoft.Recognizers.Text.DateTime.Italian
         private DateTimeResolutionResult ParseIsh(string text, DateObject referenceTime)
         {
             var ret = new DateTimeResolutionResult();
-            var trimedText = text.ToLowerInvariant().Trim();
+            var lowerText = text;
 
-            var match = ItalianTimeExtractorConfiguration.IshRegex.Match(trimedText);
-            if (match.Success && match.Length == trimedText.Length)
+            var match = ItalianTimeExtractorConfiguration.IshRegex.MatchExact(lowerText, trim: true);
+
+            if (match.Success)
             {
                 var hourStr = match.Groups["hour"].Value;
                 var hour = 12;

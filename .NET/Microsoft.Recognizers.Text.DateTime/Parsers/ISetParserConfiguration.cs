@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
-    public interface ISetParserConfiguration : IOptionsConfiguration
+    public interface ISetParserConfiguration : IDateTimeOptionsConfiguration
     {
         IDateTimeExtractor DurationExtractor { get; }
 
@@ -13,7 +13,7 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         IDateTimeParser TimeParser { get; }
 
-        IDateTimeExtractor DateExtractor { get; }
+        IDateExtractor DateExtractor { get; }
 
         IDateTimeParser DateParser { get; }
 
@@ -50,5 +50,7 @@ namespace Microsoft.Recognizers.Text.DateTime
         bool GetMatchedDailyTimex(string text, out string timex);
 
         bool GetMatchedUnitTimex(string text, out string timex);
+
+        string WeekDayGroupMatchString(Match match);
     }
 }

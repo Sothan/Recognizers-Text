@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using DateObject = System.DateTime;
 
 namespace Microsoft.Recognizers.Text.DataTypes.TimexExpression
 {
@@ -19,7 +20,7 @@ namespace Microsoft.Recognizers.Text.DataTypes.TimexExpression
                 {
                     Start = start,
                     End = TimexDateTimeAdd(start, duration),
-                    Duration = duration
+                    Duration = duration,
                 };
             }
             else
@@ -89,9 +90,10 @@ namespace Microsoft.Recognizers.Text.DataTypes.TimexExpression
             {
                 Start = start,
                 End = TimeAdd(start, duration),
-                Duration = duration
+                Duration = duration,
             };
         }
+
         public static TimexProperty TimexDateAdd(TimexProperty start, TimexProperty duration)
         {
             if (start.DayOfWeek != null)
@@ -107,28 +109,36 @@ namespace Microsoft.Recognizers.Text.DataTypes.TimexExpression
 
             if (start.Month != null && start.DayOfMonth != null)
             {
-                if (duration.Days != null)
+                decimal? durationDays = duration.Days;
+
+                if (durationDays == null && duration.Weeks != null)
+                {
+                    durationDays = 7 * duration.Weeks.Value;
+                }
+
+                if (durationDays != null)
                 {
                     if (start.Year != null)
                     {
-                        var d = new System.DateTime(start.Year.Value, start.Month.Value, start.DayOfMonth.Value, 0, 0, 0);
-                        d = d.AddDays((double)duration.Days.Value);
+                        var d = new DateObject(start.Year.Value, start.Month.Value, start.DayOfMonth.Value, 0, 0, 0);
+                        d = d.AddDays((double)durationDays.Value);
 
-                        return new TimexProperty {
+                        return new TimexProperty
+                        {
                             Year = d.Year,
                             Month = d.Month,
-                            DayOfMonth = d.Day
+                            DayOfMonth = d.Day,
                         };
                     }
                     else
                     {
-                        var d = new System.DateTime(2001, start.Month.Value, start.DayOfMonth.Value, 0, 0, 0);
-                        d = d.AddDays((double)duration.Days.Value);
+                        var d = new DateObject(2001, start.Month.Value, start.DayOfMonth.Value, 0, 0, 0);
+                        d = d.AddDays((double)durationDays.Value);
 
                         return new TimexProperty
                         {
                             Month = d.Month,
-                            DayOfMonth = d.Day
+                            DayOfMonth = d.Day,
                         };
                     }
                 }
@@ -141,12 +151,12 @@ namespace Microsoft.Recognizers.Text.DataTypes.TimexExpression
                         {
                             Year = (int)(start.Year.Value + duration.Years.Value),
                             Month = start.Month,
-                            DayOfMonth = start.DayOfMonth
+                            DayOfMonth = start.DayOfMonth,
                         };
                     }
                 }
 
-                if (duration.Month != null)
+                if (duration.Months != null)
                 {
                     if (start.Month != null)
                     {
@@ -154,11 +164,12 @@ namespace Microsoft.Recognizers.Text.DataTypes.TimexExpression
                         {
                             Year = start.Year,
                             Month = (int)(start.Month + duration.Months),
-                            DayOfMonth = start.DayOfMonth
+                            DayOfMonth = start.DayOfMonth,
                         };
                     }
                 }
             }
+
             return start;
         }
 
@@ -176,7 +187,7 @@ namespace Microsoft.Recognizers.Text.DataTypes.TimexExpression
 
                     if (result.Year != null && result.Month != null && result.DayOfMonth != null)
                     {
-                        var d = new System.DateTime(result.Year.Value, result.Month.Value, result.DayOfMonth.Value, 0, 0, 0);
+                        var d = new DateObject(result.Year.Value, result.Month.Value, result.DayOfMonth.Value, 0, 0, 0);
                         d = d.AddDays((double)days);
 
                         result.Year = d.Year;
@@ -218,9 +229,9 @@ namespace Microsoft.Recognizers.Text.DataTypes.TimexExpression
             return TimexTimeAdd(TimexDateAdd(start, duration), duration);
         }
 
-        public static System.DateTime DateFromTimex(TimexProperty timex)
+        public static DateObject DateFromTimex(TimexProperty timex)
         {
-            return new System.DateTime(timex.Year ?? 2001, timex.Month ?? 1, timex.DayOfMonth ?? 1, timex.Hour ?? 0, timex.Minute ?? 0, timex.Second ?? 0);
+            return new DateObject(timex.Year ?? 2001, timex.Month ?? 1, timex.DayOfMonth ?? 1, timex.Hour ?? 0, timex.Minute ?? 0, timex.Second ?? 0);
         }
 
         public static Time TimeFromTimex(TimexProperty timex)
@@ -234,7 +245,7 @@ namespace Microsoft.Recognizers.Text.DataTypes.TimexExpression
             return new DateRange
             {
                 Start = DateFromTimex(expanded.Start),
-                End = DateFromTimex(expanded.End)
+                End = DateFromTimex(expanded.End),
             };
         }
 
@@ -244,7 +255,7 @@ namespace Microsoft.Recognizers.Text.DataTypes.TimexExpression
             return new TimeRange
             {
                 Start = TimeFromTimex(expanded.Start),
-                End = TimeFromTimex(expanded.End)
+                End = TimeFromTimex(expanded.End),
             };
         }
 
@@ -254,7 +265,7 @@ namespace Microsoft.Recognizers.Text.DataTypes.TimexExpression
             {
                 Hour = (int)(start.Hour.Value + duration.Hours ?? 0),
                 Minute = (int)(start.Minute + duration.Minutes ?? 0),
-                Second = (int)(start.Second + duration.Seconds ?? 0)
+                Second = (int)(start.Second + duration.Seconds ?? 0),
             };
         }
 

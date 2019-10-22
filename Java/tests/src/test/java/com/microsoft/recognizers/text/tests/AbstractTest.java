@@ -3,15 +3,15 @@ package com.microsoft.recognizers.text.tests;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.recognizers.text.Culture;
-import com.microsoft.recognizers.text.ModelResult;
-import com.microsoft.recognizers.text.ResolutionKey;
+import com.microsoft.recognizers.text.*;
+import com.microsoft.recognizers.text.datetime.parsers.DateTimeParseResult;
+import com.microsoft.recognizers.text.tests.helpers.DateTimeParseResultMixIn;
+import com.microsoft.recognizers.text.tests.helpers.ExtendedModelResultMixIn;
+import com.microsoft.recognizers.text.tests.helpers.ExtractResultMixIn;
 import com.microsoft.recognizers.text.tests.helpers.ModelResultMixIn;
 import org.apache.commons.io.FileUtils;
 import org.javatuples.Pair;
-import org.junit.Assert;
-import org.junit.AssumptionViolatedException;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -36,9 +36,73 @@ public abstract class AbstractTest {
         this.currentCase = currentCase;
     }
 
+    private static Map<String, Integer> testCounter;
+    private static Map<String, Integer> passCounter;
+    private static Map<String, Integer> failCounter;
+    private static Map<String, Integer> skipCounter;
+
+    @BeforeClass
+    public static void before(){
+        testCounter = new LinkedHashMap<>();
+        passCounter = new LinkedHashMap<>();
+        failCounter = new LinkedHashMap<>();
+        skipCounter = new LinkedHashMap<>();
+    }
+
+    @AfterClass
+    public static void after(){
+        Map<String, String> counter = new LinkedHashMap<>();
+        for (Map.Entry<String, Integer> entry : testCounter.entrySet()) {
+            int skipped = skipCounter.getOrDefault(entry.getKey(), 0);
+            if (entry.getValue() > skipped) {
+                counter.put(entry.getKey(), String.format("%7d", entry.getValue()));
+            }
+        }
+        for (Map.Entry<String, String> entry : counter.entrySet()) {
+            Integer passValue = passCounter.getOrDefault(entry.getKey(), 0);
+            Integer failValue = failCounter.getOrDefault(entry.getKey(), 0);
+            Integer skipValue = skipCounter.getOrDefault(entry.getKey(), 0);
+            counter.put(entry.getKey(), String.format("|%s  |%7d  |%7d  |%7d  ", entry.getValue(), passValue, skipValue, failValue));
+        }
+        print(counter);
+    }
+
+    private static void print(Map<String, String> map) {
+        System.out.println("|  TOTAL  |  Passed | Skipped |  Failed || Key");
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            System.out.println(entry.getValue() + "|| " + entry.getKey());
+        }
+    }
+
+    private void count(TestCase testCase) {
+        String key = testCase.recognizerName + "-" + testCase.language + "-" + testCase.modelName;
+        Integer current = testCounter.getOrDefault(key, 0);
+        testCounter.put(key, current + 1);
+    }
+
+    private void countPass(TestCase testCase) {
+        String key = testCase.recognizerName + "-" + testCase.language + "-" + testCase.modelName;
+        Integer current = passCounter.getOrDefault(key, 0);
+        passCounter.put(key, current + 1);
+    }
+
+    private void countSkip(TestCase testCase) {
+        String key = testCase.recognizerName + "-" + testCase.language + "-" + testCase.modelName;
+        Integer current = skipCounter.getOrDefault(key, 0);
+        skipCounter.put(key, current + 1);
+    }
+
+    private void countFail(TestCase testCase) {
+        String key = testCase.recognizerName + "-" + testCase.language + "-" + testCase.modelName;
+        Integer current = failCounter.getOrDefault(key, 0);
+        failCounter.put(key, current + 1);
+    }
+
     @Test
     public void test() {
+        count(currentCase);
         if (!isJavaSupported(this.currentCase.notSupported)) {
+            countSkip(currentCase);
             throw new AssumptionViolatedException("Test case wih input '" + this.currentCase.input + "' not supported.");
         }
 
@@ -47,7 +111,16 @@ public abstract class AbstractTest {
             System.out.println("Debug Brk!");
         }
 
-        recognizeAndAssert(currentCase);
+        try {
+            recognizeAndAssert(currentCase);
+            countPass(this.currentCase);
+        } catch (AssumptionViolatedException ex) {
+            countSkip(currentCase);
+            throw ex;
+        } catch (Throwable err) {
+            countFail(currentCase);
+            throw err;
+        }
     }
 
     // TODO Override in specific models
@@ -75,7 +148,9 @@ public abstract class AbstractTest {
                     Assert.assertEquals(getMessage(currentCase, "typeName"), expected.typeName, actual.typeName);
                     Assert.assertEquals(getMessage(currentCase, "text"), expected.text, actual.text);
 
-                    Assert.assertEquals(getMessage(currentCase, "resolution.value"), expected.resolution.get(ResolutionKey.Value), actual.resolution.get(ResolutionKey.Value));
+                    if (expected.resolution.containsKey(ResolutionKey.Value)) {
+                        Assert.assertEquals(getMessage(currentCase, "resolution.value"), expected.resolution.get(ResolutionKey.Value), actual.resolution.get(ResolutionKey.Value));
+                    }
 
                     for (String key : testResolutionKeys) {
                         Assert.assertEquals(getMessage(currentCase, key), expected.resolution.get(key), actual.resolution.get(key));
@@ -83,7 +158,7 @@ public abstract class AbstractTest {
                 });
     }
 
-    public static Collection<TestCase> enumerateTestCases(String recognizerType) {
+    public static Collection<TestCase> enumerateTestCases(String recognizerType, String modelName) {
 
         String recognizerTypePath = String.format(File.separator + recognizerType + File.separator);
 
@@ -100,6 +175,7 @@ public abstract class AbstractTest {
                 .filter(ts -> isJavaSupported(ts.notSupportedByDesign))
                 // Filter supported languages only
                 .filter(ts -> SupportedCultures.contains(ts.language))
+                .filter(ts -> ts.modelName.contains(modelName))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -122,11 +198,52 @@ public abstract class AbstractTest {
         }
     }
 
+    public static <T extends ExtractResult> T parseExtractResult(Class<T> extractorResultClass, Object result) {
+        // Deserializer
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        mapper.addMixIn(ExtractResult.class, ExtractResultMixIn.class);
+
+        try {
+            String json = mapper.writeValueAsString(result);
+            return mapper.readValue(json, extractorResultClass);
+
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static <T extends DateTimeParseResult> T parseDateTimeParseResult(Class<T> dateTimeParseResultClass, Object result) {
+        // Deserializer
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        mapper.addMixIn(DateTimeParseResult.class, DateTimeParseResultMixIn.class);
+
+        try {
+            String json = mapper.writeValueAsString(result);
+            return mapper.readValue(json, dateTimeParseResultClass);
+
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static <T extends ModelResult> T parseResult(Class<T> modelResultClass, Object result) {
         // Deserializer
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
         mapper.addMixIn(ModelResult.class, ModelResultMixIn.class);
+        mapper.addMixIn(ExtendedModelResult.class, ExtendedModelResultMixIn.class);
 
         try {
             String json = mapper.writeValueAsString(result);
@@ -144,6 +261,16 @@ public abstract class AbstractTest {
 
     public static <T extends ModelResult> List<T> readExpectedResults(Class<T> modelResultClass, List<Object> results) {
         return results.stream().map(r -> parseResult(modelResultClass, r))
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public static <T extends ExtractResult> List<T> readExpectedExtractResults(Class<T> extractorResultClass, List<Object> results) {
+        return results.stream().map(r -> parseExtractResult(extractorResultClass, r))
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public static <T extends DateTimeParseResult> List<T> readExpectedDateTimeParseResults(Class<T> dateTimeParseResultClass, List<Object> results) {
+        return results.stream().map(r -> parseDateTimeParseResult(dateTimeParseResultClass, r))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 

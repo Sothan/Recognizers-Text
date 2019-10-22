@@ -4,13 +4,15 @@ using Microsoft.Recognizers.Text.Matcher;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
-    public interface ITimeZoneExtractorConfiguration : IOptionsConfiguration
+    public interface ITimeZoneExtractorConfiguration : IDateTimeOptionsConfiguration
     {
-        IEnumerable<Regex> TimeZoneRegexes { get; }
+        Regex DirectUtcRegex { get; }
 
         Regex LocationTimeSuffixRegex { get; }
 
-        StringMatcher CityMatcher { get; }
+        StringMatcher LocationMatcher { get; }
+
+        StringMatcher TimeZoneMatcher { get; }
 
         List<string> AmbiguousTimezoneList { get; }
     }

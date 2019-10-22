@@ -1,11 +1,9 @@
 ﻿using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
-using Microsoft.Recognizers.Text.Number;
-
 namespace Microsoft.Recognizers.Text.DateTime
 {
-    public interface IDurationParserConfiguration : IOptionsConfiguration
+    public interface IDurationParserConfiguration : IDateTimeOptionsConfiguration
     {
         IExtractor CardinalExtractor { get; }
 
@@ -35,10 +33,13 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         Regex DurationUnitRegex { get; }
 
+        Regex SpecialNumberUnitRegex { get; }
+
         IImmutableDictionary<string, string> UnitMap { get; }
 
         IImmutableDictionary<string, long> UnitValueMap { get; }
 
         IImmutableDictionary<string, double> DoubleNumbers { get; }
+
     }
 }

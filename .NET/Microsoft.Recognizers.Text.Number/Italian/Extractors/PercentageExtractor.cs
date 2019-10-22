@@ -8,14 +8,21 @@ namespace Microsoft.Recognizers.Text.Number.Italian
 {
     public sealed class PercentageExtractor : BasePercentageExtractor
     {
-        public PercentageExtractor() : base(new NumberExtractor()) { }
-        
+        public PercentageExtractor(NumberOptions options = NumberOptions.None)
+            : base(NumberExtractor.GetInstance(options: options))
+        {
+            Options = options;
+            Regexes = InitRegexes();
+        }
+
+        protected override NumberOptions Options { get; }
+
         protected override ImmutableHashSet<Regex> InitRegexes()
         {
-            HashSet<string> regexStrs = new HashSet<string>
+            var regexStrs = new HashSet<string>
             {
                 NumbersDefinitions.NumberWithSuffixPercentage,
-                NumbersDefinitions.NumberWithPrefixPercentage
+                NumbersDefinitions.NumberWithPrefixPercentage,
             };
 
             return BuildRegexes(regexStrs);

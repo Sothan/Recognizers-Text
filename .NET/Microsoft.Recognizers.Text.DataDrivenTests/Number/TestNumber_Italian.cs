@@ -6,40 +6,32 @@ namespace Microsoft.Recognizers.Text.Number.Tests
     [TestClass]
     public class TestNumber_Italian : TestBase
     {
-        public static TestResources TestResources { get; protected set; }
-
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            TestResources = new TestResources();
-            TestResources.InitFromTestContext(context);
-        }
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            base.TestSpecInitialize(TestResources);
-        }
-
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "NumberModel-Italian.csv", "NumberModel-Italian#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void NumberModel()
+        public void NumberModel(TestModel testSpec)
         {
-            base.TestNumber();
+            TestNumber(testSpec);
         }
 
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "OrdinalModel-Italian.csv", "OrdinalModel-Italian#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void OrdinalModel()
+        public void OrdinalModel(TestModel testSpec)
         {
-            base.TestNumber();
+            TestNumber(testSpec);
         }
 
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "PercentModel-Italian.csv", "PercentModel-Italian#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void PercentModel()
+        public void PercentModel(TestModel testSpec)
         {
-            base.TestNumber();
+            TestNumber(testSpec);
+        }
+
+        [NetCoreTestDataSource]
+        [TestMethod]
+        public void NumberRangeModel(TestModel testSpec)
+        {
+            TestNumber(testSpec);
         }
     }
 }

@@ -3,10 +3,20 @@ package com.microsoft.recognizers.text.numberwithunit.extractors;
 import com.microsoft.recognizers.text.ExtractResult;
 import com.microsoft.recognizers.text.IExtractor;
 import com.microsoft.recognizers.text.numberwithunit.models.PrefixUnitResult;
-import com.microsoft.recognizers.text.numberwithunit.utilities.DinoComparer;
-import com.microsoft.recognizers.text.utilities.FormatUtility;
+import com.microsoft.recognizers.text.numberwithunit.utilities.StringComparer;
+import com.microsoft.recognizers.text.utilities.Match;
+import com.microsoft.recognizers.text.utilities.QueryProcessor;
+import com.microsoft.recognizers.text.utilities.RegExpUtility;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,13 +46,13 @@ public class NumberWithUnitExtractor implements IExtractor {
         int tempMaxPrefixMatchLen = 0;
         if (this.config.getPrefixList() != null && this.config.getPrefixList().size() > 0) {
             for (String preMatch : this.config.getPrefixList().values()) {
-                List<String> matchList = FormatUtility.split(preMatch, separators);
+                List<String> matchList = QueryProcessor.split(preMatch, separators);
                 for (String match : matchList) {
                     tempMaxPrefixMatchLen = tempMaxPrefixMatchLen >= match.length() ? tempMaxPrefixMatchLen : match.length();
                 }
             }
 
-            // 2 is the maxium length of spaces.
+            // 2 is the maximum length of spaces.
             tempMaxPrefixMatchLen += 2;
             maxPrefixMatchLen = tempMaxPrefixMatchLen;
             prefixRegexes = buildRegexFromSet(this.config.getPrefixList().values());
@@ -68,20 +78,35 @@ public class NumberWithUnitExtractor implements IExtractor {
         List<ExtractResult> numbers = this.config.getUnitNumExtractor().extract(source);
         int sourceLen = source.length();
 
+        /* Special case for cases where number multipliers clash with unit */
+        Pattern ambiguousMultiplierRegex = this.config.getAmbiguousUnitNumberMultiplierRegex();
+        if (ambiguousMultiplierRegex != null) {
+            for (int i = 0; i < numbers.size(); i++) {
+                ExtractResult number = numbers.get(i);
+
+                Match[] matches = RegExpUtility.getMatches(ambiguousMultiplierRegex, number.getText());
+                if (matches.length == 1) {
+                    int newLength = number.getLength() - matches[0].length;
+                    numbers.set(i, new ExtractResult(number.getStart(), newLength, number.getText().substring(0, newLength),
+                            number.getType(), number.getData()));
+                }
+            }
+        }
+
         /* Mix prefix and numbers, make up a prefix-number combination */
         if (maxPrefixMatchLen != 0) {
             for (ExtractResult number : numbers) {
-                if (number.start == null || number.length == null) {
+                if (number.getStart() == null || number.getLength() == null) {
                     continue;
                 }
 
-                int maxFindPref = Math.min(maxPrefixMatchLen, number.start);
+                int maxFindPref = Math.min(maxPrefixMatchLen, number.getStart());
                 if (maxFindPref == 0) {
                     continue;
                 }
 
                 /* Scan from left to right , find the longest match */
-                String leftStr = source.substring(number.start - maxFindPref, number.start);
+                String leftStr = source.substring(number.getStart() - maxFindPref, number.getStart());
                 int lastIndex = leftStr.length();
 
                 MatchResult bestMatch = null;
@@ -99,17 +124,18 @@ public class NumberWithUnitExtractor implements IExtractor {
                 if (bestMatch != null) {
                     int offset = lastIndex - bestMatch.start();
                     String unitStr = leftStr.substring(bestMatch.start(), lastIndex);
-                    mappingPrefix.put(number.start, new PrefixUnitResult(offset, unitStr));
+                    mappingPrefix.put(number.getStart(), new PrefixUnitResult(offset, unitStr));
                 }
             }
         }
 
         for (ExtractResult number : numbers) {
-            if (number.start == null || number.length == null) {
+            if (number.getStart() == null || number.getLength() == null) {
                 continue;
             }
 
-            int start = number.start, length = number.length;
+            int start = number.getStart();
+            int length = number.getLength();
             int maxFindLen = sourceLen - start - length;
 
             PrefixUnitResult prefixUnit = null;
@@ -144,15 +170,14 @@ public class NumberWithUnitExtractor implements IExtractor {
                     ExtractResult er = new ExtractResult(start, length + maxlen, substr, this.config.getExtractType(), null);
 
                     if (prefixUnit != null) {
-                        er = er
-                                .withStart(er.start - prefixUnit.offset)
-                                .withLength(er.length + prefixUnit.offset)
-                                .withText(prefixUnit.unitStr + er.text);
+                        er.setStart(er.getStart() - prefixUnit.offset);
+                        er.setLength(er.getLength() + prefixUnit.offset);
+                        er.setText(prefixUnit.unitStr + er.getText());
                     }
 
                     /* Relative position will be used in Parser */
-                    number = number.withStart(start - er.start);
-                    er = er.withData(number);
+                    number.setStart(start - er.getStart());
+                    er.setData(number);
                     result.add(er);
 
                     continue;
@@ -161,15 +186,15 @@ public class NumberWithUnitExtractor implements IExtractor {
 
             if (prefixUnit != null) {
                 ExtractResult er = new ExtractResult(
-                        number.start - prefixUnit.offset,
-                        number.length + prefixUnit.offset,
-                        prefixUnit.unitStr + number.text,
+                        number.getStart() - prefixUnit.offset,
+                        number.getLength() + prefixUnit.offset,
+                        prefixUnit.unitStr + number.getText(),
                         this.config.getExtractType(),
                         null);
 
                 /* Relative position will be used in Parser */
-                number = number.withStart(start - er.start);
-                er = er.withData(number);
+                number.setStart(start - er.getStart());
+                er.setData(number);
                 result.add(er);
             }
         }
@@ -188,11 +213,11 @@ public class NumberWithUnitExtractor implements IExtractor {
         Arrays.fill(matchResult, false);
 
         for (ExtractResult numDependResult : numDependResults) {
-            int start = numDependResult.start;
+            int start = numDependResult.getStart();
             int i = 0;
             do {
                 matchResult[start + i++] = true;
-            } while (i < numDependResult.length);
+            } while (i < numDependResult.getLength());
         }
 
         //Extract all SeparateUnits, then merge it with numDependResults
@@ -225,13 +250,12 @@ public class NumberWithUnitExtractor implements IExtractor {
         }
     }
 
-    protected boolean preCheckStr(String str)
-    {
+    protected boolean preCheckStr(String str) {
         return str != null && !str.isEmpty();
     }
 
     protected Set<Pattern> buildRegexFromSet(Collection<String> values) {
-        return buildRegexFromSet(values, true);
+        return buildRegexFromSet(values, false);
     }
 
     protected Set<Pattern> buildRegexFromSet(Collection<String> collection, boolean ignoreCase) {
@@ -239,7 +263,7 @@ public class NumberWithUnitExtractor implements IExtractor {
         Set<Pattern> regexes = new HashSet<>();
         for (String regexString : collection) {
             List<String> regexTokens = new ArrayList<>();
-            for (String token : FormatUtility.split(regexString, Arrays.asList("|"))) {
+            for (String token : QueryProcessor.split(regexString, Arrays.asList("|"))) {
                 regexTokens.add(Pattern.quote(token));
             }
 
@@ -259,7 +283,7 @@ public class NumberWithUnitExtractor implements IExtractor {
     }
 
     protected Pattern buildSeparateRegexFromSet() {
-        return buildSeparateRegexFromSet(true);
+        return buildSeparateRegexFromSet(false);
     }
 
     protected Pattern buildSeparateRegexFromSet(boolean ignoreCase) {
@@ -268,7 +292,7 @@ public class NumberWithUnitExtractor implements IExtractor {
         if (config.getPrefixList() != null && config.getPrefixList().size() > 0) {
             for (String addWord : config.getPrefixList().values()) {
 
-                for (String word : FormatUtility.split(addWord, separators)) {
+                for (String word : QueryProcessor.split(addWord, separators)) {
                     if (validateUnit(word)) {
                         separateWords.add(word);
                     }
@@ -278,7 +302,7 @@ public class NumberWithUnitExtractor implements IExtractor {
 
         if (config.getSuffixList() != null && config.getSuffixList().size() > 0) {
             for (String addWord : config.getSuffixList().values()) {
-                for (String word : FormatUtility.split(addWord, separators)) {
+                for (String word : QueryProcessor.split(addWord, separators)) {
                     if (validateUnit(word)) {
                         separateWords.add(word);
                     }
@@ -301,7 +325,7 @@ public class NumberWithUnitExtractor implements IExtractor {
             return null;
         }
 
-        Collections.sort(regexTokens, new DinoComparer());
+        Collections.sort(regexTokens, new StringComparer());
         String pattern = String.format(
                 "%s(%s)%s",
                 this.config.getBuildPrefix(),

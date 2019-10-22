@@ -1882,17 +1882,17 @@
   },
   {
     "Input": "I'll be out in 3 years",
-    "NotSupported": "javascript, python, java",
+    "NotSupported": "javascript, python",
     "Results": []
   },
   {
     "Input": "I'll be out in 3 weeks",
-    "NotSupported": "javascript, python, java",
+    "NotSupported": "javascript, python",
     "Results": []
   },
   {
     "Input": "I'll be out in 3 months",
-    "NotSupported": "javascript, python, java",
+    "NotSupported": "javascript, python",
     "Results": []
   },
   {
@@ -3138,30 +3138,6 @@
     ]
   },
   {
-    "Input": "I'll be out 11 -2016",
-    "NotSupported": "javascript",
-    "Results": [
-      {
-        "Text": "11 -2016",
-        "Type": "daterange",
-        "Start": 12,
-        "Length": 8
-      }
-    ]
-  },
-  {
-    "Input": "I'll be out 11- 2016",
-    "NotSupported": "javascript",
-    "Results": [
-      {
-        "Text": "11- 2016",
-        "Type": "daterange",
-        "Start": 12,
-        "Length": 8
-      }
-    ]
-  },
-  {
     "Input": "I'll be out 11 - 2016",
     "NotSupported": "javascript",
     "Results": [
@@ -3510,6 +3486,10 @@
     ]
   },
   {
+    "Input": "Week 0 and Week 00 aren't valid weeks",
+    "Results": []
+  },
+  {
     "Input": "I'll stay here from today to two and half days later",
     "NotSupported": "javascript",
     "Results": [
@@ -3652,6 +3632,210 @@
         "Type": "daterange",
         "Start": 45,
         "Length": 20
+      }
+    ]
+  },
+  {
+    "Input": "sales where date is this decade.",
+    "NotSupported": "javascript, python",
+    "Results": [
+      {
+        "Text": "this decade",
+        "Type": "daterange",
+        "Start": 20,
+        "Length": 11
+      }
+    ]
+  },
+  {
+    "Input": "I'll be out the third- quarter of 2016",
+    "Results": [
+      {
+        "Text": "the third- quarter of 2016",
+        "Type": "daterange",
+        "Start": 12,
+        "Length": 26
+      }
+    ]
+  },
+  {
+    "Input": "I'll be out the third- quarter",
+    "Results": [
+      {
+        "Text": "the third- quarter",
+        "Type": "daterange",
+        "Start": 12,
+        "Length": 18
+      }
+    ]
+  },
+  {
+    "Input": "I'll be out next year's third-quarter",
+    "Results": [
+      {
+        "Text": "next year's third-quarter",
+        "Type": "daterange",
+        "Start": 12,
+        "Length": 25
+      }
+    ]
+  },
+  {
+    "Input": "I'll be out next year's fourth-quarter",
+    "Results": [
+      {
+        "Text": "next year's fourth-quarter",
+        "Type": "daterange",
+        "Start": 12,
+        "Length": 26
+      }
+    ]
+  },
+  {
+    "Input": "Please convert $2000 to gbp.",
+    "Comment": "2000 shouldn't recognized as year here",
+    "Results": []
+  },
+  {
+    "Input": "This bank stock is down 20% in the year to date.",
+    "Results": [
+      {
+        "Text": "year to date",
+        "Type": "daterange",
+        "Start": 35,
+        "Length": 12
+      }
+    ]
+  },
+  {
+    "Input": "from 10/1 to 11/7",
+    "Results": [
+      {
+        "Text": "from 10/1 to 11/7",
+        "Type": "daterange",
+        "Start": 0,
+        "Length": 17
+      }
+    ]
+  },
+  {
+    "Input": "I will do my work between now and November 15th",
+    "Results": [
+      {
+        "Text": "between now and November 15th",
+        "Type": "daterange",
+        "Start": 18,
+        "Length": 29
+      }
+    ]
+  },
+  {
+    "Input": "I have finished my work between Jan 22 and now",
+    "Results": [
+      {
+        "Text": "between Jan 22 and now",
+        "Type": "daterange",
+        "Start": 24,
+        "Length": 22
+      }
+    ]
+  },
+  {
+    "Input": "3pm : I'll be out on this week",
+    "Results": [
+      {
+        "Text": "this week",
+        "Type": "daterange",
+        "Start": 21,
+        "Length": 9
+      }
+    ]
+  },
+  {
+    "Input": "this week 8am should be a daterange and a time.",
+    "Results": [
+      {
+        "Text": "this week",
+        "Type": "daterange",
+        "Start": 0,
+        "Length": 9
+      }
+    ]
+  },
+  {
+    "Input": "this week 8p.m. should be a daterange and a time.",
+    "Results": [
+      {
+        "Text": "this week",
+        "Type": "daterange",
+        "Start": 0,
+        "Length": 9
+      }
+    ]
+  },
+  {
+    "Input": "week 10 8 p.m. should be a daterange and a time.",
+    "Results": [
+      {
+        "Text": "week 10",
+        "Type": "daterange",
+        "Start": 0,
+        "Length": 7
+      }
+    ]
+  },
+  {
+    "Input": "week 10 8p.m. should be a daterange and a time.",
+    "Results": [
+      {
+        "Text": "week 10",
+        "Type": "daterange",
+        "Start": 0,
+        "Length": 7
+      }
+    ]
+  },
+  {
+    "Input": "week 10 10:20 should be a daterange and a time.",
+    "Results": [
+      {
+        "Text": "week 10",
+        "Type": "daterange",
+        "Start": 0,
+        "Length": 7
+      }
+    ]
+  },
+  {
+    "Input": "6,107.31 August 2019 should not include the decimal",
+    "Results": [
+      {
+        "Text": "August 2019",
+        "Type": "daterange",
+        "Start": 9,
+        "Length": 11
+      }
+    ]
+  },
+  {
+    "Input": "I was not there from 2019/aug/01 to today",
+    "Results": [
+      {
+        "Text": "from 2019/aug/01 to today",
+        "Type": "daterange",
+        "Start": 16,
+        "Length": 25
+      }
+    ]
+  },
+  {
+    "Input": "I was not there from 2019-aug-1 to today",
+    "Results": [
+      {
+        "Text": "from 2019-aug-1 to today",
+        "Type": "daterange",
+        "Start": 16,
+        "Length": 24
       }
     ]
   }

@@ -25,14 +25,15 @@ export class SpanishDateTimeExtractorConfiguration implements IDateTimeExtractor
     readonly nightRegex: RegExp;
     readonly timeOfTodayBeforeRegex: RegExp;
     readonly simpleTimeOfTodayBeforeRegex: RegExp;
-    readonly theEndOfRegex: RegExp;
+    readonly specificEndOfRegex: RegExp;
+    readonly unspecificEndOfRegex: RegExp;
     readonly unitRegex: RegExp;
     readonly utilityConfiguration: IDateTimeUtilityConfiguration;
     readonly prepositionRegex: RegExp;
     readonly connectorRegex: RegExp;
 
 
-    constructor() {
+    constructor(dmyDateFormat: boolean) {
         this.prepositionRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.PrepositionRegex, "gis");
         this.nowRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.NowRegex, "gis");
         this.suffixRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.SuffixRegex, "gis");
@@ -43,12 +44,13 @@ export class SpanishDateTimeExtractorConfiguration implements IDateTimeExtractor
         this.timeOfTodayBeforeRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.TimeOfTodayBeforeRegex, "gis");
         this.simpleTimeOfTodayAfterRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.SimpleTimeOfTodayAfterRegex, "gis");
         this.simpleTimeOfTodayBeforeRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.SimpleTimeOfTodayBeforeRegex, "gis");
-        this.theEndOfRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.TheEndOfRegex, "gis");
+        this.specificEndOfRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.SpecificEndOfRegex, "gis");
+        this.unspecificEndOfRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.UnspecificEndOfRegex, "gis");
         this.unitRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.UnitRegex, "gis");
         this.connectorRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.ConnectorRegex, "gis");
         this.nightRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.NightRegex, "gis");
 
-        this.datePointExtractor = new BaseDateExtractor(new SpanishDateExtractorConfiguration());
+        this.datePointExtractor = new BaseDateExtractor(new SpanishDateExtractorConfiguration(dmyDateFormat));
         this.timePointExtractor = new BaseTimeExtractor(new SpanishTimeExtractorConfiguration());
         this.durationExtractor = new BaseDurationExtractor(new SpanishDurationExtractorConfiguration());
         this.utilityConfiguration = new SpanishDateTimeUtilityConfiguration();
@@ -79,14 +81,15 @@ export class SpanishDateTimeParserConfiguration implements IDateTimeParserConfig
     readonly simpleTimeOfTodayAfterRegex: RegExp;
     readonly simpleTimeOfTodayBeforeRegex: RegExp;
     readonly specificTimeOfDayRegex: RegExp;
-    readonly theEndOfRegex: RegExp;
+    readonly specificEndOfRegex: RegExp;
+    readonly unspecificEndOfRegex: RegExp;
     readonly unitRegex: RegExp;
     readonly unitMap: ReadonlyMap<string, string>;
     readonly numbers: ReadonlyMap<string, number>;
     readonly utilityConfiguration: IDateTimeUtilityConfiguration;
 
     readonly nextPrefixRegex: RegExp;
-    readonly pastPrefixRegex: RegExp;
+    readonly previousPrefixRegex: RegExp;
 
     constructor(config: ICommonDateTimeParserConfiguration) {
         this.tokenBeforeDate = SpanishDateTime.TokenBeforeDate;
@@ -94,14 +97,15 @@ export class SpanishDateTimeParserConfiguration implements IDateTimeParserConfig
         this.nowRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.NowRegex, "gis");
         this.amTimeRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.AmTimeRegex, "gis");
         this.pmTimeRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.PmTimeRegex, "gis");
-        this.simpleTimeOfTodayAfterRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.SimpleTimeOfTodayAfterRegex, "gis")
-        this.simpleTimeOfTodayBeforeRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.SimpleTimeOfTodayBeforeRegex, "gis")
+        this.simpleTimeOfTodayAfterRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.SimpleTimeOfTodayAfterRegex, "gis");
+        this.simpleTimeOfTodayBeforeRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.SimpleTimeOfTodayBeforeRegex, "gis");
         this.specificTimeOfDayRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.SpecificTimeOfDayRegex, "gis");
-        this.theEndOfRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.TheEndOfRegex, "gis")
+        this.specificEndOfRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.SpecificEndOfRegex, "gis");
+        this.unspecificEndOfRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.UnspecificEndOfRegex, "gis");
         this.unitRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.UnitRegex, "gis");
 
         this.nextPrefixRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.NextPrefixRegex, "gis");
-        this.pastPrefixRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.PastPrefixRegex, "gis")
+        this.previousPrefixRegex = RegExpUtility.getSafeRegExp(SpanishDateTime.PreviousPrefixRegex, "gis");
 
         this.dateExtractor = config.dateExtractor;
         this.timeExtractor = config.timeExtractor;
@@ -151,7 +155,7 @@ export class SpanishDateTimeParserConfiguration implements IDateTimeParserConfig
         let trimedText = text.trim().toLowerCase();
         let swift = 0;
 
-        if (RegExpUtility.getFirstMatchIndex(this.pastPrefixRegex, trimedText).matched) {
+        if (RegExpUtility.getFirstMatchIndex(this.previousPrefixRegex, trimedText).matched) {
             swift = -1;
         }
         else if (RegExpUtility.getFirstMatchIndex(this.nextPrefixRegex, trimedText).matched) {

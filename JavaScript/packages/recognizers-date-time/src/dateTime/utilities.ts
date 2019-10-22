@@ -1,7 +1,7 @@
-import { IExtractor, ExtractResult, FormatUtility } from "@microsoft/recognizers-text";
+import { IExtractor, ExtractResult, QueryProcessor } from "@microsoft/recognizers-text";
 import { RegExpUtility } from "@microsoft/recognizers-text";
-import { IDateTimeParser, DateTimeParseResult } from "../dateTime/parsers"
-import { TimeTypeConstants } from "../dateTime/constants"
+import { IDateTimeParser, DateTimeParseResult } from "../dateTime/parsers";
+import { Constants, TimeTypeConstants } from "../dateTime/constants";
 import { IDateTimeExtractor } from "./baseDateTime";
 
 export class Token {
@@ -17,10 +17,12 @@ export class Token {
         return this.end - this.start;
     }
 
-    static mergeAllTokens(tokens: Token[], source: string, extractorName: string): Array<ExtractResult> {
-        let ret: Array<ExtractResult> = [];
-        let mergedTokens: Array<Token> = [];
-        tokens = tokens.sort((a, b) => { return a.start < b.start ? -1 : 1 });
+    static mergeAllTokens(tokens: Token[], source: string, extractorName: string): ExtractResult[] {
+        let ret: ExtractResult[] = [];
+        let mergedTokens: Token[] = [];
+        tokens = tokens.sort((a, b) => {
+            return a.start < b.start ? -1 : 1;
+        });
         tokens.forEach(token => {
             if (token) {
                 let bAdd = true;
@@ -69,7 +71,7 @@ export enum AgoLaterMode {
 }
 
 export class AgoLaterUtil {
-    static extractorDurationWithBeforeAndAfter(source: string, er: ExtractResult, ret: Token[], config: IDateTimeUtilityConfiguration): Array<Token> {
+    static extractorDurationWithBeforeAndAfter(source: string, er: ExtractResult, ret: Token[], config: IDateTimeUtilityConfiguration): Token[] {
         let pos = er.start + er.length;
         if (pos <= source.length) {
             let afterString = source.substring(pos);
@@ -87,7 +89,9 @@ export class AgoLaterUtil {
                 else {
                     value = MatchingUtil.getInIndex(beforeString, config.inConnectorRegex);
                     // for range unit like "week, month, year", it should output dateRange or datetimeRange
-                    if (RegExpUtility.getMatches(config.rangeUnitRegex, er.text).length > 0) return ret;
+                    if (RegExpUtility.getMatches(config.rangeUnitRegex, er.text).length > 0) {
+                        return ret;
+                    }
                     if (value.matched && er.start && er.length && er.start >= value.index) {
                         ret.push(new Token(er.start - value.index, er.start + er.length));
                     }
@@ -100,11 +104,17 @@ export class AgoLaterUtil {
     static parseDurationWithAgoAndLater(source: string, referenceDate: Date, durationExtractor: IDateTimeExtractor, durationParser: IDateTimeParser, unitMap: ReadonlyMap<string, string>, unitRegex: RegExp, utilityConfiguration: IDateTimeUtilityConfiguration, mode: AgoLaterMode): DateTimeResolutionResult {
         let result = new DateTimeResolutionResult();
         let duration = durationExtractor.extract(source, referenceDate).pop();
-        if (!duration) return result;
+        if (!duration) {
+            return result;
+        }
         let pr = durationParser.parse(duration, referenceDate);
-        if (!pr) return result;
+        if (!pr) {
+            return result;
+        }
         let match = RegExpUtility.getMatches(unitRegex, source).pop();
-        if (!match) return result;
+        if (!match) {
+            return result;
+        }
         let afterStr = source.substr(duration.start + duration.length);
         let beforeStr = source.substr(0, duration.start);
         let srcUnit = match.groups('unit').value;
@@ -113,14 +123,18 @@ export class AgoLaterUtil {
             .replace('P', '')
             .replace('T', '');
         let num = Number.parseInt(numStr, 10);
-        if (!num) return result;
+        if (!num) {
+            return result;
+        }
         return AgoLaterUtil.getAgoLaterResult(pr, num, unitMap, srcUnit, afterStr, beforeStr, referenceDate, utilityConfiguration, mode);
     }
 
     static getAgoLaterResult(durationParseResult: DateTimeParseResult, num: number, unitMap: ReadonlyMap<string, string>, srcUnit: string, afterStr: string, beforeStr: string, referenceDate: Date, utilityConfiguration: IDateTimeUtilityConfiguration, mode: AgoLaterMode) {
         let result = new DateTimeResolutionResult();
         let unitStr = unitMap.get(srcUnit);
-        if (!unitStr) return result;
+        if (!unitStr) {
+            return result;
+        }
         let numStr = num.toString();
         let containsAgo = MatchingUtil.containsAgoLaterIndex(afterStr, utilityConfiguration.agoRegex);
         let containsLaterOrIn = MatchingUtil.containsAgoLaterIndex(afterStr, utilityConfiguration.laterRegex) || MatchingUtil.containsInIndex(beforeStr, utilityConfiguration.inConnectorRegex);
@@ -153,7 +167,7 @@ export class AgoLaterUtil {
             case 'S': value.setSeconds(referenceDate.getSeconds() + (num * swift)); break;
             default: return result;
         }
-        result.timex = mode === AgoLaterMode.Date ? FormatUtil.luisDateFromDate(value) : FormatUtil.luisDateTime(value);
+        result.timex = mode === AgoLaterMode.Date ? DateTimeFormatUtil.luisDateFromDate(value) : DateTimeFormatUtil.luisDateTime(value);
         result.futureValue = value;
         result.pastValue = value;
         result.success = true;
@@ -171,7 +185,7 @@ export class MatchingUtil {
         let result: MatchedIndex = { matched: false, index: -1 };
         let referencedMatches = RegExpUtility.getMatches(regex, source.trim().toLowerCase());
         if (referencedMatches && referencedMatches.length > 0 && referencedMatches[0].index === 0) {
-            result.index = source.toLowerCase().lastIndexOf(referencedMatches[0].value) + referencedMatches[0].length;
+            result.index = source.toLowerCase().indexOf(referencedMatches[0].value) + referencedMatches[0].length;
             result.matched = true;
         }
         return result;
@@ -196,7 +210,7 @@ export class MatchingUtil {
     }
 }
 
-export class FormatUtil {
+export class DateTimeFormatUtil {
     public static readonly HourTimexRegex = RegExpUtility.getSafeRegExp(String.raw`(?<!P)T\d{2}`, "gis");
 
     // Emulates .NET ToString("D{size}")
@@ -208,54 +222,55 @@ export class FormatUtil {
     public static luisDate(year: number, month: number, day: number): string {
         if (year === -1) {
             if (month === -1) {
-                return new Array("XXXX", "XX", FormatUtil.toString(day, 2)).join("-");
+                return ["XXXX", "XX", DateTimeFormatUtil.toString(day, 2)].join("-");
             }
 
-            return new Array("XXXX", FormatUtil.toString(month + 1, 2), FormatUtil.toString(day, 2)).join("-");
+            return ["XXXX", DateTimeFormatUtil.toString(month + 1, 2), DateTimeFormatUtil.toString(day, 2)].join("-");
         }
 
-        return new Array(FormatUtil.toString(year, 4), FormatUtil.toString(month + 1, 2), FormatUtil.toString(day, 2)).join("-");
+        return [DateTimeFormatUtil.toString(year, 4), DateTimeFormatUtil.toString(month + 1, 2), DateTimeFormatUtil.toString(day, 2)].join("-");
     }
 
     public static luisDateFromDate(date: Date): string {
-        return FormatUtil.luisDate(date.getFullYear(), date.getMonth(), date.getDate());
+        return DateTimeFormatUtil.luisDate(date.getFullYear(), date.getMonth(), date.getDate());
     }
 
     public static luisTime(hour: number, min: number, second: number): string {
-        return new Array(FormatUtil.toString(hour, 2), FormatUtil.toString(min, 2), FormatUtil.toString(second, 2)).join(":");
+        return [DateTimeFormatUtil.toString(hour, 2), DateTimeFormatUtil.toString(min, 2), DateTimeFormatUtil.toString(second, 2)].join(":");
     }
 
     public static luisTimeFromDate(time: Date): string {
-        return FormatUtil.luisTime(time.getHours(), time.getMinutes(), time.getSeconds());
+        return DateTimeFormatUtil.luisTime(time.getHours(), time.getMinutes(), time.getSeconds());
     }
 
     public static luisDateTime(time: Date): string {
-        return `${FormatUtil.luisDateFromDate(time)}T${FormatUtil.luisTimeFromDate(time)}`;
+        return `${DateTimeFormatUtil.luisDateFromDate(time)}T${DateTimeFormatUtil.luisTimeFromDate(time)}`;
     }
 
     public static formatDate(date: Date): string {
-        return new Array(FormatUtil.toString(date.getFullYear(), 4),
-            FormatUtil.toString(date.getMonth() + 1, 2),
-            FormatUtil.toString(date.getDate(), 2)).join("-");
+        return [DateTimeFormatUtil.toString(date.getFullYear(), 4),
+        DateTimeFormatUtil.toString(date.getMonth() + 1, 2),
+        DateTimeFormatUtil.toString(date.getDate(), 2)].join("-");
     }
 
     public static formatTime(time: Date) {
-        return new Array(FormatUtil.toString(time.getHours(), 2),
-            FormatUtil.toString(time.getMinutes(), 2),
-            FormatUtil.toString(time.getSeconds(), 2)).join(":");
+        return [DateTimeFormatUtil.toString(time.getHours(), 2),
+        DateTimeFormatUtil.toString(time.getMinutes(), 2),
+        DateTimeFormatUtil.toString(time.getSeconds(), 2)].join(":");
     }
 
     public static formatDateTime(datetime: Date): string {
-        return `${FormatUtil.formatDate(datetime)} ${FormatUtil.formatTime(datetime)}`;
+        return `${DateTimeFormatUtil.formatDate(datetime)} ${DateTimeFormatUtil.formatTime(datetime)}`;
     }
 
     public static shortTime(hour: number, minute: number, second: number): string {
         if (minute < 0 && second < 0) {
-            return `T${FormatUtil.toString(hour, 2)}`;
-        } else if (second < 0) {
-            return `T${FormatUtil.toString(hour, 2)}:${FormatUtil.toString(minute, 2)}`;
+            return `T${DateTimeFormatUtil.toString(hour, 2)}`;
         }
-        return `T${FormatUtil.toString(hour, 2)}:${FormatUtil.toString(minute, 2)}:${FormatUtil.toString(second, 2)}`;
+        else if (second < 0) {
+            return `T${DateTimeFormatUtil.toString(hour, 2)}:${DateTimeFormatUtil.toString(minute, 2)}`;
+        }
+        return `T${DateTimeFormatUtil.toString(hour, 2)}:${DateTimeFormatUtil.toString(minute, 2)}:${DateTimeFormatUtil.toString(second, 2)}`;
     }
 
     public static luisTimeSpan(from: Date, to: Date): string {
@@ -269,7 +284,7 @@ export class FormatUtil {
         if (span > 0 && span < 60) {
             result = `${result}${span}M`;
         }
-        
+
         span = DateUtils.totalSeconds(from, to) - (span * 60);
         if (span > 0 && span < 60) {
             result = `${result}${span}S`;
@@ -279,11 +294,13 @@ export class FormatUtil {
     }
 
     public static allStringToPm(timeStr: string): string {
-        let matches = RegExpUtility.getMatches(FormatUtil.HourTimexRegex, timeStr);
+        let matches = RegExpUtility.getMatches(DateTimeFormatUtil.HourTimexRegex, timeStr);
         let split = Array<string>();
         let lastPos = 0;
         matches.forEach(match => {
-            if (lastPos !== match.index) split.push(timeStr.substring(lastPos, match.index));
+            if (lastPos !== match.index) {
+                split.push(timeStr.substring(lastPos, match.index));
+            }
             split.push(timeStr.substring(match.index, match.index + match.length));
             lastPos = match.index + match.length;
         });
@@ -293,8 +310,8 @@ export class FormatUtil {
         }
 
         for (let i = 0; i < split.length; i += 1) {
-            if (RegExpUtility.getMatches(FormatUtil.HourTimexRegex, split[i]).length > 0) {
-                split[i] = FormatUtil.toPm(split[i]);
+            if (RegExpUtility.getMatches(DateTimeFormatUtil.HourTimexRegex, split[i]).length > 0) {
+                split[i] = DateTimeFormatUtil.toPm(split[i]);
             }
         }
 
@@ -311,7 +328,7 @@ export class FormatUtil {
         let split = timeStr.split(':');
         let hour = parseInt(split[0], 10);
         hour = (hour === 12) ? 0 : hour + 12;
-        split[0] = FormatUtil.toString(hour, 2);
+        split[0] = DateTimeFormatUtil.toString(hour, 2);
 
         return (hasT ? "T" : "") + split.join(":");
     }
@@ -331,10 +348,22 @@ export class DateTimeResolutionResult {
     pastResolution: StringMap;
     futureValue: any;
     pastValue: any;
-    subDateTimeEntities: Array<any>;
+    subDateTimeEntities: any[];
 
     constructor() {
         this.success = false;
+    }
+}
+
+export class TimeOfDayResolutionResult {
+    timeX: string;
+    beginHour: number;
+    endHour: number;
+    endMin: number;
+
+    constructor() {
+        this.timeX = null;
+        this.beginHour = this.endHour = this.endMin = 0;
     }
 }
 
@@ -357,8 +386,12 @@ export class DateUtils {
     static next(from: Date, dayOfWeek: DayOfWeek): Date {
         let start = from.getDay();
         let target = dayOfWeek;
-        if (start === 0) start = 7;
-        if (target === 0) target = 7;
+        if (start === 0) {
+            start = 7;
+        }
+        if (target === 0) {
+            target = 7;
+        }
         let result = new Date(from);
         result.setDate(from.getDate() + target - start + 7);
         return result;
@@ -367,8 +400,12 @@ export class DateUtils {
     static this(from: Date, dayOfWeek: DayOfWeek): Date {
         let start = from.getDay();
         let target = dayOfWeek;
-        if (start === 0) start = 7;
-        if (target === 0) target = 7;
+        if (start === 0) {
+            start = 7;
+        }
+        if (target === 0) {
+            target = 7;
+        }
         let result = new Date(from);
         result.setDate(from.getDate() + target - start);
         return result;
@@ -377,8 +414,12 @@ export class DateUtils {
     static last(from: Date, dayOfWeek: DayOfWeek): Date {
         let start = from.getDay();
         let target = dayOfWeek;
-        if (start === 0) start = 7;
-        if (target === 0) target = 7;
+        if (start === 0) {
+            start = 7;
+        }
+        if (target === 0) {
+            target = 7;
+        }
         let result = new Date(from);
         result.setDate(from.getDate() + target - start - 7);
         return result;
@@ -462,20 +503,21 @@ export class DateUtils {
 
     static getWeekNumber(referenceDate: Date): { weekNo: number, year: number } {
         // Create a copy of this date object
-	    let target  = new Date(referenceDate.valueOf());
-    
+        let target = new Date(referenceDate.valueOf());
+
         // ISO week date weeks start on monday
         // so correct the day number
-        let dayNr   = (referenceDate.getDay() + 6) % 7;
-    
+        let dayNr = (referenceDate.getDay() + 6) % 7;
+
         // ISO 8601 states that week 1 is the week
         // with the first thursday of that year.
         // Set the target date to the thursday in the target week
         target.setDate(target.getDate() - dayNr + 3);
-    
+
         // Store the millisecond value of the target date
         let firstThursday = target.valueOf();
-    
+        let thursday = new Date(firstThursday);
+
         // Set the target to the first thursday of the year
         // First set the target to january first
         target.setMonth(0, 1);
@@ -483,11 +525,11 @@ export class DateUtils {
         if (target.getDay() !== 4) {
             target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
         }
-    
+
         // The weeknumber is the number of weeks between the 
         // first thursday of the year and the thursday in the target week
         let weekNo = 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000); // 604800000 = 7 * 24 * 3600 * 1000
-        return { weekNo: weekNo, year: referenceDate.getUTCFullYear() }
+        return { weekNo: weekNo, year: thursday.getFullYear() };
     }
 
     static minValue(): Date {
@@ -512,7 +554,7 @@ export class DateUtils {
         if (month >= 12) {
             year += (month + 1) / 12;
             month %= 12;
-        }       
+        }
         return this.safeCreateFromMinValue(year, month, day);
     }
 
@@ -533,9 +575,11 @@ export class DateUtils {
         return Math.floor(diffDays / DateUtils.oneDay);
     }
 
-    private static validDays(year: number) { return [31, this.isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] }
+    private static validDays(year: number) {
+        return [31, this.isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    }
 
-    private static isValidDate(year: number, month: number, day: number): boolean {
+    static isValidDate(year: number, month: number, day: number): boolean {
         return year > 0 && year <= 9999
             && month >= 0 && month < 12
             && day > 0 && day <= this.validDays(year)[month];
@@ -545,5 +589,58 @@ export class DateUtils {
         return hour >= 0 && hour < 24
             && minute >= 0 && minute < 60
             && second >= 0 && minute < 60;
+    }
+}
+
+export class TimexUtil {
+    public static parseTimeOfDay(tod: string): TimeOfDayResolutionResult {
+        let result = new TimeOfDayResolutionResult();
+        switch (tod) {
+            case Constants.EarlyMorning:
+                result.timeX = Constants.EarlyMorning;
+                result.beginHour = 4;
+                result.endHour = 8;
+                break;
+            case Constants.Morning:
+                result.timeX = Constants.Morning;
+                result.beginHour = 8;
+                result.endHour = 12;
+                break;
+            case Constants.MidDay:
+                result.timeX = Constants.MidDay;
+                result.beginHour = 11;
+                result.endHour = 13;
+                break;
+            case Constants.Afternoon:
+                result.timeX = Constants.Afternoon;
+                result.beginHour = 12;
+                result.endHour = 16;
+                break;
+            case Constants.Evening:
+                result.timeX = Constants.Evening;
+                result.beginHour = 16;
+                result.endHour = 20;
+                break;
+            case Constants.Daytime:
+                result.timeX = Constants.Daytime;
+                result.beginHour = 8;
+                result.endHour = 18;
+                break;
+            case Constants.BusinessHour:
+                result.timeX = Constants.BusinessHour;
+                result.beginHour = 8;
+                result.endHour = 18;
+                break;
+            case Constants.Night:
+                result.timeX = Constants.Night;
+                result.beginHour = 20;
+                result.endHour = 23;
+                result.endMin = 59;
+                break;
+            default:
+                break;
+        }
+
+        return result;
     }
 }

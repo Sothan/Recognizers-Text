@@ -1,10 +1,14 @@
-﻿using DateObject = System.DateTime;
+﻿using Microsoft.Recognizers.Text.Utilities;
+using DateObject = System.DateTime;
 
 namespace Microsoft.Recognizers.Text.DateTime.German
 {
     public class TimeParser : BaseTimeParser
     {
-        public TimeParser(ITimeParserConfiguration configuration) : base(configuration) { }
+        public TimeParser(ITimeParserConfiguration configuration)
+            : base(configuration)
+        {
+        }
 
         protected override DateTimeResolutionResult InternalParse(string text, DateObject referenceTime)
         {
@@ -13,6 +17,7 @@ namespace Microsoft.Recognizers.Text.DateTime.German
             {
                 innerResult = ParseIsh(text, referenceTime);
             }
+
             return innerResult;
         }
 
@@ -20,10 +25,10 @@ namespace Microsoft.Recognizers.Text.DateTime.German
         private DateTimeResolutionResult ParseIsh(string text, DateObject referenceTime)
         {
             var ret = new DateTimeResolutionResult();
-            var trimedText = text.ToLowerInvariant().Trim();
 
-            var match = GermanTimeExtractorConfiguration.IshRegex.Match(trimedText);
-            if (match.Success && match.Length == trimedText.Length)
+            var match = GermanTimeExtractorConfiguration.IshRegex.MatchExact(text, trim: true);
+
+            if (match.Success)
             {
                 var hourStr = match.Groups[Constants.HourGroupName].Value;
                 var hour = Constants.HalfDayHourCount;

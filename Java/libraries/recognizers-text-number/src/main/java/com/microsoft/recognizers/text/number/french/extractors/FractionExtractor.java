@@ -1,8 +1,10 @@
 package com.microsoft.recognizers.text.number.french.extractors;
 
 import com.microsoft.recognizers.text.number.Constants;
+import com.microsoft.recognizers.text.number.NumberMode;
 import com.microsoft.recognizers.text.number.extractors.BaseNumberExtractor;
 import com.microsoft.recognizers.text.number.resources.FrenchNumeric;
+import com.microsoft.recognizers.text.utilities.RegExpUtility;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,13 +24,18 @@ public class FractionExtractor extends BaseNumberExtractor {
         return Constants.SYS_NUM_FRACTION;
     }
 
-    public FractionExtractor() {
+    public FractionExtractor(NumberMode mode) {
+
         HashMap<Pattern, String> builder = new HashMap<>();
-        builder.put(Pattern.compile(FrenchNumeric.FractionNotationWithSpacesRegex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS), "FracNum");
-        builder.put(Pattern.compile(FrenchNumeric.FractionNotationRegex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS), "FracNum");
-        builder.put(Pattern.compile(FrenchNumeric.FractionNounRegex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS), "FracFr");
-        builder.put(Pattern.compile(FrenchNumeric.FractionNounWithArticleRegex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS), "FracFr");
-        builder.put(Pattern.compile(FrenchNumeric.FractionPrepositionRegex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS), "FracFr");
+
+        builder.put(RegExpUtility.getSafeLookbehindRegExp(FrenchNumeric.FractionNotationWithSpacesRegex, Pattern.UNICODE_CHARACTER_CLASS), "FracNum");
+        builder.put(RegExpUtility.getSafeLookbehindRegExp(FrenchNumeric.FractionNotationRegex, Pattern.UNICODE_CHARACTER_CLASS), "FracNum");
+        builder.put(RegExpUtility.getSafeLookbehindRegExp(FrenchNumeric.FractionNounRegex, Pattern.UNICODE_CHARACTER_CLASS), "FracFr");
+        builder.put(RegExpUtility.getSafeLookbehindRegExp(FrenchNumeric.FractionNounWithArticleRegex, Pattern.UNICODE_CHARACTER_CLASS), "FracFr");
+        if (mode != NumberMode.Unit) {
+            builder.put(RegExpUtility.getSafeLookbehindRegExp(FrenchNumeric.FractionPrepositionRegex, Pattern.UNICODE_CHARACTER_CLASS), "FracFr");
+        }
+
         this.regexes = Collections.unmodifiableMap(builder);
     }
 }

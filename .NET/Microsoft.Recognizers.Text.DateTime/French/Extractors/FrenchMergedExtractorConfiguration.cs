@@ -1,52 +1,76 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
+using Microsoft.Recognizers.Definitions;
 using Microsoft.Recognizers.Definitions.French;
 using Microsoft.Recognizers.Text.Matcher;
 
 namespace Microsoft.Recognizers.Text.DateTime.French
 {
-    public class FrenchMergedExtractorConfiguration : BaseOptionsConfiguration, IMergedExtractorConfiguration
+    public class FrenchMergedExtractorConfiguration : BaseDateTimeOptionsConfiguration, IMergedExtractorConfiguration
     {
+        // avant - 'before'
         public static readonly Regex BeforeRegex =
-            new Regex(DateTimeDefinitions.BeforeRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline); // avant - 'before'
+            new Regex(DateTimeDefinitions.BeforeRegex, RegexFlags);
 
+        // ensuite/puis are for adverbs, i.e 'i ate and then i walked', so we'll use apres
         public static readonly Regex AfterRegex =
-            new Regex(DateTimeDefinitions.AfterRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline); // ensuite/puis are for adverbs, i.e 'i ate and then i walked', so we'll use apres 
+            new Regex(DateTimeDefinitions.AfterRegex, RegexFlags);
 
         public static readonly Regex SinceRegex =
-            new Regex(DateTimeDefinitions.SinceRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.SinceRegex, RegexFlags);
 
         public static readonly Regex AroundRegex =
-            new Regex(DateTimeDefinitions.AroundRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.AroundRegex, RegexFlags);
 
+        public static readonly Regex EqualRegex =
+            new Regex(BaseDateTime.EqualRegex, RegexFlags);
+
+        // 'Je vais du lundi au mecredi' - I will go from monday to weds
         public static readonly Regex FromToRegex =
-            new Regex(DateTimeDefinitions.FromToRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline); // 'Je vais du lundi au mecredi' - I will go from monday to weds
+            new Regex(DateTimeDefinitions.FromToRegex, RegexFlags);
 
         public static readonly Regex SingleAmbiguousMonthRegex =
-            new Regex(DateTimeDefinitions.SingleAmbiguousMonthRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.SingleAmbiguousMonthRegex, RegexFlags);
 
         public static readonly Regex PrepositionSuffixRegex =
-            new Regex(DateTimeDefinitions.PrepositionSuffixRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.PrepositionSuffixRegex, RegexFlags);
+
+        public static readonly Regex AmbiguousRangeModifierPrefix =
+            new Regex(DateTimeDefinitions.AmbiguousRangeModifierPrefix, RegexFlags);
 
         public static readonly Regex NumberEndingPattern =
-            new Regex(DateTimeDefinitions.NumberEndingPattern,
-                RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.NumberEndingPattern, RegexFlags);
 
-        public static readonly Regex YearAfterRegex =
-            new Regex(DateTimeDefinitions.YearAfterRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex SuffixAfterRegex =
+            new Regex(DateTimeDefinitions.SuffixAfterRegex, RegexFlags);
 
         public static readonly Regex UnspecificDatePeriodRegex =
-            new Regex(DateTimeDefinitions.UnspecificDatePeriodRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.UnspecificDatePeriodRegex, RegexFlags);
 
-        public static readonly Regex[] FilterWordRegexList =
-        {
-
-        };
+        public static readonly Regex[] TermFilterRegexes = { };
 
         public static readonly StringMatcher SuperfluousWordMatcher = new StringMatcher();
 
-        public IDateTimeExtractor DateExtractor { get; }
+        private const RegexOptions RegexFlags = RegexOptions.Singleline | RegexOptions.ExplicitCapture;
+
+        public FrenchMergedExtractorConfiguration(IDateTimeOptionsConfiguration config)
+            : base(config)
+        {
+            DateExtractor = new BaseDateExtractor(new FrenchDateExtractorConfiguration(this));
+            TimeExtractor = new BaseTimeExtractor(new FrenchTimeExtractorConfiguration(this));
+            DateTimeExtractor = new BaseDateTimeExtractor(new FrenchDateTimeExtractorConfiguration(this));
+            DatePeriodExtractor = new BaseDatePeriodExtractor(new FrenchDatePeriodExtractorConfiguration(this));
+            TimePeriodExtractor = new BaseTimePeriodExtractor(new FrenchTimePeriodExtractorConfiguration(this));
+            DateTimePeriodExtractor = new BaseDateTimePeriodExtractor(new FrenchDateTimePeriodExtractorConfiguration(this));
+            DurationExtractor = new BaseDurationExtractor(new FrenchDurationExtractorConfiguration(this));
+            SetExtractor = new BaseSetExtractor(new FrenchSetExtractorConfiguration(this));
+            HolidayExtractor = new BaseHolidayExtractor(new FrenchHolidayExtractorConfiguration(this));
+            TimeZoneExtractor = new BaseTimeZoneExtractor(new FrenchTimeZoneExtractorConfiguration(this));
+            DateTimeAltExtractor = new BaseDateTimeAltExtractor(new FrenchDateTimeAltExtractorConfiguration(this));
+            IntegerExtractor = Number.French.IntegerExtractor.GetInstance();
+        }
+
+        public IDateExtractor DateExtractor { get; }
 
         public IDateTimeExtractor TimeExtractor { get; }
 
@@ -72,34 +96,38 @@ namespace Microsoft.Recognizers.Text.DateTime.French
 
         public Dictionary<Regex, Regex> AmbiguityFiltersDict { get; } = null;
 
-        public FrenchMergedExtractorConfiguration(DateTimeOptions options) : base(options)
-        {
-
-            DateExtractor = new BaseDateExtractor(new FrenchDateExtractorConfiguration(this));
-            TimeExtractor = new BaseTimeExtractor(new FrenchTimeExtractorConfiguration(this));
-            DateTimeExtractor = new BaseDateTimeExtractor(new FrenchDateTimeExtractorConfiguration(this));
-            DatePeriodExtractor = new BaseDatePeriodExtractor(new FrenchDatePeriodExtractorConfiguration(this));
-            TimePeriodExtractor = new BaseTimePeriodExtractor(new FrenchTimePeriodExtractorConfiguration(this));
-            DateTimePeriodExtractor = new BaseDateTimePeriodExtractor(new FrenchDateTimePeriodExtractorConfiguration(this));
-            DurationExtractor = new BaseDurationExtractor(new FrenchDurationExtractorConfiguration(this));
-            SetExtractor = new BaseSetExtractor(new FrenchSetExtractorConfiguration(this));
-            HolidayExtractor = new BaseHolidayExtractor(new FrenchHolidayExtractorConfiguration(this));
-            TimeZoneExtractor = new BaseTimeZoneExtractor(new FrenchTimeZoneExtractorConfiguration(this));
-            DateTimeAltExtractor = new BaseDateTimeAltExtractor(new FrenchDateTimeAltExtractorConfiguration(this));
-            IntegerExtractor = new Number.French.IntegerExtractor();
-        }
-
         Regex IMergedExtractorConfiguration.AfterRegex => AfterRegex;
+
         Regex IMergedExtractorConfiguration.BeforeRegex => BeforeRegex;
+
         Regex IMergedExtractorConfiguration.SinceRegex => SinceRegex;
+
         Regex IMergedExtractorConfiguration.AroundRegex => AroundRegex;
+
+        Regex IMergedExtractorConfiguration.EqualRegex => EqualRegex;
+
         Regex IMergedExtractorConfiguration.FromToRegex => FromToRegex;
+
         Regex IMergedExtractorConfiguration.SingleAmbiguousMonthRegex => SingleAmbiguousMonthRegex;
+
         Regex IMergedExtractorConfiguration.PrepositionSuffixRegex => PrepositionSuffixRegex;
+
+        Regex IMergedExtractorConfiguration.AmbiguousRangeModifierPrefix => null;
+
+        Regex IMergedExtractorConfiguration.PotentialAmbiguousRangeRegex => null;
+
         Regex IMergedExtractorConfiguration.NumberEndingPattern => NumberEndingPattern;
-        Regex IMergedExtractorConfiguration.YearAfterRegex => YearAfterRegex;
+
+        Regex IMergedExtractorConfiguration.SuffixAfterRegex => SuffixAfterRegex;
+
         Regex IMergedExtractorConfiguration.UnspecificDatePeriodRegex => UnspecificDatePeriodRegex;
-        IEnumerable<Regex> IMergedExtractorConfiguration.FilterWordRegexList => FilterWordRegexList;
+
+        Regex IMergedExtractorConfiguration.UnspecificTimePeriodRegex => null;
+
+        public Regex FailFastRegex { get; } = null;
+
+        IEnumerable<Regex> IMergedExtractorConfiguration.TermFilterRegexes => TermFilterRegexes;
+
         StringMatcher IMergedExtractorConfiguration.SuperfluousWordMatcher => SuperfluousWordMatcher;
     }
 }

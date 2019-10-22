@@ -7,7 +7,7 @@ import escapeRegExp = require("lodash.escaperegexp");
 export interface INumberWithUnitExtractorConfiguration {
     readonly suffixList: ReadonlyMap<string, string>;
     readonly prefixList: ReadonlyMap<string, string>;
-    readonly ambiguousUnitList: ReadonlyArray<string>;
+    readonly ambiguousUnitList: readonly string[];
 
     readonly extractType: string;
     readonly cultureInfo: CultureInfo;
@@ -16,6 +16,8 @@ export interface INumberWithUnitExtractorConfiguration {
     readonly buildSuffix: string;
     readonly connectorToken: string;
     readonly compoundUnitConnectorRegex: RegExp;
+    readonly nonUnitRegex: RegExp;
+    readonly ambiguousUnitNumberMultiplierRegex: RegExp;
 }
 
 export class NumberWithUnitExtractor implements IExtractor {
@@ -29,7 +31,8 @@ export class NumberWithUnitExtractor implements IExtractor {
         this.config = config;
         if (this.config.suffixList && this.config.suffixList.size > 0) {
             this.suffixRegexes = this.buildRegexFromSet(Array.from(this.config.suffixList.values()));
-        } else {
+        }
+        else {
             this.suffixRegexes = new Set<RegExp>(); // empty
         }
 
@@ -41,18 +44,19 @@ export class NumberWithUnitExtractor implements IExtractor {
                 maxLength = maxLength >= len ? maxLength : len;
             });
 
-            // 2 is the maxium length of spaces.
+            // 2 is the maximum length of spaces.
             this.maxPrefixMatchLen = maxLength + 2;
 
             this.prefixRegexes = this.buildRegexFromSet(Array.from(this.config.prefixList.values()));
-        } else {
+        }
+        else {
             this.prefixRegexes = new Set<RegExp>(); // empty
         }
 
         this.separateRegex = this.buildSeparateRegexFromSet();
     }
 
-    extract(source: string): Array<ExtractResult> {
+    extract(source: string): ExtractResult[] {
         if (!this.preCheckStr(source)) {
             return new Array<ExtractResult>();
         }
@@ -62,6 +66,20 @@ export class NumberWithUnitExtractor implements IExtractor {
         let numbers = this.config.unitNumExtractor.extract(source);
         let result = new Array<ExtractResult>();
         let sourceLen = source.length;
+
+        /* Special case for cases where number multipliers clash with unit */
+        let ambiguousMultiplierRegex = this.config.ambiguousUnitNumberMultiplierRegex;
+        if (ambiguousMultiplierRegex !== null) {
+
+            numbers.forEach(extNumber => {
+                let match = RegExpUtility.getMatches(ambiguousMultiplierRegex, extNumber.text);
+                if (match.length === 1) {
+                    let newLength = extNumber.length - match[0].length;
+                    extNumber.text = extNumber.text.substring(0, newLength);
+                    extNumber.length = newLength;
+                }
+            });
+        }
 
         /* Mix prefix and numbers, make up a prefix-number combination */
         if (this.maxPrefixMatchLen !== 0) {
@@ -110,7 +128,7 @@ export class NumberWithUnitExtractor implements IExtractor {
                 continue;
             }
 
-            let start = num.start
+            let start = num.start;
             let length = num.length;
             let maxFindLen = sourceLen - start - length;
 
@@ -154,9 +172,25 @@ export class NumberWithUnitExtractor implements IExtractor {
                         er.length += prefixUnit.offset;
                         er.text = prefixUnit.unitString + er.text;
                     }
+
                     /* Relative position will be used in Parser */
                     num.start = start - er.start;
                     er.data = num;
+
+                    let isNotUnit = false;
+                    if (er.type === Constants.SYS_UNIT_DIMENSION) {
+                        let nonUnitMatch = RegExpUtility.getMatches(this.config.nonUnitRegex, source);
+
+                        nonUnitMatch.forEach(match => {
+                            if (er.start >= match.index && er.start + er.length <= match.index + match.length) {
+                                isNotUnit = true;
+                            }
+                        });
+                    }
+
+                    if (isNotUnit) {
+                        continue;
+                    }
 
                     result.push(er);
                     continue;
@@ -195,7 +229,7 @@ export class NumberWithUnitExtractor implements IExtractor {
     }
 
 
-    protected extractSeparateUnits(source: string, numDependResults: Array<ExtractResult>): void {
+    protected extractSeparateUnits(source: string, numDependResults: ExtractResult[]): void {
         // Default is false
         let matchResult = new Array<boolean>(source.length);
         numDependResults.forEach(numDependResult => {
@@ -219,25 +253,41 @@ export class NumberWithUnitExtractor implements IExtractor {
                     for (let j = 0; j < i; j++) {
                         matchResult[j] = true;
                     }
-                    numDependResults.push({
-                        start: match.index,
-                        length: match.length,
-                        text: match.value,
-                        type: this.config.extractType,
-                        data: null
-                    } as ExtractResult);
+
+                    let isNotUnit = false;
+                    if (match.value === Constants.AMBIGUOUS_TIME_TERM) {
+                        let nonUnitMatch = RegExpUtility.getMatches(this.config.nonUnitRegex, source);
+
+                        nonUnitMatch.forEach(time => {
+                            if (this.DimensionInsideTime(match, time)) {
+                                isNotUnit = true;
+                            }
+                        });
+                    }
+
+                    if (isNotUnit === false) {
+                        numDependResults.push({
+                            start: match.index,
+                            length: match.length,
+                            text: match.value,
+                            type: this.config.extractType,
+                            data: null
+                        } as ExtractResult);
+                    }
                 }
             });
         }
     }
 
-    protected buildRegexFromSet(collection: Array<string>, ignoreCase: boolean = true): Set<RegExp> {
+    protected buildRegexFromSet(collection: string[], ignoreCase: boolean = true): Set<RegExp> {
         return new Set<RegExp>(
             collection.map(regexString => {
                 let regexTokens = regexString.split('|').map(escapeRegExp);
                 let pattern = `${this.config.buildPrefix}(${regexTokens.join('|')})${this.config.buildSuffix}`;
                 let options = "gs";
-                if (ignoreCase) options += "i";
+                if (ignoreCase) {
+                    options += "i";
+                }
                 return RegExpUtility.getSafeRegExp(pattern, options);
             }));
     }
@@ -275,65 +325,39 @@ export class NumberWithUnitExtractor implements IExtractor {
         }
 
         // Sort SeparateWords using descending length.
-        regexTokens = regexTokens.sort(this.dinoComparer);
+        regexTokens = regexTokens.sort(this.stringComparer);
 
         let pattern = `${this.config.buildPrefix}(${regexTokens.join('|')})${this.config.buildSuffix}`;
         let options = "gs";
-        if (ignoreCase) options += "i";
+        if (ignoreCase) {
+            options += "i";
+        }
         return RegExpUtility.getSafeRegExp(pattern, options);
     }
 
-    protected dinoComparer(x: string, y: string): number {
-        if (x === null) {
-            if (y === null) {
-                // If x is null and y is null, they're
-                // equal.
-                return 0;
-            }
-            else {
-                // If x is null and y is not null, y
-                // is greater.
-                return 1;
-            }
+    protected stringComparer(stringA: string, stringB: string): number {
+        if (!stringA && !stringB) {
+            return 0;
         }
         else {
-            // If x is not null...
-            //
-            if (y === null)
-            // ...and y is null, x is greater.
-            {
+            if (!stringA) {
+                return 1;
+            }
+            if (!stringB) {
                 return -1;
             }
-            else {
-                // ...and y is not null, compare the
-                // lengths of the two strings.
-                //
-                let retval = y.length - x.length;
-
-                if (retval !== 0) {
-                    // If the strings are not of equal length,
-                    // the longer string is greater.
-                    //
-                    return retval;
-                }
-                else {
-                    // If the strings are of equal length,
-                    // sort them with ordinary string comparison.
-                    //
-                    let xl = x.toLowerCase();
-                    let yl = y.toLowerCase();
-                    if (xl < yl) {
-                        return -1;
-                    }
-
-                    if (xl > yl) {
-                        return 1;
-                    }
-
-                    return 0;
-                }
-            }
+            return stringB.localeCompare(stringA);
         }
+    }
+
+
+    private DimensionInsideTime(dimension: Match, time: Match): boolean {
+        let isSubMatch = false;
+        if (dimension.index >= time.index && dimension.index + dimension.length <= time.index + time.length) {
+            isSubMatch = true;
+        }
+
+        return isSubMatch;
     }
 }
 
@@ -346,19 +370,20 @@ export class BaseMergedUnitExtractor implements IExtractor {
         this.innerExtractor = new NumberWithUnitExtractor(config);
     }
 
-    extract(source: string): Array<ExtractResult> {
+    extract(source: string): ExtractResult[] {
         let result = new Array<ExtractResult>();
 
         if (this.config.extractType === Constants.SYS_UNIT_CURRENCY) {
             result = this.mergeCompoundUnits(source);
-        } else {
+        }
+        else {
             result = this.innerExtractor.extract(source);
         }
 
         return result;
     }
 
-    private mergeCompoundUnits(source: string): Array<ExtractResult> {
+    private mergeCompoundUnits(source: string): ExtractResult[] {
         let result = new Array<ExtractResult>();
         let ers = this.innerExtractor.extract(source);
         this.MergePureNumber(source, ers);
@@ -371,7 +396,7 @@ export class BaseMergedUnitExtractor implements IExtractor {
             }
 
             if (ers[i].data != null && (ers[i].data as ExtractResult).data != null && !ers[i].data.data.startsWith('Integer')) {
-                groups[i + 1] = groups[i] + 1
+                groups[i + 1] = groups[i] + 1;
                 continue;
             }
 
@@ -379,7 +404,7 @@ export class BaseMergedUnitExtractor implements IExtractor {
             let middleEnd = ers[i + 1].start;
 
             let middleStr = source.substring(middleBegin, middleEnd).trim().toLowerCase();
-            
+
             // Separated by whitespace
             if (StringUtility.isNullOrEmpty(middleStr)) {
                 groups[i + 1] = groups[i];
@@ -390,7 +415,8 @@ export class BaseMergedUnitExtractor implements IExtractor {
             let match = RegExpUtility.getMatches(this.config.compoundUnitConnectorRegex, middleStr).pop();
             if (match && match.index === 0 && match.length === middleStr.length) {
                 groups[i + 1] = groups[i];
-            } else {
+            }
+            else {
                 groups[i + 1] = groups[i] + 1;
             }
         }
@@ -412,7 +438,7 @@ export class BaseMergedUnitExtractor implements IExtractor {
             }
 
             // Reduce extract results in same group
-            if (i + 1 < ers.length && groups[i  + 1] === groups[i]) {
+            if (i + 1 < ers.length && groups[i + 1] === groups[i]) {
                 let group = groups[i];
 
                 let periodBegin = result[group].start;
@@ -426,7 +452,7 @@ export class BaseMergedUnitExtractor implements IExtractor {
         }
 
         for (let i = 0; i < result.length; i++) {
-            let innerData: Array<ExtractResult> = result[i].data;
+            let innerData: ExtractResult[] = result[i].data;
             if (innerData && innerData.length === 1) {
                 result[i] = innerData[0];
             }
@@ -437,13 +463,13 @@ export class BaseMergedUnitExtractor implements IExtractor {
         return result;
     }
 
-    private MergePureNumber(source: string, result: Array<ExtractResult>) {
+    private MergePureNumber(source: string, result: ExtractResult[]) {
         let numErs = this.config.unitNumExtractor.extract(source);
         let unitNumbers = new Array<ExtractResult>();
         let i: number;
         let j: number;
         for (i = 0, j = 0; i < numErs.length; i++) {
-            let hasBehindExtraction: boolean = false;
+            let hasBehindExtraction = false;
             while (j < result.length && result[j].start + result[j].length < numErs[i].start) {
                 hasBehindExtraction = true;
                 j++;
@@ -481,7 +507,7 @@ export class BaseMergedUnitExtractor implements IExtractor {
 
             if (!overlap) {
                 result.push(extractResult);
-            } 
+            }
         });
 
         result.sort((x, y) => x.start - y.start);

@@ -1,11 +1,31 @@
-﻿using Microsoft.Recognizers.Definitions.Japanese;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.RegularExpressions;
+using Microsoft.Recognizers.Definitions.Japanese;
 
 namespace Microsoft.Recognizers.Text.Number.Japanese
 {
     public class JapaneseNumberRangeParserConfiguration : INumberRangeParserConfiguration
     {
+
+        private const RegexOptions RegexFlags = RegexOptions.Singleline | RegexOptions.ExplicitCapture;
+
+        public JapaneseNumberRangeParserConfiguration(INumberOptionsConfiguration config)
+        {
+            CultureInfo = new CultureInfo(config.Culture);
+
+            NumberExtractor = new NumberExtractor();
+            OrdinalExtractor = new OrdinalExtractor();
+
+            NumberParser = new BaseCJKNumberParser(new JapaneseNumberParserConfiguration(config));
+
+            MoreOrEqual = new Regex(NumbersDefinitions.MoreOrEqual, RegexFlags);
+            LessOrEqual = new Regex(NumbersDefinitions.LessOrEqual, RegexFlags);
+            MoreOrEqualSuffix = new Regex(NumbersDefinitions.MoreOrEqualSuffix, RegexFlags);
+            LessOrEqualSuffix = new Regex(NumbersDefinitions.LessOrEqualSuffix, RegexFlags);
+            MoreOrEqualSeparate = new Regex(NumbersDefinitions.OneNumberRangeMoreSeparateRegex, RegexFlags);
+            LessOrEqualSeparate = new Regex(NumbersDefinitions.OneNumberRangeLessSeparateRegex, RegexFlags);
+        }
+
         public CultureInfo CultureInfo { get; private set; }
 
         public IExtractor NumberExtractor { get; private set; }
@@ -25,24 +45,5 @@ namespace Microsoft.Recognizers.Text.Number.Japanese
         public Regex MoreOrEqualSeparate { get; private set; }
 
         public Regex LessOrEqualSeparate { get; private set; }
-
-        public JapaneseNumberRangeParserConfiguration() : this(new CultureInfo(Culture.Japanese))
-        {
-        }
-
-        public JapaneseNumberRangeParserConfiguration(CultureInfo ci)
-        {
-            CultureInfo = ci;
-
-            NumberExtractor = new NumberExtractor();
-            OrdinalExtractor = new OrdinalExtractor();
-            NumberParser = new BaseCJKNumberParser(new JapaneseNumberParserConfiguration());
-            MoreOrEqual = new Regex(NumbersDefinitions.MoreOrEqual, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            LessOrEqual = new Regex(NumbersDefinitions.LessOrEqual, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            MoreOrEqualSuffix = new Regex(NumbersDefinitions.MoreOrEqualSuffix, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            LessOrEqualSuffix = new Regex(NumbersDefinitions.LessOrEqualSuffix, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            MoreOrEqualSeparate = new Regex(NumbersDefinitions.OneNumberRangeMoreSeparateRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            LessOrEqualSeparate = new Regex(NumbersDefinitions.OneNumberRangeLessSeparateRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        }
     }
 }

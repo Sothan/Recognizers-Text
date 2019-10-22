@@ -1,9 +1,9 @@
-﻿// ReSharper disable InconsistentNaming
-
+﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Recognizers.Definitions;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
+    [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1310: CSharp.Naming : Field names must not contain underscores.", Justification = "Constant names are written in upper case so they can be readily distinguished from camel case variable names.")]
     public static class Constants
     {
         public const string SYS_DATETIME_DATE = "date";
@@ -17,6 +17,9 @@ namespace Microsoft.Recognizers.Text.DateTime
         public const string SYS_DATETIME_DATETIMEALT = "datetimealt";
         public const string SYS_DATETIME_TIMEZONE = "timezone";
 
+        // SourceEntity Types
+        public const string SYS_DATETIME_DATETIMEPOINT = "datetimepoint";
+
         // Model Name
         public const string MODEL_DATETIME = "datetime";
 
@@ -26,7 +29,7 @@ namespace Microsoft.Recognizers.Text.DateTime
         public const string MultipleDuration_DateTime = MultipleDuration_Prefix + "DateTime";
         public const string MultipleDuration_Date = MultipleDuration_Prefix + "Date";
         public const string MultipleDuration_Time = MultipleDuration_Prefix + "Time";
-        
+
         // DateTime Parse
         public const string Resolve = "resolve";
         public const string ResolveToPast = "resolveToPast";
@@ -39,14 +42,17 @@ namespace Microsoft.Recognizers.Text.DateTime
         public const string ContextType_AmPm = "AmPm";
         public const string SubType = "subType";
 
-        // Comment - internal tag used during entity processing, never exposed to users. 
+        // Comment - internal tag used during entity processing, never exposed to users.
         // Tags are filtered out in BaseMergedDateTimeParser DateTimeResolution()
         public const string Comment = "Comment";
+
         // AmPm time representation for time parser
         public const string Comment_AmPm = "ampm";
+
         // Prefix early/late for time parser
         public const string Comment_Early = "early";
         public const string Comment_Late = "late";
+
         // Parse week of date format
         public const string Comment_WeekOf = "WeekOf";
         public const string Comment_MonthOf = "MonthOf";
@@ -75,15 +81,6 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         public const string APPROX_MOD = "approx";
 
-        // Invalid year
-        public const int InvalidYear = int.MinValue;
-
-        public static readonly int MinYearNum = int.Parse(BaseDateTime.MinYearNum);
-        public static readonly int MaxYearNum = int.Parse(BaseDateTime.MaxYearNum);
-
-        public static readonly int MaxTwoDigitYearFutureNum = int.Parse(BaseDateTime.MaxTwoDigitYearFutureNum);
-        public static readonly int MinTwoDigitYearPastNum = int.Parse(BaseDateTime.MinTwoDigitYearPastNum);
-
         // These are some particular values for timezone recognition
         public const int InvalidOffsetValue = -10000;
         public const string UtcOffsetMinsKey = "utcOffsetMins";
@@ -94,14 +91,22 @@ namespace Microsoft.Recognizers.Text.DateTime
         public const int NegativeSign = -1;
 
         public const int TrimesterMonthCount = 3;
+        public const int QuarterCount = 4;
         public const int SemesterMonthCount = 6;
         public const int WeekDayCount = 7;
         public const int CenturyYearsCount = 100;
+        public const int MaxWeekOfMonth = 5;
+        public const int MaxMonth = 12;
+        public const int MinMonth = 1;
 
         // hours of one half day
         public const int HalfDayHourCount = 12;
+
         // hours of a half mid-day-duration
         public const int HalfMidDayDurationHourCount = 2;
+
+        // the length of four digits year, e.g., 2018
+        public const int FourDigitsYearLength = 4;
 
         public const string DefaultLanguageFallback_MDY = "MDY";
         public const string DefaultLanguageFallback_DMY = "DMY";
@@ -118,17 +123,71 @@ namespace Microsoft.Recognizers.Text.DateTime
         public const string SecondGroupName = "sec";
         public const string MinuteGroupName = "min";
         public const string HourGroupName = "hour";
+        public const string YearGroupName = "year";
         public const string TimeOfDayGroupName = "timeOfDay";
         public const string BusinessDayGroupName = "business";
+        public const string LeftAmPmGroupName = "leftDesc";
+        public const string RightAmPmGroupName = "rightDesc";
+        public const string MealTimeGroupName = "mealTime";
+
+        public const string DECADE_UNIT = "10Y";
+        public const string FORTNIGHT_UNIT = "2W";
 
         // Timex
-        public static readonly string[] DatePeriodTimexSplitter = { ",", "(", ")" };
         public const string TimexYear = "Y";
         public const string TimexMonth = "M";
         public const string TimexMonthFull = "MON";
         public const string TimexWeek = "W";
         public const string TimexDay = "D";
         public const string TimexBusinessDay = "BD";
+        public const string TimexWeekend = "WE";
+        public const string TimexHour = "H";
+        public const string TimexMinute = "M";
+        public const string TimexSecond = "S";
         public const char TimexFuzzy = 'X';
+        public const string TimexFuzzyYear = "XXXX";
+        public const string TimexFuzzyMonth = "XX";
+        public const string TimexFuzzyWeek = "WXX";
+        public const string TimexFuzzyDay = "XX";
+        public const string DateTimexConnector = "-";
+        public const string TimeTimexConnector = ":";
+        public const string GeneralPeriodPrefix = "P";
+        public const string TimeTimexPrefix = "T";
+
+        // Timex of TimeOfDay
+        public const string EarlyMorning = "TDA";
+        public const string Morning = "TMO";
+        public const string MidDay = "TMI";
+        public const string Afternoon = "TAF";
+        public const string Evening = "TEV";
+        public const string Daytime = "TDT";
+        public const string Night = "TNI";
+        public const string BusinessHour = "TBH";
+        public const string MealtimeBreakfast = "TMEB";
+        public const string MealtimeBrunch = "TMER";
+        public const string MealtimeLunch = "TMEL";
+        public const string MealtimeDinner = "TMED";
+
+        // Invalid year
+        public const int InvalidYear = int.MinValue;
+        public const int InvalidMonth = int.MinValue;
+        public const int InvalidDay = int.MinValue;
+        public const int InvalidHour = int.MinValue;
+        public const int InvalidMinute = int.MinValue;
+        public const int InvalidSecond = int.MinValue;
+
+        // Failed connector extraction
+        public const int INVALID_CONNECTOR_CODE = -1;
+
+        // Invalid year non-constant
+        public static readonly int MinYearNum = int.Parse(BaseDateTime.MinYearNum);
+        public static readonly int MaxYearNum = int.Parse(BaseDateTime.MaxYearNum);
+
+        public static readonly int MaxTwoDigitYearFutureNum = int.Parse(BaseDateTime.MaxTwoDigitYearFutureNum);
+        public static readonly int MinTwoDigitYearPastNum = int.Parse(BaseDateTime.MinTwoDigitYearPastNum);
+        public static readonly System.DateTime InvalidDate = default(System.DateTime);
+
+        // Timex non-constant
+        public static readonly string[] DatePeriodTimexSplitter = { ",", "(", ")" };
     }
 }

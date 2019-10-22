@@ -1,21 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using DateObject = System.DateTime;
-
 using Microsoft.Recognizers.Definitions;
-using Microsoft.Recognizers.Text.Number;
+using DateObject = System.DateTime;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
     public class BaseTimeExtractor : IDateTimeExtractor
     {
-        private static readonly string ExtractorName = Constants.SYS_DATETIME_TIME; // "Time";
+        public static readonly Regex HourRegex =
+            new Regex(BaseDateTime.HourRegex, RegexOptions.Singleline);
 
-        public static readonly Regex HourRegex = new Regex(BaseDateTime.HourRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex MinuteRegex =
+            new Regex(BaseDateTime.MinuteRegex, RegexOptions.Singleline);
 
-        public static readonly Regex MinuteRegex = new Regex(BaseDateTime.MinuteRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex SecondRegex =
+            new Regex(BaseDateTime.SecondRegex, RegexOptions.Singleline);
 
-        public static readonly Regex SecondRegex = new Regex(BaseDateTime.SecondRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        private const string ExtractorName = Constants.SYS_DATETIME_TIME; // "Time";
 
         private readonly ITimeExtractorConfiguration config;
 
@@ -41,36 +42,7 @@ namespace Microsoft.Recognizers.Text.DateTime
 
             if ((this.config.Options & DateTimeOptions.EnablePreview) != 0)
             {
-                timeErs = MergeTimeZones(timeErs, config.TimeZoneExtractor.Extract(text, reference), text);
-            }
-
-            return timeErs;
-        }
-
-        private List<ExtractResult> MergeTimeZones(List<ExtractResult> timeErs, List<ExtractResult> timeZoneErs, string text)
-        {
-            foreach (var er in timeErs)
-            {
-                foreach (var timeZoneEr in timeZoneErs)
-                {
-                    var begin = er.Start + er.Length;
-                    var end = timeZoneEr.Start;
-
-                    if (begin < end)
-                    {
-                        var gapText = text.Substring((int) begin, (int) (end - begin));
-
-                        if (string.IsNullOrWhiteSpace(gapText))
-                        {
-                            var newLength = (int) (timeZoneEr.Start + timeZoneEr.Length - er.Start);
-
-                            er.Text = text.Substring((int) er.Start, newLength);
-                            er.Length = newLength;
-                            er.Data = new KeyValuePair<string, ExtractResult>(Constants.SYS_DATETIME_TIMEZONE,
-                                timeZoneEr);
-                        }
-                    }
-                }
+                timeErs = TimeZoneUtility.MergeTimeZones(timeErs, config.TimeZoneExtractor.Extract(text, reference), text);
             }
 
             return timeErs;
@@ -78,21 +50,26 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         private List<Token> BasicRegexMatch(string text)
         {
-            var ret = new List<Token>();
+            var result = new List<Token>();
+
             foreach (var regex in this.config.TimeRegexList)
             {
                 var matches = regex.Matches(text);
+
                 foreach (Match match in matches)
                 {
-                    ret.Add(new Token(match.Index, match.Index + match.Length));
+                    result.Add(new Token(match.Index, match.Index + match.Length));
                 }
+
             }
-            return ret;
+
+            return result;
         }
 
         private List<Token> AtRegexMatch(string text)
         {
-            var ret = new List<Token>();
+            var result = new List<Token>();
+
             // handle "at 5", "at seven"
             if (this.config.AtRegex.IsMatch(text))
             {
@@ -104,15 +81,18 @@ namespace Microsoft.Recognizers.Text.DateTime
                     {
                         continue;
                     }
-                    ret.Add(new Token(match.Index, match.Index + match.Length));
+
+                    result.Add(new Token(match.Index, match.Index + match.Length));
                 }
             }
-            return ret;
+
+            return result;
         }
 
         private List<Token> BeforeAfterRegexMatch(string text)
         {
-            var ret = new List<Token>();
+            var result = new List<Token>();
+
             // only enabled in CalendarMode
             if ((this.config.Options & DateTimeOptions.CalendarMode) != 0)
             {
@@ -123,16 +103,18 @@ namespace Microsoft.Recognizers.Text.DateTime
                     var matches = beforeAfterRegex.Matches(text);
                     foreach (Match match in matches)
                     {
-                        ret.Add(new Token(match.Index, match.Index + match.Length));
+                        result.Add(new Token(match.Index, match.Index + match.Length));
                     }
                 }
             }
-            return ret;
+
+            return result;
         }
 
         private List<Token> SpecialCasesRegexMatch(string text, DateObject reference)
         {
-            var ret = new List<Token>();
+            var result = new List<Token>();
+
             // handle "ish"
             if (this.config.IshRegex != null && this.config.IshRegex.IsMatch(text))
             {
@@ -140,10 +122,11 @@ namespace Microsoft.Recognizers.Text.DateTime
 
                 foreach (Match match in matches)
                 {
-                    ret.Add(new Token(match.Index, match.Index + match.Length));
+                    result.Add(new Token(match.Index, match.Index + match.Length));
                 }
             }
-            return ret;
+
+            return result;
         }
     }
 }

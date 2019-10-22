@@ -6,6 +6,21 @@ namespace Microsoft.Recognizers.Text.DateTime.French
 {
     public sealed class FrenchMergedParserConfiguration : FrenchCommonDateTimeParserConfiguration, IMergedParserConfiguration
     {
+        public FrenchMergedParserConfiguration(IDateTimeOptionsConfiguration config)
+            : base(config)
+        {
+            BeforeRegex = FrenchMergedExtractorConfiguration.BeforeRegex;
+            AfterRegex = FrenchMergedExtractorConfiguration.AfterRegex;
+            SinceRegex = FrenchMergedExtractorConfiguration.SinceRegex;
+            AroundRegex = FrenchMergedExtractorConfiguration.AroundRegex;
+            EqualRegex = FrenchMergedExtractorConfiguration.EqualRegex;
+            SuffixAfter = FrenchMergedExtractorConfiguration.SuffixAfterRegex;
+            YearRegex = FrenchDatePeriodExtractorConfiguration.YearRegex;
+            SuperfluousWordMatcher = FrenchMergedExtractorConfiguration.SuperfluousWordMatcher;
+            SetParser = new BaseSetParser(new FrenchSetParserConfiguration(this));
+            HolidayParser = new BaseHolidayParser(new FrenchHolidayParserConfiguration(this));
+            TimeZoneParser = new DummyTimeZoneParser();
+        }
 
         public Regex BeforeRegex { get; }
 
@@ -15,7 +30,9 @@ namespace Microsoft.Recognizers.Text.DateTime.French
 
         public Regex AroundRegex { get; }
 
-        public Regex YearAfterRegex { get; }
+        public Regex EqualRegex { get; }
+
+        public Regex SuffixAfter { get; }
 
         public Regex YearRegex { get; }
 
@@ -23,22 +40,6 @@ namespace Microsoft.Recognizers.Text.DateTime.French
 
         public IDateTimeParser HolidayParser { get; }
 
-        public IDateTimeParser TimeZoneParser { get; }
-
         public StringMatcher SuperfluousWordMatcher { get; }
-
-        public FrenchMergedParserConfiguration(IOptionsConfiguration config) : base(config)
-        {
-            BeforeRegex = FrenchMergedExtractorConfiguration.BeforeRegex;
-            AfterRegex = FrenchMergedExtractorConfiguration.AfterRegex;
-            SinceRegex = FrenchMergedExtractorConfiguration.SinceRegex;
-            AroundRegex = FrenchMergedExtractorConfiguration.AroundRegex;
-            YearAfterRegex = FrenchMergedExtractorConfiguration.YearAfterRegex;
-            YearRegex = FrenchDatePeriodExtractorConfiguration.YearRegex;
-            SuperfluousWordMatcher = FrenchMergedExtractorConfiguration.SuperfluousWordMatcher;
-            SetParser = new BaseSetParser(new FrenchSetParserConfiguration(this));
-            HolidayParser = new BaseHolidayParser(new FrenchHolidayParserConfiguration(this));
-            TimeZoneParser = new BaseTimeZoneParser();
-        }
     }
 }

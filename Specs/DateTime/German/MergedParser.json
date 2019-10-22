@@ -4,7 +4,7 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "dotnet, javascript, python",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "morgen Abend gegen 8 Uhr",
@@ -17,7 +17,9 @@
               "value": "2016-11-08 20:00:00"
             }
           ]
-        }
+        },
+        "Start": 23,
+        "Length": 24
       }
     ]
   },
@@ -34,9 +36,9 @@
         "Value": {
           "values": [
             {
-              "timex": "",
+              "timex": "XXXX",
               "type": "date",
-              "value": "not resolved"
+              "value": "2016-03-27"
             }
           ]
         },
@@ -74,7 +76,8 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "dotnet, javascript, python",
+    "Comment": "Returning only the future resolution, which is sematically correct in that case",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "Freitag Nachmittag",
@@ -94,12 +97,65 @@
               "end": "2016-11-11 16:00:00"
             }
           ]
-        }
+        },
+        "Start": 3,
+        "Length": 18
       }
     ]
   },
   {
-    "Input": "Ich würde 2016-05 nicht hier",
+    "Input": "Letzten Freitag Nachmittag habe ich Feierabend gemacht",
+    "Context": {
+      "ReferenceDateTime": "2016-11-07T00:00:00"
+    },
+    "NotSupported": "javascript, python",
+    "Results": [
+      {
+        "Text": "Letzten Freitag Nachmittag",
+        "Type": "datetimeV2.datetimerange",
+        "Value": {
+          "values": [
+            {
+              "timex": "2016-11-04TAF",
+              "type": "datetimerange",
+              "start": "2016-11-04 12:00:00",
+              "end": "2016-11-04 16:00:00"
+            }
+          ]
+        },
+        "Start": 0,
+        "Length": 26
+      }
+    ]
+  },
+  {
+    "Input": "Letzten Freitag Nachmittag habe ich Feierabend gemacht",
+    "Comment": "In German it should be the 07.12. not the 30.11. It is false by design",
+    "Context": {
+      "ReferenceDateTime": "2018-12-09T00:00:00"
+    },
+    "NotSupported": "dotNet, javascript, python",
+    "Results": [
+      {
+        "Text": "Letzten Freitag Nachmittag",
+        "Type": "datetimeV2.datetimerange",
+        "Value": {
+          "values": [
+            {
+              "timex": "2018-12-07TAF",
+              "type": "datetimerange",
+              "start": "2018-12-07 12:00:00",
+              "end": "2018-12-07 16:00:00"
+            }
+          ]
+        },
+        "Start": 0,
+        "Length": 26
+      }
+    ]
+  },
+  {
+    "Input": "Ich bin 2016-05 nicht hier",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
@@ -118,13 +174,13 @@
             }
           ]
         },
-        "Start": 10,
+        "Start": 8,
         "Length": 7
       }
     ]
   },
   {
-    "Input": "Ich würde 2016/05 nicht hier",
+    "Input": "Ich bin 2016/05 nicht hier",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
@@ -143,13 +199,13 @@
             }
           ]
         },
-        "Start": 10,
+        "Start": 8,
         "Length": 7
       }
     ]
   },
   {
-    "Input": "Ich würde 05/2016 nicht hier",
+    "Input": "Ich bin 05/2016 nicht hier",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
@@ -168,13 +224,13 @@
             }
           ]
         },
-        "Start": 10,
+        "Start": 8,
         "Length": 7
       }
     ]
   },
   {
-    "Input": "Ich würde 05-2016 nicht hier",
+    "Input": "Ich bin 05-2016 nicht hier",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
@@ -193,13 +249,13 @@
             }
           ]
         },
-        "Start": 10,
+        "Start": 8,
         "Length": 7
       }
     ]
   },
   {
-    "Input": "Ich würde 2016 -  05 nicht hier",
+    "Input": "Ich bin 2016 -  05 nicht hier",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
@@ -218,13 +274,13 @@
             }
           ]
         },
-        "Start": 10,
+        "Start": 8,
         "Length": 10
       }
     ]
   },
   {
-    "Input": "Ich würde 2016  /05 nicht hier",
+    "Input": "Ich bin 2016  /05 nicht hier",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
@@ -243,13 +299,13 @@
             }
           ]
         },
-        "Start": 10,
+        "Start": 8,
         "Length": 9
       }
     ]
   },
   {
-    "Input": "Ich würde 05/  2016 nicht hier",
+    "Input": "Ich bin 05/  2016 nicht hier",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
@@ -268,13 +324,13 @@
             }
           ]
         },
-        "Start": 10,
+        "Start": 8,
         "Length": 9
       }
     ]
   },
   {
-    "Input": "Ich würde 05 -  2016 nicht hier",
+    "Input": "Ich bin 05 -  2016 nicht hier",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
@@ -293,7 +349,7 @@
             }
           ]
         },
-        "Start": 10,
+        "Start": 8,
         "Length": 10
       }
     ]

@@ -1,36 +1,41 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 using Microsoft.Recognizers.Definitions.English;
+using Microsoft.Recognizers.Text.DateTime.Utilities;
 
 namespace Microsoft.Recognizers.Text.DateTime.English
 {
-    public class EnglishSetExtractorConfiguration : BaseOptionsConfiguration, ISetExtractorConfiguration
+    public class EnglishSetExtractorConfiguration : BaseDateTimeOptionsConfiguration, ISetExtractorConfiguration
     {
         public static readonly Regex SetUnitRegex =
-            new Regex(DateTimeDefinitions.DurationUnitRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.DurationUnitRegex, RegexFlags);
 
-        public static readonly Regex PeriodicRegex = 
-            new Regex(DateTimeDefinitions.PeriodicRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex PeriodicRegex =
+            new Regex(DateTimeDefinitions.PeriodicRegex, RegexFlags);
 
-        public static readonly Regex EachUnitRegex = 
-            new Regex(DateTimeDefinitions.EachUnitRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex EachUnitRegex =
+            new Regex(DateTimeDefinitions.EachUnitRegex, RegexFlags);
 
-        public static readonly Regex EachPrefixRegex = 
-            new Regex(DateTimeDefinitions.EachPrefixRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex EachPrefixRegex =
+            new Regex(DateTimeDefinitions.EachPrefixRegex, RegexFlags);
 
-        public static readonly Regex SetLastRegex = 
-            new Regex(DateTimeDefinitions.SetLastRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex SetLastRegex =
+            new Regex(DateTimeDefinitions.SetLastRegex, RegexFlags);
 
-        public static readonly Regex EachDayRegex = 
-            new Regex(DateTimeDefinitions.EachDayRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex EachDayRegex =
+            new Regex(DateTimeDefinitions.EachDayRegex, RegexFlags);
 
-        public static readonly Regex SetWeekDayRegex = 
-            new Regex(DateTimeDefinitions.SetWeekDayRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex SetWeekDayRegex =
+            new Regex(DateTimeDefinitions.SetWeekDayRegex, RegexFlags);
 
         public static readonly Regex SetEachRegex =
-            new Regex(DateTimeDefinitions.SetEachRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.SetEachRegex, RegexFlags);
 
-        public EnglishSetExtractorConfiguration(IOptionsConfiguration config) : base(config)
+        private const RegexOptions RegexFlags = RegexOptions.Singleline | RegexOptions.ExplicitCapture;
+
+        public EnglishSetExtractorConfiguration(IDateTimeOptionsConfiguration config)
+            : base(config)
         {
             DurationExtractor = new BaseDurationExtractor(new EnglishDurationExtractorConfiguration(this));
             TimeExtractor = new BaseTimeExtractor(new EnglishTimeExtractorConfiguration(this));
@@ -45,7 +50,7 @@ namespace Microsoft.Recognizers.Text.DateTime.English
 
         public IDateTimeExtractor TimeExtractor { get; }
 
-        public IDateTimeExtractor DateExtractor { get; }
+        public IDateExtractor DateExtractor { get; }
 
         public IDateTimeExtractor DateTimeExtractor { get; }
 
@@ -70,5 +75,7 @@ namespace Microsoft.Recognizers.Text.DateTime.English
         Regex ISetExtractorConfiguration.SetWeekDayRegex => SetWeekDayRegex;
 
         Regex ISetExtractorConfiguration.SetEachRegex => SetEachRegex;
+
+        public Tuple<string, int> WeekDayGroupMatchTuple(Match match) => SetHandler.WeekDayGroupMatchTuple(match);
     }
 }

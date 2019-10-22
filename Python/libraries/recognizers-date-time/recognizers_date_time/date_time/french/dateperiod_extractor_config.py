@@ -1,9 +1,10 @@
 from typing import List, Pattern
 
 from recognizers_text.utilities import RegExpUtility
-from recognizers_number.number import BaseNumberParser, BaseNumberExtractor
+from recognizers_number.number import BaseNumberParser
 from recognizers_number.number.french.extractors import FrenchIntegerExtractor
 from recognizers_number.number.french.parsers import FrenchNumberParserConfiguration
+from ...resources.base_date_time import BaseDateTime
 from ...resources.french_date_time import FrenchDateTime
 from ..extractors import DateTimeExtractor
 from ..base_duration import BaseDurationExtractor
@@ -11,11 +12,18 @@ from ..base_date import BaseDateExtractor
 from ..base_dateperiod import DatePeriodExtractorConfiguration, MatchedIndex
 from .duration_extractor_config import FrenchDurationExtractorConfiguration
 from .date_extractor_config import FrenchDateExtractorConfiguration
+from recognizers_text.extractor import Extractor
+from recognizers_number import FrenchOrdinalExtractor, BaseNumberExtractor
+
 
 class FrenchDatePeriodExtractorConfiguration(DatePeriodExtractorConfiguration):
     @property
     def simple_cases_regexes(self) -> List[Pattern]:
         return self._simple_cases_regexes
+
+    @property
+    def illegal_year_regex(self) -> Pattern:
+        return self._illegal_year_regex
 
     @property
     def year_regex(self) -> Pattern:
@@ -77,6 +85,62 @@ class FrenchDatePeriodExtractorConfiguration(DatePeriodExtractorConfiguration):
     def duration_extractor(self) -> DateTimeExtractor:
         return self._duration_extractor
 
+    @property
+    def now_regex(self) -> Pattern:
+        return self._now_regex
+
+    @property
+    def future_suffix_regex(self) -> Pattern:
+        return self._future_suffix_regex
+
+    @property
+    def ago_regex(self) -> Pattern:
+        return self._ago_regex
+
+    @property
+    def later_regex(self) -> Pattern:
+        return self._later_regex
+
+    @property
+    def less_than_regex(self) -> Pattern:
+        return self._less_than_regex
+
+    @property
+    def more_than_regex(self) -> Pattern:
+        return self._more_than_regex
+
+    @property
+    def duration_date_restrictions(self) -> [str]:
+        return self._duration_date_restrictions
+
+    @property
+    def year_period_regex(self) -> Pattern:
+        return self._year_period_regex
+
+    @property
+    def month_num_regex(self) -> Pattern:
+        return self._month_num_regex
+
+    @property
+    def century_suffix_regex(self) -> Pattern:
+        return self._century_suffix_regex
+
+    @property
+    def ordinal_extractor(self) -> BaseNumberExtractor:
+        return self._ordinal_extractor
+
+    @property
+    def cardinal_extractor(self) -> Extractor:
+        return self._cardinal_extractor
+
+    @property
+    def time_unit_regex(self) -> Pattern:
+        return self._time_unit_regex
+
+    @property
+    def within_next_prefix_regex(self) -> Pattern:
+        return self._within_next_prefix_regex
+
     def __init__(self):
         self._simple_cases_regexes = [
             RegExpUtility.get_safe_reg_exp(FrenchDateTime.SimpleCasesRegex),
@@ -87,38 +151,92 @@ class FrenchDatePeriodExtractorConfiguration(DatePeriodExtractorConfiguration):
             RegExpUtility.get_safe_reg_exp(FrenchDateTime.YearRegex),
             RegExpUtility.get_safe_reg_exp(FrenchDateTime.WeekDayOfMonthRegex),
             RegExpUtility.get_safe_reg_exp(FrenchDateTime.WeekOfYearRegex),
-            RegExpUtility.get_safe_reg_exp(FrenchDateTime.MonthFrontBetweenRegex),
-            RegExpUtility.get_safe_reg_exp(FrenchDateTime.MonthFrontSimpleCasesRegex),
+            RegExpUtility.get_safe_reg_exp(
+                FrenchDateTime.MonthFrontBetweenRegex),
+            RegExpUtility.get_safe_reg_exp(
+                FrenchDateTime.MonthFrontSimpleCasesRegex),
             RegExpUtility.get_safe_reg_exp(FrenchDateTime.QuarterRegex),
-            RegExpUtility.get_safe_reg_exp(FrenchDateTime.QuarterRegexYearFront),
+            RegExpUtility.get_safe_reg_exp(
+                FrenchDateTime.QuarterRegexYearFront),
             RegExpUtility.get_safe_reg_exp(FrenchDateTime.AllHalfYearRegex),
             RegExpUtility.get_safe_reg_exp(FrenchDateTime.SeasonRegex),
-            RegExpUtility.get_safe_reg_exp(FrenchDateTime.PastSuffixRegex),
-            RegExpUtility.get_safe_reg_exp(FrenchDateTime.NextSuffixRegex),
-            RegExpUtility.get_safe_reg_exp(FrenchDateTime.ThisPrefixRegex),
-            RegExpUtility.get_safe_reg_exp(FrenchDateTime.LaterEarlyPeriodRegex),
-            RegExpUtility.get_safe_reg_exp(FrenchDateTime.WeekWithWeekDayRangeRegex)
+            RegExpUtility.get_safe_reg_exp(
+                FrenchDateTime.LaterEarlyPeriodRegex),
+            RegExpUtility.get_safe_reg_exp(
+                FrenchDateTime.WeekWithWeekDayRangeRegex)
         ]
-        self._year_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.YearRegex)
-        self._till_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.TillRegex)
-        self._followed_unit = RegExpUtility.get_safe_reg_exp(FrenchDateTime.FollowedDateUnit)
-        self._number_combined_with_unit = RegExpUtility.get_safe_reg_exp(FrenchDateTime.NumberCombinedWithDateUnit)
-        self._past_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.PastSuffixRegex)
-        self._future_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.NextSuffixRegex)
-        self._week_of_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.WeekOfRegex)
-        self._month_of_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.MonthOfRegex)
-        self._date_unit_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.DateUnitRegex)
-        self._in_connector_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.InConnectorRegex)
-        self._range_unit_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.RangeUnitRegex)
+        self._illegal_year_regex = RegExpUtility.get_safe_reg_exp(
+            BaseDateTime.IllegalYearRegex)
+        self._year_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.YearRegex)
+        self._till_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.TillRegex)
+        self._followed_unit = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.FollowedDateUnit)
+        self._number_combined_with_unit = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.NumberCombinedWithDateUnit)
+        self._past_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.PastSuffixRegex)
+        self._future_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.NextSuffixRegex)
+        self._week_of_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.WeekOfRegex)
+        self._month_of_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.MonthOfRegex)
+        self._date_unit_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.DateUnitRegex)
+        self._within_next_prefix_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.WithinNextPrefixRegex)
+        self._in_connector_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.InConnectorRegex)
+        self._range_unit_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.RangeUnitRegex)
 
-        self.from_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.FromRegex)
-        self.connector_and_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.ConnectorAndRegex)
-        self.before_regex = RegExpUtility.get_safe_reg_exp(FrenchDateTime.BeforeRegex2)
+        self.from_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.FromRegex)
+        self.connector_and_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.ConnectorAndRegex)
+        self.before_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.BeforeRegex2)
 
-        self._date_point_extractor = BaseDateExtractor(FrenchDateExtractorConfiguration())
+        self._date_point_extractor = BaseDateExtractor(
+            FrenchDateExtractorConfiguration())
         self._integer_extractor = FrenchIntegerExtractor()
-        self._number_parser = BaseNumberParser(FrenchNumberParserConfiguration())
-        self._duration_extractor = BaseDurationExtractor(FrenchDurationExtractorConfiguration())
+        self._number_parser = BaseNumberParser(
+            FrenchNumberParserConfiguration())
+        self._duration_extractor = BaseDurationExtractor(
+            FrenchDurationExtractorConfiguration())
+        self._now_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.NowRegex)
+        self._future_suffix_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.FutureSuffixRegex
+        )
+        self._ago_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.AgoRegex
+        )
+        self._later_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.LaterRegex
+        )
+        self._less_than_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.LessThanRegex
+        )
+        self._more_than_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.MoreThanRegex
+        )
+        self._duration_date_restrictions = FrenchDateTime.DurationDateRestrictions
+        self._year_period_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.YearPeriodRegex
+        )
+        self._month_num_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.MonthNumRegex
+        )
+        self._century_suffix_regex = RegExpUtility.get_safe_reg_exp(
+            FrenchDateTime.CenturySuffixRegex
+        )
+        self._ordinal_extractor = FrenchOrdinalExtractor()
+        # TODO When the implementation for these properties is added, change the None values to their respective Regexps
+        self._time_unit_regex = None
+        self._cardinal_extractor = None
 
     def get_from_token_index(self, source: str) -> MatchedIndex:
         match = self.from_regex.search(source)

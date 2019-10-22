@@ -4,6 +4,9 @@
 //     Changes to this file may cause incorrect behavior and will be lost if
 //     the code is regenerated.
 // </auto-generated>
+//
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 // ------------------------------------------------------------------------------
 
 package com.microsoft.recognizers.text.number.resources;
@@ -18,7 +21,11 @@ public class GermanNumeric {
 
     public static final String LangMarker = "Ger";
 
-    public static final String ZeroToNineIntegerRegex = "(drei|sieben|acht|vier|fuenf|fünf|null|neun|eins|ein|eine|einer|einen|zwei|sechs)";
+    public static final Boolean CompoundNumberLanguage = true;
+
+    public static final Boolean MultiDecimalSeparatorCulture = false;
+
+    public static final String ZeroToNineIntegerRegex = "(drei|sieben|acht|vier|fuenf|fünf|null|neun|eins|(ein(?!($|\\.|,|!|\\?)))|eine|einer|einen|zwei|zwo|sechs)";
 
     public static final String RoundNumberIntegerRegex = "(hundert|einhundert|tausend|(\\s*million\\s*)|(\\s*millionen\\s*)|(\\s*mio\\s*)|(\\s*milliarde\\s*)|(\\s*milliarden\\s*)|(\\s*mrd\\s*)|(\\s*billion\\s*)|(\\s*billionen\\s*))";
 
@@ -54,10 +61,11 @@ public class GermanNumeric {
 
     public static String NumbersWithPlaceHolder(String placeholder) {
         return "(((?<!\\d+\\s*)-\\s*)|(?<=\\b))\\d+(?!(\\,\\d+[a-zA-Z]))(?={placeholder})"
-			.replace("{placeholder}", placeholder);
+            .replace("{placeholder}", placeholder);
     }
 
-    public static final String NumbersWithSuffix = "(((?<!\\d+\\s*)-\\s*)|(?<=\\b))\\d+\\s*(K|k|M|T|G)(?=\\b)";
+    public static final String NumbersWithSuffix = "(((?<!\\d+\\s*)-\\s*)|(?<=\\b))\\d+\\s*{BaseNumbers.NumberMultiplierRegex}(?=\\b)"
+            .replace("{BaseNumbers.NumberMultiplierRegex}", BaseNumbers.NumberMultiplierRegex);
 
     public static final String RoundNumberIntegerRegexWithLocks = "(?<=\\b)\\d+\\s*{RoundNumberIntegerRegex}(?=\\b)"
             .replace("{RoundNumberIntegerRegex}", RoundNumberIntegerRegex);
@@ -90,11 +98,11 @@ public class GermanNumeric {
             .replace("{SuffixRoundNumberOrdinalRegex}", SuffixRoundNumberOrdinalRegex)
             .replace("{AllIntRegex}", AllIntRegex);
 
-    public static final String OrdinalSuffixRegex = "(?<=\\b)((\\d*(1|2|3|4|5|6|7|8|9|0))|(11|12))(?=\\b)";
+    public static final String OrdinalSuffixRegex = "^[\\.]";
 
-    public static final String OrdinalNumericRegex = "(?<=\\b)(\\d{1,3}(\\s*,\\s*\\d+)*\\s*th)(?=\\b)";
+    public static final String OrdinalNumericRegex = "(?<=\\b)(\\d{1,3}\\.)(?=(\\s+|^))";
 
-    public static final String OrdinalRoundNumberRegex = "(?<!(ein|eine)\\s+){RoundNumberOrdinalRegex}"
+    public static final String OrdinalRoundNumberRegex = "(?<!eine?\\s+){RoundNumberOrdinalRegex}"
             .replace("{RoundNumberOrdinalRegex}", RoundNumberOrdinalRegex);
 
     public static final String OrdinalGermanRegex = "(?<=\\b){AllOrdinalRegex}(?=\\b)"
@@ -109,13 +117,14 @@ public class GermanNumeric {
             .replace("{AllOrdinalRegex}", AllOrdinalRegex)
             .replace("{RoundNumberOrdinalRegex}", RoundNumberOrdinalRegex);
 
-    public static final String FractionNounWithArticleRegex = "(?<=\\b)({AllIntRegex}\\s+(und\\s+)?)?(ein|eine)(\\s+|\\s*-\\s*)(({AllOrdinalRegex})|({RoundNumberOrdinalRegex})|halb(er|e|es)?|hälfte)(?=\\b)"
+    public static final String FractionNounWithArticleRegex = "(?<=\\b)({AllIntRegex}\\s+(und\\s+)?)?eine?(\\s+|\\s*-\\s*)(({AllOrdinalRegex})|({RoundNumberOrdinalRegex})|halb(er|e|es)?|hälfte)(?=\\b)"
             .replace("{AllIntRegex}", AllIntRegex)
             .replace("{AllOrdinalRegex}", AllOrdinalRegex)
             .replace("{RoundNumberOrdinalRegex}", RoundNumberOrdinalRegex);
 
-    public static final String FractionPrepositionRegex = "(?<=\\b)(?<numerator>({AllIntRegex})|((?<!\\.)\\d+))\\s+over\\s+(?<denominator>({AllIntRegex})|(\\d+)(?!\\.))(?=\\b)"
-            .replace("{AllIntRegex}", AllIntRegex);
+    public static final String FractionPrepositionRegex = "(?<!{BaseNumbers.CommonCurrencySymbol}\\s*)(?<=\\b)(?<numerator>({AllIntRegex})|((?<!\\.)\\d+))\\s+over\\s+(?<denominator>({AllIntRegex})|(\\d+)(?!\\.))(?=\\b)"
+            .replace("{AllIntRegex}", AllIntRegex)
+            .replace("{BaseNumbers.CommonCurrencySymbol}", BaseNumbers.CommonCurrencySymbol);
 
     public static final String AllPointRegex = "((\\s*{ZeroToNineIntegerRegex})+|(\\s*{SeparaIntRegex}))"
             .replace("{ZeroToNineIntegerRegex}", ZeroToNineIntegerRegex)
@@ -125,20 +134,21 @@ public class GermanNumeric {
             .replace("{AllIntRegex}", AllIntRegex)
             .replace("{AllPointRegex}", AllPointRegex);
 
-    public static final String DoubleWithMultiplierRegex = "(((?<!\\d+\\s*)-\\s*)|((?<=\\b)(?<!\\d+\\.)))\\d+\\.\\d+\\s*(K|k|M|G|T|B|b)(?=\\b)";
+    public static final String DoubleWithMultiplierRegex = "(((?<!\\d+\\s*)-\\s*)|((?<=\\b)(?<!\\d+\\.)))\\d+\\.\\d+\\s*{BaseNumbers.NumberMultiplierRegex}(?=\\b)"
+            .replace("{BaseNumbers.NumberMultiplierRegex}", BaseNumbers.NumberMultiplierRegex);
 
     public static final String DoubleExponentialNotationRegex = "(((?<!\\d+\\s*)-\\s*)|((?<=\\b)(?<!\\d+\\.)))(\\d+(\\.\\d+)?)e([+-]*[1-9]\\d*)(?=\\b)";
 
     public static final String DoubleCaretExponentialNotationRegex = "(((?<!\\d+\\s*)-\\s*)|((?<=\\b)(?<!\\d+\\.)))(\\d+(\\.\\d+)?)\\^([+-]*[1-9]\\d*)(?=\\b)";
 
     public static String DoubleDecimalPointRegex(String placeholder) {
-        return "((\\d{1,3})(\\.\\d{3})*(\\,\\d+)?)(?={placeholder})"
-			.replace("{placeholder}", placeholder);
+        return "(?<=\\b)((\\d{1,3})(\\.\\d{3})*(\\,\\d+)?)(?={placeholder})"
+            .replace("{placeholder}", placeholder);
     }
 
     public static String DoubleWithoutIntegralRegex(String placeholder) {
         return "(?<=\\s|^)(?<!(\\d+))\\.\\d+(?!(\\.\\d+))(?={placeholder})"
-			.replace("{placeholder}", placeholder);
+            .replace("{placeholder}", placeholder);
     }
 
     public static final String DoubleWithRoundNumber = "(((?<!\\d+\\s*)-\\s*)|((?<=\\b)(?<!\\d+\\,)))\\d+\\,\\d+\\s+{RoundNumberIntegerRegex}(?=\\b)"
@@ -147,9 +157,7 @@ public class GermanNumeric {
     public static final String DoubleAllFloatRegex = "((?<=\\b){AllFloatRegex}(?=\\b))"
             .replace("{AllFloatRegex}", AllFloatRegex);
 
-    public static final String CurrencyRegex = "(((?<=\\W|^)-\\s*)|(?<=\\b))\\d+\\s*(B|b|m|t|g)(?=\\b)";
-
-    public static final String NumberWithSuffixPercentage = "(?<!%)({BaseNumbers.NumberReplaceToken})(\\s*)(%(?!{BaseNumbers.NumberReplaceToken})|Prozent\\b)"
+    public static final String NumberWithSuffixPercentage = "(?<!%)({BaseNumbers.NumberReplaceToken})(\\s*)(%(?!{BaseNumbers.NumberReplaceToken})|prozent(punkte)?\\b)"
             .replace("{BaseNumbers.NumberReplaceToken}", BaseNumbers.NumberReplaceToken);
 
     public static final String NumberWithPrefixPercentage = "(Prozent)(\\s*)({BaseNumbers.NumberReplaceToken})"
@@ -177,16 +185,19 @@ public class GermanNumeric {
 
     public static final String HalfADozenRegex = "ein\\s+halbes\\s+dutzend";
 
-    public static final String DigitalNumberRegex = "((?<=\\b)(hundert|tausend|million(en)?|mio|milliarde(n)?|mrd|billion(en)?|dutzend(e)?)(?=\\b))|((?<=(\\d|\\b))(k|t|m|g|b)(?=\\b))";
+    public static final String DigitalNumberRegex = "((?<=\\b)(hundert|tausend|million(en)?|mio|milliarde(n)?|mrd|billion(en)?|dutzend(e)?)(?=\\b))|((?<=(\\d|\\b)){BaseNumbers.MultiplierLookupRegex}(?=\\b))"
+            .replace("{BaseNumbers.MultiplierLookupRegex}", BaseNumbers.MultiplierLookupRegex);
 
-    public static final Map<String, Long> CardinalNumberMap = ImmutableMap.<String, Long>builder()
+    public static final ImmutableMap<String, Long> CardinalNumberMap = ImmutableMap.<String, Long>builder()
         .put("ein", 1L)
         .put("null", 0L)
         .put("eine", 1L)
         .put("eins", 1L)
         .put("einer", 1L)
         .put("einen", 1L)
+        .put("beiden", 2L)
         .put("zwei", 2L)
+        .put("zwo", 2L)
         .put("drei", 3L)
         .put("vier", 4L)
         .put("fünf", 5L)
@@ -230,7 +241,7 @@ public class GermanNumeric {
         .put("billionen", 1000000000000L)
         .build();
 
-    public static final Map<String, Long> OrdinalNumberMap = ImmutableMap.<String, Long>builder()
+    public static final ImmutableMap<String, Long> OrdinalNumberMap = ImmutableMap.<String, Long>builder()
         .put("zuerst", 1L)
         .put("erst", 1L)
         .put("erster", 1L)
@@ -451,7 +462,7 @@ public class GermanNumeric {
         .put("billionstel", 1000000000000L)
         .build();
 
-    public static final Map<String, Long> RoundNumberMap = ImmutableMap.<String, Long>builder()
+    public static final ImmutableMap<String, Long> RoundNumberMap = ImmutableMap.<String, Long>builder()
         .put("hundert", 100L)
         .put("tausend", 1000L)
         .put("million", 1000000L)
@@ -476,5 +487,17 @@ public class GermanNumeric {
         .put("g", 1000000000L)
         .put("b", 1000000000L)
         .put("t", 1000000000000L)
+        .build();
+
+    public static final ImmutableMap<String, String> AmbiguityFiltersDict = ImmutableMap.<String, String>builder()
+        .put("^[.]", "")
+        .build();
+
+    public static final ImmutableMap<String, String> RelativeReferenceOffsetMap = ImmutableMap.<String, String>builder()
+        .put("", "")
+        .build();
+
+    public static final ImmutableMap<String, String> RelativeReferenceRelativeToMap = ImmutableMap.<String, String>builder()
+        .put("", "")
         .build();
 }

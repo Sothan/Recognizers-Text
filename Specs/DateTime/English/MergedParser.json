@@ -25,7 +25,6 @@
       {
         "Text": "5 years ago",
         "Start": 31,
-        "End": 41,
         "Type": "datetimeV2.date",
         "Value": {
           "values": [
@@ -70,6 +69,8 @@
   },
   {
     "Input": "ADD LUNCH AT 12:30 PM ON FRI ",
+    "Comment":"Disable this for now because of new features in .NET",
+    "NotSupported": "javascript, python, Java",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
@@ -205,6 +206,7 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
+    "NotSupported": "python, javascript, java",
     "Results": [
       {
         "Text": "Easter",
@@ -212,14 +214,43 @@
         "Value": {
           "values": [
             {
-              "timex": "",
+              "timex": "XXXX-03-27",
               "type": "date",
-              "value": "not resolved"
+              "value": "2016-03-27"
+            },
+            {
+              "timex": "XXXX-03-27",
+              "type": "date",
+              "value": "2017-04-16"
             }
           ]
         },
         "Start": 23,
         "Length": 6
+      }
+    ]
+  },
+  {
+    "Input": "Set an appointment for Easter 2019",
+    "Context": {
+      "ReferenceDateTime": "2016-11-07T00:00:00"
+    },
+    "NotSupported": "python, javascript, java",
+    "Results": [
+      {
+        "Text": "Easter 2019",
+        "Type": "datetimeV2.date",
+        "Value": {
+          "values": [
+            {
+              "timex": "2019-04-21",
+              "type": "date",
+              "value": "2019-04-21"
+            }
+          ]
+        },
+        "Start": 23,
+        "Length": 11
       }
     ]
   },
@@ -475,7 +506,7 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript, python, java",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "in 3 weeks",
@@ -499,7 +530,7 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript, python, java",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "in 3 months",
@@ -523,7 +554,7 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript, python, java",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "in 3 years",
@@ -557,7 +588,8 @@
               "timex": "T20",
               "Mod": "after",
               "type": "timerange",
-              "start": "20:00:00"
+              "start": "20:00:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -581,7 +613,8 @@
               "timex": "T20",
               "Mod": "before",
               "type": "timerange",
-              "end": "20:00:00"
+              "end": "20:00:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -605,7 +638,8 @@
               "timex": "T20",
               "Mod": "since",
               "type": "timerange",
-              "start": "20:00:00"
+              "start": "20:00:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -666,24 +700,8 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "Results": [
-      {
-        "Text": "2017",
-        "Type": "datetimeV2.daterange",
-        "Value": {
-          "values": [
-            {
-              "timex": "2017",
-              "type": "daterange",
-              "start": "2017-01-01",
-              "end": "2018-01-01"
-            }
-          ]
-        },
-        "Start": 0,
-        "Length": 4
-      }
-    ]
+    "NotSupported": "javascript, java, python",
+    "Results": []
   },
   {
     "Input": "add yoga to personal calendar on monday and wednesday at 3pm",
@@ -814,41 +832,51 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
+    "NotSupported": "python, javascript, java",
     "Results": [
       {
-        "Text": "Easter",
+        "Text": "Easter Sunday",
         "Type": "datetimeV2.date",
         "Value": {
           "values": [
             {
-              "timex": "",
+              "timex": "XXXX-03-27",
               "type": "date",
-              "value": "not resolved"
+              "value": "2016-03-27"
+            },
+            {
+              "timex": "XXXX-03-27",
+              "type": "date",
+              "value": "2017-04-16"
             }
           ]
         },
         "Start": 23,
-        "Length": 6
-      },
+        "Length": 13
+      }
+    ]
+  },
+  {
+    "Input": "Set an appointment for Easter Monday 2017",
+    "Context": {
+      "ReferenceDateTime": "2016-11-07T00:00:00"
+    },
+    "NotSupported": "python, javascript, java",
+    "Results": [
       {
-        "Text": "Sunday",
+        "Text": "Easter Monday 2017",
         "Type": "datetimeV2.date",
         "Value": {
           "values": [
             {
-              "timex": "XXXX-WXX-7",
+              "timex": "2017-04-17",
               "type": "date",
-              "value": "2016-11-06"
-            },
-            {
-              "timex": "XXXX-WXX-7",
-              "type": "date",
-              "value": "2016-11-13"
+              "value": "2017-04-17"
             }
           ]
         },
-        "Start": 30,
-        "Length": 6
+        "Start": 23,
+        "Length": 18
       }
     ]
   },
@@ -998,13 +1026,15 @@
               "timex": "2016-11-15T12:00",
               "Mod": "before",
               "type": "datetimerange",
-              "end": "2016-11-15 12:00:00"
+              "end": "2016-11-15 12:00:00",
+              "sourceEntity": "datetimepoint"
             },
             {
               "timex": "2016-11-15T00:00",
               "Mod": "before",
               "type": "datetimerange",
-              "end": "2016-11-15 00:00:00"
+              "end": "2016-11-15 00:00:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -1028,31 +1058,8 @@
               "timex": "T14",
               "Mod": "before",
               "type": "timerange",
-              "end": "14:00:00"
-            }
-          ]
-        },
-        "Start": 19,
-        "Length": 17
-      }
-    ]
-  },
-  {
-    "Input": "schedule a meeting in advance of 2pm",
-    "Context": {
-      "ReferenceDateTime": "2016-11-07T00:00:00"
-    },
-    "Results": [
-      {
-        "Text": "in advance of 2pm",
-        "Type": "datetimeV2.timerange",
-        "Value": {
-          "values": [
-            {
-              "timex": "T14",
-              "Mod": "before",
-              "type": "timerange",
-              "end": "14:00:00"
+              "end": "14:00:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -1076,7 +1083,8 @@
               "timex": "T14",
               "Mod": "before",
               "type": "timerange",
-              "end": "14:00:00"
+              "end": "14:00:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -1335,7 +1343,8 @@
               "timex": "2016-11-08",
               "Mod": "before",
               "type": "daterange",
-              "end": "2016-11-08"
+              "end": "2016-11-08",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -1359,7 +1368,8 @@
               "timex": "2016-11-08",
               "Mod": "before",
               "type": "daterange",
-              "end": "2016-11-08"
+              "end": "2016-11-08",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -1383,7 +1393,8 @@
               "timex": "2016-11-08",
               "Mod": "before",
               "type": "daterange",
-              "end": "2016-11-08"
+              "end": "2016-11-08",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -1407,7 +1418,8 @@
               "timex": "2016-01-01",
               "Mod": "since",
               "type": "daterange",
-              "start": "2016-01-01"
+              "start": "2016-01-01",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -1431,7 +1443,8 @@
               "timex": "2016-01-01",
               "Mod": "after",
               "type": "daterange",
-              "start": "2016-01-01"
+              "start": "2016-01-01",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -1455,7 +1468,8 @@
               "timex": "2016-01-01",
               "Mod": "after",
               "type": "daterange",
-              "start": "2016-01-01"
+              "start": "2016-01-01",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -1479,7 +1493,8 @@
               "timex": "2016-01-01",
               "Mod": "before",
               "type": "daterange",
-              "end": "2016-01-01"
+              "end": "2016-01-01",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -1503,7 +1518,8 @@
               "timex": "2016-01-01",
               "Mod": "since",
               "type": "daterange",
-              "start": "2016-01-01"
+              "start": "2016-01-01",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -1527,7 +1543,8 @@
               "timex": "2016-01-01",
               "Mod": "before",
               "type": "daterange",
-              "end": "2016-01-01"
+              "end": "2016-01-01",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -1551,7 +1568,8 @@
               "timex": "2020",
               "Mod": "before",
               "type": "daterange",
-              "end": "2020-01-01"
+              "end": "2020-01-01",
+              "sourceEntity": "datetimerange"
             }
           ]
         },
@@ -1575,7 +1593,8 @@
               "timex": "2012",
               "Mod": "before",
               "type": "daterange",
-              "end": "2012-01-01"
+              "end": "2012-01-01",
+              "sourceEntity": "datetimerange"
             }
           ]
         },
@@ -1600,7 +1619,8 @@
               "timex": "2012",
               "Mod": "since",
               "type": "daterange",
-              "start": "2012-01-01"
+              "start": "2012-01-01",
+              "sourceEntity": "datetimerange"
             }
           ]
         },
@@ -1822,7 +1842,7 @@
         "Value": {
           "values": [
             {
-              "timex": "(2016-11-07T16:12:00,2016-11-09T17:17:30,P2DT1HT5MT30S)",
+              "timex": "(2016-11-07T16:12:00,2016-11-09T17:17:30,P2DT1H5M30S)",
               "type": "datetimerange",
               "start": "2016-11-07 16:12:00",
               "end": "2016-11-09 17:17:30"
@@ -1872,7 +1892,7 @@
         "Value": {
           "values": [
             {
-              "timex": "(2016-11-07T16:12:00,2016-11-09T17:17:30,P2DT1HT5MT30S)",
+              "timex": "(2016-11-07T16:12:00,2016-11-09T17:17:30,P2DT1H5M30S)",
               "type": "datetimerange",
               "start": "2016-11-07 16:12:00",
               "end": "2016-11-09 17:17:30"
@@ -2367,54 +2387,6 @@
     ]
   },
   {
-    "Input": "I'll be out 11- 2016",
-    "Context": {
-      "ReferenceDateTime": "2016-11-07T00:00:00"
-    },
-    "Results": [
-      {
-        "Text": "11- 2016",
-        "Type": "datetimeV2.daterange",
-        "Value": {
-          "values": [
-            {
-              "timex": "2016-11",
-              "type": "daterange",
-              "start": "2016-11-01",
-              "end": "2016-12-01"
-            }
-          ]
-        },
-        "Start": 12,
-        "Length": 8
-      }
-    ]
-  },
-  {
-    "Input": "I'll be out 11 -2016",
-    "Context": {
-      "ReferenceDateTime": "2016-11-07T00:00:00"
-    },
-    "Results": [
-      {
-        "Text": "11 -2016",
-        "Type": "datetimeV2.daterange",
-        "Value": {
-          "values": [
-            {
-              "timex": "2016-11",
-              "type": "daterange",
-              "start": "2016-11-01",
-              "end": "2016-12-01"
-            }
-          ]
-        },
-        "Start": 12,
-        "Length": 8
-      }
-    ]
-  },
-  {
     "Input": "He will arrive later than or at 1/1/2016",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
@@ -2430,7 +2402,8 @@
               "timex": "2016-01-01",
               "Mod": "since",
               "type": "daterange",
-              "start": "2016-01-01"
+              "start": "2016-01-01",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -2444,7 +2417,6 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript",
     "Results": [
       {
         "Text": "later than 1/1/2016",
@@ -2455,7 +2427,8 @@
               "timex": "2016-01-01",
               "Mod": "after",
               "type": "daterange",
-              "start": "2016-01-01"
+              "start": "2016-01-01",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -2469,7 +2442,6 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript",
     "Results": [
       {
         "Text": "1/1/2016",
@@ -2504,7 +2476,8 @@
               "timex": "2016-01-01",
               "Mod": "until",
               "type": "daterange",
-              "end": "2016-01-01"
+              "end": "2016-01-01",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -2518,7 +2491,6 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript",
     "Results": [
       {
         "Text": "before 1/1/2016",
@@ -2529,7 +2501,8 @@
               "timex": "2016-01-01",
               "Mod": "before",
               "type": "daterange",
-              "end": "2016-01-01"
+              "end": "2016-01-01",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -2554,7 +2527,8 @@
               "timex": "2016-01-01",
               "Mod": "until",
               "type": "daterange",
-              "end": "2016-01-01"
+              "end": "2016-01-01",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -2568,7 +2542,6 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript",
     "Results": [
       {
         "Text": "1/1/2016",
@@ -2592,7 +2565,6 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript",
     "Results": [
       {
         "Text": "earlier than 1/1/2016",
@@ -2603,7 +2575,8 @@
               "timex": "2016-01-01",
               "Mod": "before",
               "type": "daterange",
-              "end": "2016-01-01"
+              "end": "2016-01-01",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -2628,7 +2601,8 @@
               "timex": "2018-02",
               "Mod": "until",
               "type": "daterange",
-              "end": "2018-03-01"
+              "end": "2018-03-01",
+              "sourceEntity": "datetimerange"
             }
           ]
         },
@@ -2642,7 +2616,6 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript",
     "Results": [
       {
         "Text": "before Feb 2018",
@@ -2653,7 +2626,8 @@
               "timex": "2018-02",
               "Mod": "before",
               "type": "daterange",
-              "end": "2018-02-01"
+              "end": "2018-02-01",
+              "sourceEntity": "datetimerange"
             }
           ]
         },
@@ -2667,7 +2641,6 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript",
     "Results": [
       {
         "Text": "Feb 2018",
@@ -2703,7 +2676,8 @@
               "timex": "2016",
               "Mod": "since",
               "type": "daterange",
-              "start": "2016-01-01"
+              "start": "2016-01-01",
+              "sourceEntity": "datetimerange"
             }
           ]
         },
@@ -2717,7 +2691,6 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "later than 2016",
@@ -2728,7 +2701,8 @@
               "timex": "2016",
               "Mod": "after",
               "type": "daterange",
-              "start": "2016-12-31"
+              "start": "2017-01-01",
+              "sourceEntity": "datetimerange"
             }
           ]
         },
@@ -2742,7 +2716,6 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript",
     "Results": [
       {
         "Text": "2016",
@@ -2778,7 +2751,8 @@
               "timex": "2016-11-07T18:30",
               "Mod": "since",
               "type": "datetimerange",
-              "start": "2016-11-07 18:30:00"
+              "start": "2016-11-07 18:30:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -2792,7 +2766,6 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript",
     "Results": [
       {
         "Text": "after 6:30PM today",
@@ -2803,7 +2776,8 @@
               "timex": "2016-11-07T18:30",
               "Mod": "after",
               "type": "datetimerange",
-              "start": "2016-11-07 18:30:00"
+              "start": "2016-11-07 18:30:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -2817,7 +2791,6 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript",
     "Results": [
       {
         "Text": "6:30PM today",
@@ -2852,7 +2825,8 @@
               "timex": "2016-11-09",
               "Mod": "until",
               "type": "daterange",
-              "end": "2016-11-09"
+              "end": "2016-11-09",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -2866,7 +2840,6 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript",
     "Results": [
       {
         "Text": "the day after tomorrow",
@@ -2890,7 +2863,6 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript",
     "Results": [
       {
         "Text": "before the day after tomorrow",
@@ -2901,7 +2873,8 @@
               "timex": "2016-11-09",
               "Mod": "before",
               "type": "daterange",
-              "end": "2016-11-09"
+              "end": "2016-11-09",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -2926,7 +2899,8 @@
               "timex": "2018-05-15T15",
               "Mod": "until",
               "type": "datetimerange",
-              "end": "2018-05-15 15:00:00"
+              "end": "2018-05-15 15:00:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -2940,7 +2914,6 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript",
     "Results": [
       {
         "Text": "earlier than 3pm 5/15/2018",
@@ -2951,7 +2924,8 @@
               "timex": "2018-05-15T15",
               "Mod": "before",
               "type": "datetimerange",
-              "end": "2018-05-15 15:00:00"
+              "end": "2018-05-15 15:00:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -2965,7 +2939,6 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "NotSupported": "javascript",
     "Results": [
       {
         "Text": "3pm 5/15/2018",
@@ -2989,7 +2962,6 @@
     "Context": {
       "ReferenceDateTime": "2018-05-31T00:00:00"
     },
-    "NotSupported": "javascript",
     "Results": [
       {
         "Text": "two days after today",
@@ -3061,7 +3033,6 @@
     "Context": {
       "ReferenceDateTime": "2018-05-31T00:00:00"
     },
-    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "before 2010",
@@ -3072,7 +3043,8 @@
               "timex": "2010",
               "Mod": "before",
               "type": "daterange",
-              "end": "2010-01-01"
+              "end": "2010-01-01",
+              "sourceEntity": "datetimerange"
             }
           ]
         },
@@ -3088,7 +3060,8 @@
               "timex": "2018",
               "Mod": "after",
               "type": "daterange",
-              "start": "2018-12-31"
+              "start": "2019-01-01",
+              "sourceEntity": "datetimerange"
             }
           ]
         },
@@ -3102,7 +3075,6 @@
     "Context": {
       "ReferenceDateTime": "2018-05-31T00:00:00"
     },
-    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "after 2010",
@@ -3113,7 +3085,8 @@
               "timex": "2010",
               "Mod": "after",
               "type": "daterange",
-              "start": "2010-12-31"
+              "start": "2011-01-01",
+              "sourceEntity": "datetimerange"
             }
           ]
         },
@@ -3129,7 +3102,8 @@
               "timex": "2018",
               "Mod": "before",
               "type": "daterange",
-              "end": "2018-01-01"
+              "end": "2018-01-01",
+              "sourceEntity": "datetimerange"
             }
           ]
         },
@@ -3145,7 +3119,8 @@
               "timex": "2000",
               "Mod": "before",
               "type": "daterange",
-              "end": "2000-01-01"
+              "end": "2000-01-01",
+              "sourceEntity": "datetimerange"
             }
           ]
         },
@@ -3224,7 +3199,7 @@
         "Value": {
           "values": [
             {
-              "timex": "PT1HT30M",
+              "timex": "PT1H30M",
               "Mod": "more",
               "type": "duration",
               "value": "5400"
@@ -3408,19 +3383,21 @@
         "Length": 9
       },
       {
-        "Text": "today",
-        "Type": "datetimeV2.date",
+        "Text": "from today",
+        "Type": "datetimeV2.daterange",
         "Value": {
           "values": [
             {
               "timex": "2018-05-29",
-              "type": "date",
-              "value": "2018-05-29"
+              "Mod": "since",
+              "type": "daterange",
+              "sourceEntity": "datetimepoint",
+              "start": "2018-05-29"
             }
           ]
         },
-        "Start": 27,
-        "Length": 5
+        "Start": 22,
+        "Length": 10
       }
     ]
   },
@@ -3592,7 +3569,7 @@
     "Context": {
       "ReferenceDateTime": "2018-06-22T00:00:00"
     },
-    "NotSupported": "javascript, java, python",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "after 2018",
@@ -3603,7 +3580,8 @@
               "timex": "2018",
               "Mod": "after",
               "type": "daterange",
-              "start": "2018-12-31"
+              "start": "2019-01-01",
+              "sourceEntity": "datetimerange"
             }
           ]
         },
@@ -3617,7 +3595,7 @@
     "Context": {
       "ReferenceDateTime": "2018-06-22T00:00:00"
     },
-    "NotSupported": "javascript, java, python",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "after Feb 2018",
@@ -3628,7 +3606,8 @@
               "timex": "2018-02",
               "Mod": "after",
               "type": "daterange",
-              "start": "2018-02-28"
+              "start": "2018-03-01",
+              "sourceEntity": "datetimerange"
             }
           ]
         },
@@ -3642,7 +3621,7 @@
     "Context": {
       "ReferenceDateTime": "2018-06-22T00:00:00"
     },
-    "NotSupported": "javascript, java, python",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "after Feb",
@@ -3653,13 +3632,15 @@
               "timex": "XXXX-02",
               "Mod": "after",
               "type": "daterange",
-              "start": "2018-02-28"
+              "start": "2018-03-01",
+              "sourceEntity": "datetimerange"
             },
             {
               "timex": "XXXX-02",
               "Mod": "after",
               "type": "daterange",
-              "start": "2019-02-28"
+              "start": "2019-03-01",
+              "sourceEntity": "datetimerange"
             }
           ]
         },
@@ -3673,7 +3654,7 @@
     "Context": {
       "ReferenceDateTime": "2018-06-22T00:00:00"
     },
-    "NotSupported": "javascript, java, python",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "1/1/2015 after 2:00",
@@ -3704,7 +3685,7 @@
     "Context": {
       "ReferenceDateTime": "2018-06-22T00:00:00"
     },
-    "NotSupported": "javascript, java, python",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "today before 4pm",
@@ -3729,7 +3710,7 @@
     "Context": {
       "ReferenceDateTime": "2018-06-26T00:00:00"
     },
-    "NotSupported": "javascript, java, python",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "next Wednesday later than 10 in the morning",
@@ -3754,7 +3735,7 @@
     "Context": {
       "ReferenceDateTime": "2018-06-26T00:00:00"
     },
-    "NotSupported": "javascript, java, python",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "previous Tuesday by 2 in the afternoon",
@@ -3779,7 +3760,7 @@
     "Context": {
       "ReferenceDateTime": "2018-06-26T00:00:00"
     },
-    "NotSupported": "javascript, java, python",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "Feb 1st no later than 6:00",
@@ -3822,7 +3803,7 @@
     "Context": {
       "ReferenceDateTime": "2018-06-26T00:00:00"
     },
-    "NotSupported": "javascript, java, python",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "next week",
@@ -3849,13 +3830,15 @@
               "timex": "T02:00",
               "Mod": "after",
               "type": "timerange",
-              "start": "02:00:00"
+              "start": "02:00:00",
+              "sourceEntity": "datetimepoint"
             },
             {
               "timex": "T14:00",
               "Mod": "after",
               "type": "timerange",
-              "start": "14:00:00"
+              "start": "14:00:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -3869,7 +3852,7 @@
     "Context": {
       "ReferenceDateTime": "2018-06-26T00:00:00"
     },
-    "NotSupported": "javascript,java",
+    "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
     "Results": [
       {
@@ -3911,7 +3894,7 @@
     "Context": {
       "ReferenceDateTime": "2018-06-26T00:00:00"
     },
-    "NotSupported": "javascript,java",
+    "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
     "Results": [
       {
@@ -3937,7 +3920,7 @@
     "Context": {
       "ReferenceDateTime": "2018-06-26T00:00:00"
     },
-    "NotSupported": "javascript,java",
+    "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
     "Results": [
       {
@@ -3963,7 +3946,7 @@
     "Context": {
       "ReferenceDateTime": "2018-06-26T00:00:00"
     },
-    "NotSupported": "javascript,java",
+    "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
     "Results": [
       {
@@ -3989,7 +3972,7 @@
     "Context": {
       "ReferenceDateTime": "2018-07-02T00:00:00"
     },
-    "NotSupported": "javascript,java",
+    "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
     "Results": [
       {
@@ -4015,7 +3998,7 @@
     "Context": {
       "ReferenceDateTime": "2018-07-02T00:00:00"
     },
-    "NotSupported": "javascript,java",
+    "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
     "Results": [
       {
@@ -4041,7 +4024,7 @@
     "Context": {
       "ReferenceDateTime": "2018-07-02T00:00:00"
     },
-    "NotSupported": "javascript,java",
+    "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
     "Results": [
       {
@@ -4052,8 +4035,8 @@
             {
               "timex": "2018-W31",
               "type": "daterange",
-              "start": "2018-08-06",
-              "end": "2018-08-13"
+              "start": "2018-07-30",
+              "end": "2018-08-06"
             }
           ]
         },
@@ -4067,7 +4050,7 @@
     "Context": {
       "ReferenceDateTime": "2018-07-05T00:00:00"
     },
-    "NotSupported": "javascript,java",
+    "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
     "Results": [
       {
@@ -4092,7 +4075,7 @@
     "Context": {
       "ReferenceDateTime": "2018-07-05T00:00:00"
     },
-    "NotSupported": "javascript,java",
+    "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
     "Results": [
       {
@@ -4117,7 +4100,7 @@
     "Context": {
       "ReferenceDateTime": "2018-07-05T00:00:00"
     },
-    "NotSupported": "javascript,java",
+    "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
     "Results": [
       {
@@ -4142,7 +4125,7 @@
     "Context": {
       "ReferenceDateTime": "2018-07-05T00:00:00"
     },
-    "NotSupported": "javascript,java",
+    "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
     "Results": [
       {
@@ -4167,7 +4150,7 @@
     "Context": {
       "ReferenceDateTime": "2018-07-05T00:00:00"
     },
-    "NotSupported": "javascript,java",
+    "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
     "Results": [
       {
@@ -4192,7 +4175,7 @@
     "Context": {
       "ReferenceDateTime": "2018-07-05T00:00:00"
     },
-    "NotSupported": "javascript,java",
+    "NotSupported": "javascript",
     "NotSupportedByDesign": "python",
     "Results": [
       {
@@ -4217,7 +4200,7 @@
     "Context": {
       "ReferenceDateTime": "2018-08-10T00:00:00"
     },
-    "NotSupported": "javascript,java,python",
+    "NotSupported": "javascript,python",
     "Results": [
       {
         "Text": "> 6pm today",
@@ -4228,7 +4211,8 @@
               "timex": "2018-08-10T18",
               "Mod": "after",
               "type": "datetimerange",
-              "start": "2018-08-10 18:00:00"
+              "start": "2018-08-10 18:00:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -4242,7 +4226,7 @@
     "Context": {
       "ReferenceDateTime": "2018-08-10T00:00:00"
     },
-    "NotSupported": "javascript,java,python",
+    "NotSupported": "javascript,python",
     "Results": [
       {
         "Text": ">= 6pm today",
@@ -4253,7 +4237,8 @@
               "timex": "2018-08-10T18",
               "Mod": "since",
               "type": "datetimerange",
-              "start": "2018-08-10 18:00:00"
+              "start": "2018-08-10 18:00:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -4267,7 +4252,7 @@
     "Context": {
       "ReferenceDateTime": "2018-08-10T00:00:00"
     },
-    "NotSupported": "javascript,java,python",
+    "NotSupported": "javascript,python",
     "Results": [
       {
         "Text": "<6pm today",
@@ -4278,7 +4263,8 @@
               "timex": "2018-08-10T18",
               "Mod": "before",
               "type": "datetimerange",
-              "end": "2018-08-10 18:00:00"
+              "end": "2018-08-10 18:00:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -4292,7 +4278,7 @@
     "Context": {
       "ReferenceDateTime": "2018-08-10T00:00:00"
     },
-    "NotSupported": "javascript,java,python",
+    "NotSupported": "javascript,python",
     "Results": [
       {
         "Text": "<=6pm today",
@@ -4303,7 +4289,8 @@
               "timex": "2018-08-10T18",
               "Mod": "until",
               "type": "datetimerange",
-              "end": "2018-08-10 18:00:00"
+              "end": "2018-08-10 18:00:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -4317,7 +4304,7 @@
     "Context": {
       "ReferenceDateTime": "2018-08-10T00:00:00"
     },
-    "NotSupported": "javascript,java,python",
+    "NotSupported": "javascript,python",
     "Results": [
       {
         "Text": "6pm",
@@ -4341,7 +4328,7 @@
     "Context": {
       "ReferenceDateTime": "2018-08-10T00:00:00"
     },
-    "NotSupported": "javascript,java,python",
+    "NotSupported": "javascript,python",
     "Results": [
       {
         "Text": "6pm",
@@ -4357,6 +4344,65 @@
         },
         "Start": 14,
         "Length": 3
+      }
+    ]
+  },
+  {
+    "Input": "He will leave after 2016 and before 2018, or before 2019",
+    "Context": {
+      "ReferenceDateTime": "2015-11-07T00:00:00"
+    },
+    "Results": [
+      {
+        "Text": "after 2016",
+        "Start": 14,
+        "Length": 10,
+        "Type": "datetimeV2.daterange",
+        "Value": {
+          "values": [
+            {
+              "timex": "2016",
+              "Mod": "after",
+              "type": "daterange",
+              "sourceEntity": "datetimerange",
+              "start": "2017-01-01"
+            }
+          ]
+        }
+      },
+      {
+        "Text": "before 2018",
+        "Start": 29,
+        "Length": 11,
+        "Type": "datetimeV2.daterange",
+        "Value": {
+          "values": [
+            {
+              "timex": "2018",
+              "Mod": "before",
+              "type": "daterange",
+              "sourceEntity": "datetimerange",
+              "end": "2018-01-01"
+            }
+          ]
+        }
+      },
+      {
+        "Text": "before 2019",
+        "Start": 45,
+        "Length": 11,
+        "Type": "datetimeV2.daterange",
+        "Value": {
+          "values": [
+            {
+              "timex": "2019",
+              "Mod": "before",
+              "type": "daterange",
+              "sourceEntity": "datetimerange",
+              "end": "2019-01-01"
+            }
+          ]
+        }
       }
     ]
   }

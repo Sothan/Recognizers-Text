@@ -204,13 +204,15 @@
               "timex": "T04",
               "Mod": "before",
               "type": "timerange",
-              "end": "04:00:00"
+              "end": "04:00:00",
+              "sourceEntity": "datetimepoint"
             },
             {
               "timex": "T16",
               "Mod": "before",
               "type": "timerange",
-              "end": "16:00:00"
+              "end": "16:00:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -235,13 +237,15 @@
               "timex": "T03",
               "Mod": "after",
               "type": "timerange",
-              "start": "03:00:00"
+              "start": "03:00:00",
+              "sourceEntity": "datetimepoint"
             },
             {
               "timex": "T15",
               "Mod": "after",
               "type": "timerange",
-              "start": "15:00:00"
+              "start": "15:00:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -266,13 +270,15 @@
               "timex": "T04",
               "Mod": "before",
               "type": "timerange",
-              "end": "04:00:00"
+              "end": "04:00:00",
+              "sourceEntity": "datetimepoint"
             },
             {
               "timex": "T16",
               "Mod": "before",
               "type": "timerange",
-              "end": "16:00:00"
+              "end": "16:00:00",
+              "sourceEntity": "datetimepoint"
             }
           ]
         },
@@ -718,6 +724,355 @@
               "Mod": "approx",
               "type": "datetimerange",
               "value": "2018-08-17 10:00:00"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "Input": "What will happen in the 5 upcoming years?",
+    "Context": {
+      "ReferenceDateTime": "2018-08-30T10:00:00"
+    },
+    "NotSupported": "javascript, python",
+    "Results": [
+      {
+        "Text": "5 upcoming years",
+        "Start": 24,
+        "End": 39,
+        "TypeName": "datetimeV2.daterange",
+        "Resolution": {
+          "values": [
+            {
+              "timex": "(2018-08-31,2023-08-31,P5Y)",
+              "type": "daterange",
+              "start": "2018-08-31",
+              "end": "2023-08-31"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "Input": "What will happen in the 2 upcoming months?",
+    "Context": {
+      "ReferenceDateTime": "2018-08-30T10:00:00"
+    },
+    "NotSupported": "javascript, python",
+    "Results": [
+      {
+        "Text": "2 upcoming months",
+        "Start": 24,
+        "End": 40,
+        "TypeName": "datetimeV2.daterange",
+        "Resolution": {
+          "values": [
+            {
+              "timex": "(2018-08-31,2018-10-31,P2M)",
+              "type": "daterange",
+              "start": "2018-08-31",
+              "end": "2018-10-31"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "Input": "What will happen in the 2 next days?",
+    "Context": {
+      "ReferenceDateTime": "2018-08-30T10:00:00"
+    },
+    "NotSupported": "javascript, python",
+    "Results": [
+      {
+        "Text": "2 next days",
+        "Start": 24,
+        "End": 34,
+        "TypeName": "datetimeV2.daterange",
+        "Resolution": {
+          "values": [
+            {
+              "timex": "(2018-08-31,2018-09-02,P2D)",
+              "type": "daterange",
+              "start": "2018-08-31",
+              "end": "2018-09-02"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "Input": "What will happen in the 5 coming minutes?",
+    "Context": {
+      "ReferenceDateTime": "2018-08-30T10:00:00"
+    },
+    "NotSupported": "javascript, python",
+    "Results": [
+      {
+        "Text": "5 coming minutes",
+        "Start": 24,
+        "End": 39,
+        "TypeName": "datetimeV2.datetimerange",
+        "Resolution": {
+          "values": [
+            {
+              "timex": "(2018-08-30T10:00:00,2018-08-30T10:05:00,PT5M)",
+              "type": "datetimerange",
+              "start": "2018-08-30 10:00:00",
+              "end": "2018-08-30 10:05:00"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "Input": "What happened in the 5 past minutes?",
+    "Context": {
+      "ReferenceDateTime": "2018-08-30T10:00:00"
+    },
+    "NotSupported": "javascript, python",
+    "Results": [
+      {
+        "Text": "5 past minutes",
+        "Start": 21,
+        "End": 34,
+        "TypeName": "datetimeV2.datetimerange",
+        "Resolution": {
+          "values": [
+            {
+              "timex": "(2018-08-30T09:55:00,2018-08-30T10:00:00,PT5M)",
+              "type": "datetimerange",
+              "start": "2018-08-30 09:55:00",
+              "end": "2018-08-30 10:00:00"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "Input": "What happened in the 5 past years?",
+    "Context": {
+      "ReferenceDateTime": "2018-08-30T10:00:00"
+    },
+    "NotSupported": "javascript, python",
+    "Results": [
+      {
+        "Text": "5 past years",
+        "Start": 21,
+        "End": 32,
+        "TypeName": "datetimeV2.daterange",
+        "Resolution": {
+          "values": [
+            {
+              "timex": "(2013-08-30,2018-08-30,P5Y)",
+              "type": "daterange",
+              "start": "2013-08-30",
+              "end": "2018-08-30"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "Input": "What happened in the 10 previous weeks?",
+    "Context": {
+      "ReferenceDateTime": "2018-08-30T10:00:00"
+    },
+    "NotSupported": "javascript, python",
+    "Results": [
+      {
+        "Text": "10 previous weeks",
+        "Start": 21,
+        "End": 37,
+        "TypeName": "datetimeV2.daterange",
+        "Resolution": {
+          "values": [
+            {
+              "timex": "(2018-06-21,2018-08-30,P10W)",
+              "type": "daterange",
+              "start": "2018-06-21",
+              "end": "2018-08-30"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "Input": "What's your plan for Dec-2018",
+    "Context": {
+      "ReferenceDateTime": "2018-11-01T12:00:00"
+    },
+    "Results": [
+      {
+        "Text": "dec-2018",
+        "Start": 21,
+        "End": 28,
+        "TypeName": "datetimeV2.daterange",
+        "Resolution": {
+          "values": [
+            {
+              "timex": "2018-12",
+              "type": "daterange",
+              "start": "2018-12-01",
+              "end": "2019-01-01"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "Input": "What's your plan for Dec/2018",
+    "Context": {
+      "ReferenceDateTime": "2018-11-01T12:00:00"
+    },
+    "Results": [
+      {
+        "Text": "dec/2018",
+        "Start": 21,
+        "End": 28,
+        "TypeName": "datetimeV2.daterange",
+        "Resolution": {
+          "values": [
+            {
+              "timex": "2018-12",
+              "type": "daterange",
+              "start": "2018-12-01",
+              "end": "2019-01-01"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "Input": "What's your plan for Dec, 2018",
+    "Context": {
+      "ReferenceDateTime": "2018-11-01T12:00:00"
+    },
+    "Results": [
+      {
+        "Text": "dec, 2018",
+        "Start": 21,
+        "End": 29,
+        "TypeName": "datetimeV2.daterange",
+        "Resolution": {
+          "values": [
+            {
+              "timex": "2018-12",
+              "type": "daterange",
+              "start": "2018-12-01",
+              "end": "2019-01-01"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "Input": "What's your plan for Dec/2018-May/2019",
+    "Context": {
+      "ReferenceDateTime": "2018-11-01T12:00:00"
+    },
+    "NotSupportedByDesign": "javascript, python",
+    "Results": [
+      {
+        "Text": "dec/2018-may/2019",
+        "Start": 21,
+        "End": 37,
+        "TypeName": "datetimeV2.daterange",
+        "Resolution": {
+          "values": [
+            {
+              "timex": "(2018-12-01,2019-05-01,P5M)",
+              "type": "daterange",
+              "start": "2018-12-01",
+              "end": "2019-05-01"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "Input": "I will arrange a meeting from 6 to 7.",
+    "Context": {
+      "ReferenceDateTime": "2018-12-20T12:00:00"
+    },
+    "NotSupportedByDesign": "java, javascript, python",
+    "Results": [
+      {
+        "Text": "from 6 to 7",
+        "Start": 25,
+        "End": 35,
+        "TypeName": "datetimeV2.timerange",
+        "Resolution": {
+          "values": [
+            {
+              "timex": "(T06,T07,PT1H)",
+              "type": "timerange",
+              "start": "06:00:00",
+              "end": "07:00:00"
+            },
+            {
+              "timex": "(T18,T19,PT1H)",
+              "type": "timerange",
+              "start": "18:00:00",
+              "end": "19:00:00"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "Input": "Let's meet once a week",
+    "Context": {
+      "ReferenceDateTime": "2016-11-07T00:00:00"
+    },
+    "Results": [
+      {
+        "Text": "once a week",
+        "Start": 11,
+        "End": 21,
+        "TypeName": "datetimeV2.set",
+        "Resolution": {
+          "values": [
+            {
+              "timex": "P1W",
+              "type": "set",
+              "value": "not resolved"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "Input": "I go on vacation once a year",
+    "Context": {
+      "ReferenceDateTime": "2016-11-07T00:00:00"
+    },
+    "Results": [
+      {
+        "Text": "once a year",
+        "Start": 17,
+        "End": 27,
+        "TypeName": "datetimeV2.set",
+        "Resolution": {
+          "values": [
+            {
+              "timex": "P1Y",
+              "type": "set",
+              "value": "not resolved"
             }
           ]
         }

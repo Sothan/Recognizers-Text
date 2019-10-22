@@ -1,11 +1,29 @@
-﻿using Microsoft.Recognizers.Definitions.English;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.RegularExpressions;
+using Microsoft.Recognizers.Definitions.English;
 
 namespace Microsoft.Recognizers.Text.Number.English
 {
     public class EnglishNumberRangeParserConfiguration : INumberRangeParserConfiguration
     {
+        private const RegexOptions RegexFlags = RegexOptions.Singleline | RegexOptions.ExplicitCapture;
+
+        public EnglishNumberRangeParserConfiguration(INumberOptionsConfiguration config)
+        {
+            CultureInfo = new CultureInfo(config.Culture);
+
+            NumberExtractor = English.NumberExtractor.GetInstance();
+            OrdinalExtractor = English.OrdinalExtractor.GetInstance();
+            NumberParser = new BaseNumberParser(new EnglishNumberParserConfiguration(config));
+
+            MoreOrEqual = new Regex(NumbersDefinitions.MoreOrEqual, RegexFlags);
+            LessOrEqual = new Regex(NumbersDefinitions.LessOrEqual, RegexFlags);
+            MoreOrEqualSuffix = new Regex(NumbersDefinitions.MoreOrEqualSuffix, RegexFlags);
+            LessOrEqualSuffix = new Regex(NumbersDefinitions.LessOrEqualSuffix, RegexFlags);
+            MoreOrEqualSeparate = new Regex(NumbersDefinitions.OneNumberRangeMoreSeparateRegex, RegexFlags);
+            LessOrEqualSeparate = new Regex(NumbersDefinitions.OneNumberRangeLessSeparateRegex, RegexFlags);
+        }
+
         public CultureInfo CultureInfo { get; private set; }
 
         public IExtractor NumberExtractor { get; private set; }
@@ -25,24 +43,5 @@ namespace Microsoft.Recognizers.Text.Number.English
         public Regex MoreOrEqualSeparate { get; private set; }
 
         public Regex LessOrEqualSeparate { get; private set; }
-
-        public EnglishNumberRangeParserConfiguration() : this(new CultureInfo(Culture.English))
-        {
-        }
-
-        public EnglishNumberRangeParserConfiguration(CultureInfo ci)
-        {
-            CultureInfo = ci;
-
-            NumberExtractor = English.NumberExtractor.GetInstance();
-            OrdinalExtractor = English.OrdinalExtractor.GetInstance();
-            NumberParser = new BaseNumberParser(new EnglishNumberParserConfiguration());
-            MoreOrEqual = new Regex(NumbersDefinitions.MoreOrEqual, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            LessOrEqual = new Regex(NumbersDefinitions.LessOrEqual, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            MoreOrEqualSuffix = new Regex(NumbersDefinitions.MoreOrEqualSuffix, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            LessOrEqualSuffix = new Regex(NumbersDefinitions.LessOrEqualSuffix, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            MoreOrEqualSeparate = new Regex(NumbersDefinitions.OneNumberRangeMoreSeparateRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            LessOrEqualSeparate = new Regex(NumbersDefinitions.OneNumberRangeLessSeparateRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        }
     }
 }

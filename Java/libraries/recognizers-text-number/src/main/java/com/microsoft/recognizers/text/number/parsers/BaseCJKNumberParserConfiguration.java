@@ -15,6 +15,8 @@ public abstract class BaseCJKNumberParserConfiguration implements ICJKNumberPars
 
     private final char nonDecimalSeparatorChar;
     private final char decimalSeparatorChar;
+    private final char zeroChar;
+    private final char pairChar;
     private final String fractionMarkerToken;
     private final String halfADozenText;
     private final String wordSeparatorToken;
@@ -41,6 +43,7 @@ public abstract class BaseCJKNumberParserConfiguration implements ICJKNumberPars
     private final Map<Character, Character> tratoSimMap;
 
     private final List<Character> roundDirectList;
+    private final List<Character> tenChars;
 
     private final Pattern fracSplitRegex;
     private final Pattern digitNumRegex;
@@ -52,12 +55,27 @@ public abstract class BaseCJKNumberParserConfiguration implements ICJKNumberPars
     private final Pattern dozenRegex;
     private final Pattern roundNumberIntegerRegex;
 
-    protected BaseCJKNumberParserConfiguration(String langMarker, CultureInfo cultureInfo, NumberOptions options, char nonDecimalSeparatorChar, char decimalSeparatorChar, String fractionMarkerToken, String halfADozenText, String wordSeparatorToken, List<String> writtenDecimalSeparatorTexts, List<String> writtenGroupSeparatorTexts, List<String> writtenIntegerSeparatorTexts, List<String> writtenFractionSeparatorTexts, Map<String, Long> cardinalNumberMap, Map<String, Long> ordinalNumberMap, Map<String, Long> roundNumberMap, Pattern halfADozenRegex, Pattern digitalNumberRegex, Pattern negativeNumberSignRegex, Pattern fractionPrepositionRegex, Map<Character, Double> zeroToNineMap, Map<Character, Long> roundNumberMapChar, Map<Character, Character> fullToHalfMap, Map<String, String> unitMap, Map<Character, Character> tratoSimMap, List<Character> roundDirectList, Pattern fracSplitRegex, Pattern digitNumRegex, Pattern speGetNumberRegex, Pattern percentageRegex, Pattern pointRegex, Pattern doubleAndRoundRegex, Pattern pairRegex, Pattern dozenRegex, Pattern roundNumberIntegerRegex) {
+    private final boolean isCompoundNumberLanguage;
+    private final boolean isMultiDecimalSeparatorCulture;
+
+    protected BaseCJKNumberParserConfiguration(String langMarker, CultureInfo cultureInfo, boolean isCompoundNumberLanguage, boolean isMultiDecimalSeparatorCulture,
+        NumberOptions options, char nonDecimalSeparatorChar, char decimalSeparatorChar,
+        String fractionMarkerToken, String halfADozenText, String wordSeparatorToken, List<String> writtenDecimalSeparatorTexts, List<String> writtenGroupSeparatorTexts,
+        List<String> writtenIntegerSeparatorTexts, List<String> writtenFractionSeparatorTexts, Map<String, Long> cardinalNumberMap, Map<String, Long> ordinalNumberMap,
+        Map<String, Long> roundNumberMap, Pattern halfADozenRegex, Pattern digitalNumberRegex, Pattern negativeNumberSignRegex, Pattern fractionPrepositionRegex, Map<Character,
+        Double> zeroToNineMap, Map<Character, Long> roundNumberMapChar, Map<Character, Character> fullToHalfMap, Map<String, String> unitMap, Map<Character, Character> tratoSimMap,
+        List<Character> roundDirectList, Pattern fracSplitRegex, Pattern digitNumRegex, Pattern speGetNumberRegex, Pattern percentageRegex, Pattern pointRegex,
+        Pattern doubleAndRoundRegex, Pattern pairRegex, Pattern dozenRegex, Pattern roundNumberIntegerRegex,char zeroChar, List<Character> tenChars,char pairChar) {
+
         this.langMarker = langMarker;
         this.cultureInfo = cultureInfo;
+        this.isCompoundNumberLanguage = isCompoundNumberLanguage;
+        this.isMultiDecimalSeparatorCulture = isMultiDecimalSeparatorCulture;
         this.options = options;
         this.nonDecimalSeparatorChar = nonDecimalSeparatorChar;
         this.decimalSeparatorChar = decimalSeparatorChar;
+        this.zeroChar = zeroChar;
+        this.pairChar = pairChar;
         this.fractionMarkerToken = fractionMarkerToken;
         this.halfADozenText = halfADozenText;
         this.wordSeparatorToken = wordSeparatorToken;
@@ -78,6 +96,7 @@ public abstract class BaseCJKNumberParserConfiguration implements ICJKNumberPars
         this.unitMap = unitMap;
         this.tratoSimMap = tratoSimMap;
         this.roundDirectList = roundDirectList;
+        this.tenChars = tenChars;
         this.fracSplitRegex = fracSplitRegex;
         this.digitNumRegex = digitNumRegex;
         this.speGetNumberRegex = speGetNumberRegex;
@@ -91,104 +110,197 @@ public abstract class BaseCJKNumberParserConfiguration implements ICJKNumberPars
     //endregion
 
     @Override
-    public Map<Character, Double> getZeroToNineMap() { return this.zeroToNineMap; }
+    public Map<Character, Double> getZeroToNineMap() {
+        return this.zeroToNineMap;
+    }
 
     @Override
-    public Map<Character, Long> getRoundNumberMapChar() { return this.roundNumberMapChar; }
+    public Map<Character, Long> getRoundNumberMapChar() {
+        return this.roundNumberMapChar;
+    }
 
     @Override
-    public Map<Character, Character> getFullToHalfMap() { return this.fullToHalfMap; }
+    public Map<Character, Character> getFullToHalfMap() {
+        return this.fullToHalfMap;
+    }
 
     @Override
-    public Map<String, String> getUnitMap() { return this.unitMap; }
+    public Map<String, String> getUnitMap() {
+        return this.unitMap;
+    }
 
     @Override
-    public Map<Character, Character> getTratoSimMap() { return this.tratoSimMap; }
+    public Map<Character, Character> getTratoSimMap() {
+        return this.tratoSimMap;
+    }
 
     @Override
-    public List<Character> getRoundDirectList() { return this.roundDirectList; }
+    public List<Character> getRoundDirectList() {
+        return this.roundDirectList;
+    }
 
     @Override
-    public Pattern getFracSplitRegex() { return this.fracSplitRegex; }
+    public List<Character> getTenChars() {
+        return this.tenChars;
+    }
 
     @Override
-    public Pattern getDigitNumRegex() { return this.digitNumRegex; }
+    public Pattern getFracSplitRegex() {
+        return this.fracSplitRegex;
+    }
 
     @Override
-    public Pattern getSpeGetNumberRegex() { return this.speGetNumberRegex; }
+    public Pattern getDigitNumRegex() {
+        return this.digitNumRegex;
+    }
 
     @Override
-    public Pattern getPercentageRegex() { return this.percentageRegex; }
+    public Pattern getSpeGetNumberRegex() {
+        return this.speGetNumberRegex;
+    }
 
     @Override
-    public Pattern getPointRegex() { return this.pointRegex; }
+    public Pattern getPercentageRegex() {
+        return this.percentageRegex;
+    }
 
     @Override
-    public Pattern getDoubleAndRoundRegex() { return this.doubleAndRoundRegex; }
+    public Pattern getPointRegex() {
+        return this.pointRegex;
+    }
 
     @Override
-    public Pattern getPairRegex() { return this.pairRegex; }
+    public Pattern getDoubleAndRoundRegex() {
+        return this.doubleAndRoundRegex;
+    }
 
     @Override
-    public Pattern getDozenRegex() { return this.dozenRegex; }
+    public Pattern getPairRegex() {
+        return this.pairRegex;
+    }
 
     @Override
-    public Pattern getRoundNumberIntegerRegex() { return this.roundNumberIntegerRegex; }
+    public Pattern getDozenRegex() {
+        return this.dozenRegex;
+    }
 
     @Override
-    public Map<String, Long> getCardinalNumberMap() { return this.cardinalNumberMap; }
+    public Pattern getRoundNumberIntegerRegex() {
+        return this.roundNumberIntegerRegex;
+    }
 
     @Override
-    public Map<String, Long> getOrdinalNumberMap() { return this.ordinalNumberMap; }
+    public Map<String, Long> getCardinalNumberMap() {
+        return this.cardinalNumberMap;
+    }
 
     @Override
-    public Map<String, Long> getRoundNumberMap() { return this.roundNumberMap; }
+    public Map<String, Long> getOrdinalNumberMap() {
+        return this.ordinalNumberMap;
+    }
 
     @Override
-    public NumberOptions getOptions() { return this.options; }
+    public Map<String, Long> getRoundNumberMap() {
+        return this.roundNumberMap;
+    }
 
     @Override
-    public CultureInfo getCultureInfo() { return this.cultureInfo; }
+    public NumberOptions getOptions() {
+        return this.options;
+    }
 
     @Override
-    public Pattern getDigitalNumberRegex() { return this.digitalNumberRegex; }
+    public CultureInfo getCultureInfo() {
+        return this.cultureInfo;
+    }
 
     @Override
-    public Pattern getFractionPrepositionRegex() { return this.fractionPrepositionRegex; }
+    public Pattern getDigitalNumberRegex() {
+        return this.digitalNumberRegex;
+    }
 
     @Override
-    public String getFractionMarkerToken() { return this.fractionMarkerToken; }
+    public Pattern getFractionPrepositionRegex() {
+        return this.fractionPrepositionRegex;
+    }
 
     @Override
-    public Pattern getHalfADozenRegex() { return this.halfADozenRegex; }
+    public String getFractionMarkerToken() {
+        return this.fractionMarkerToken;
+    }
 
     @Override
-    public String getHalfADozenText() { return this.halfADozenText; }
+    public Pattern getHalfADozenRegex() {
+        return this.halfADozenRegex;
+    }
 
     @Override
-    public String getLangMarker() { return this.langMarker; }
+    public String getHalfADozenText() {
+        return this.halfADozenText;
+    }
 
     @Override
-    public char getNonDecimalSeparatorChar() { return this.nonDecimalSeparatorChar; }
+    public String getLangMarker() {
+        return this.langMarker;
+    }
 
     @Override
-    public char getDecimalSeparatorChar() { return this.decimalSeparatorChar; }
+    public char getNonDecimalSeparatorChar() {
+        return this.nonDecimalSeparatorChar;
+    }
 
     @Override
-    public String getWordSeparatorToken() { return this.wordSeparatorToken; }
+    public char getDecimalSeparatorChar() {
+        return this.decimalSeparatorChar;
+    }
 
     @Override
-    public List<String> getWrittenDecimalSeparatorTexts() { return this.writtenDecimalSeparatorTexts; }
+    public char getZeroChar() {
+        return this.zeroChar;
+    }
 
     @Override
-    public List<String> getWrittenGroupSeparatorTexts() { return this.writtenGroupSeparatorTexts; }
+    public char getPairChar() {
+        return this.pairChar;
+    }
 
     @Override
-    public List<String> getWrittenIntegerSeparatorTexts() { return this.writtenIntegerSeparatorTexts; }
+    public String getWordSeparatorToken() {
+        return this.wordSeparatorToken;
+    }
 
     @Override
-    public List<String> getWrittenFractionSeparatorTexts() { return this.writtenFractionSeparatorTexts; }
+    public List<String> getWrittenDecimalSeparatorTexts() {
+        return this.writtenDecimalSeparatorTexts;
+    }
 
     @Override
-    public Pattern getNegativeNumberSignRegex() { return this.negativeNumberSignRegex; }
+    public List<String> getWrittenGroupSeparatorTexts() {
+        return this.writtenGroupSeparatorTexts;
+    }
+
+    @Override
+    public List<String> getWrittenIntegerSeparatorTexts() {
+        return this.writtenIntegerSeparatorTexts;
+    }
+
+    @Override
+    public List<String> getWrittenFractionSeparatorTexts() {
+        return this.writtenFractionSeparatorTexts;
+    }
+
+    @Override
+    public Pattern getNegativeNumberSignRegex() {
+        return this.negativeNumberSignRegex;
+    }
+
+    @Override
+    public boolean isCompoundNumberLanguage() {
+        return this.isCompoundNumberLanguage;
+    }
+
+    @Override
+    public boolean isMultiDecimalSeparatorCulture() {
+        return this.isMultiDecimalSeparatorCulture;
+    }
 }

@@ -4,11 +4,12 @@ import { Constants } from "../constants";
 import { INumberWithUnitExtractorConfiguration } from "../extractors";
 import { BaseNumberWithUnitParserConfiguration } from "../parsers";
 import { JapaneseNumericWithUnit } from "../../resources/japaneseNumericWithUnit";
+import { BaseUnits } from "../../resources/baseUnits";
 
 export abstract class JapaneseNumberWithUnitExtractorConfiguration implements INumberWithUnitExtractorConfiguration {
     abstract readonly suffixList: ReadonlyMap<string, string>;
     abstract readonly prefixList: ReadonlyMap<string, string>;
-    abstract readonly ambiguousUnitList: ReadonlyArray<string>;
+    abstract readonly ambiguousUnitList: readonly string[];
     readonly abstract extractType: string;
 
     readonly cultureInfo: CultureInfo;
@@ -17,6 +18,8 @@ export abstract class JapaneseNumberWithUnitExtractorConfiguration implements IN
     readonly buildSuffix: string;
     readonly connectorToken: string;
     readonly compoundUnitConnectorRegex: RegExp;
+    readonly nonUnitRegex: RegExp;
+    readonly ambiguousUnitNumberMultiplierRegex: RegExp;
 
     constructor(ci: CultureInfo) {
         this.cultureInfo = ci;
@@ -26,6 +29,7 @@ export abstract class JapaneseNumberWithUnitExtractorConfiguration implements IN
         this.buildSuffix = JapaneseNumericWithUnit.BuildSuffix;
         this.connectorToken = JapaneseNumericWithUnit.ConnectorToken;
         this.compoundUnitConnectorRegex = RegExpUtility.getSafeRegExp(JapaneseNumericWithUnit.CompoundUnitConnectorRegex);
+        this.nonUnitRegex = RegExpUtility.getSafeRegExp(BaseUnits.PmNonUnitRegex);
     }
 }
 

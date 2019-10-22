@@ -7,18 +7,26 @@ namespace Microsoft.Recognizers.Text.NumberWithUnit.Spanish
 {
     public class AgeExtractorConfiguration : SpanishNumberWithUnitExtractorConfiguration
     {
-        public AgeExtractorConfiguration() : this(new CultureInfo(Culture.Spanish)) { }
+        public static readonly ImmutableDictionary<string, string> AgeSuffixList = NumbersWithUnitDefinitions.AgeSuffixList.ToImmutableDictionary();
 
-        public AgeExtractorConfiguration(CultureInfo ci) : base(ci) { }
+        public static readonly ImmutableList<string> AmbiguousAgeUnitList = NumbersWithUnitDefinitions.AmbiguousAgeUnitList.ToImmutableList();
+
+        public AgeExtractorConfiguration()
+               : this(new CultureInfo(Culture.Spanish))
+        {
+        }
+
+        public AgeExtractorConfiguration(CultureInfo ci)
+               : base(ci)
+        {
+        }
 
         public override ImmutableDictionary<string, string> SuffixList => AgeSuffixList;
 
         public override ImmutableDictionary<string, string> PrefixList => null;
 
-        public override ImmutableList<string> AmbiguousUnitList => null;
+        public override ImmutableList<string> AmbiguousUnitList => AmbiguousAgeUnitList;
 
         public override string ExtractType => Constants.SYS_UNIT_AGE;
-
-        public static readonly ImmutableDictionary<string, string> AgeSuffixList = NumbersWithUnitDefinitions.AgeSuffixList.ToImmutableDictionary();
     }
 }

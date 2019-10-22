@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Recognizers.Text.Utilities;
 using DateObject = System.DateTime;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
     public class BaseHolidayParser : IDateTimeParser
     {
-        public static readonly string ParserName = Constants.SYS_DATETIME_DATE; //"Date";
-        
+        public static readonly string ParserName = Constants.SYS_DATETIME_DATE; // "Date"
+
         private readonly IHolidayParserConfiguration config;
 
         public BaseHolidayParser(IHolidayParserConfiguration config)
@@ -27,7 +28,7 @@ namespace Microsoft.Recognizers.Text.DateTime
             var referenceDate = refDate;
             object value = null;
 
-            if (er.Type.Equals(ParserName))
+            if (er.Type.Equals(ParserName, StringComparison.Ordinal))
             {
                 var innerResult = ParseHolidayRegexMatch(er.Text, referenceDate);
 
@@ -35,11 +36,11 @@ namespace Microsoft.Recognizers.Text.DateTime
                 {
                     innerResult.FutureResolution = new Dictionary<string, string>
                     {
-                        {TimeTypeConstants.DATE, FormatUtil.FormatDate((DateObject) innerResult.FutureValue)}
+                        { TimeTypeConstants.DATE, DateTimeFormatUtil.FormatDate((DateObject)innerResult.FutureValue) },
                     };
                     innerResult.PastResolution = new Dictionary<string, string>
                     {
-                        {TimeTypeConstants.DATE, FormatUtil.FormatDate((DateObject) innerResult.PastValue)}
+                        { TimeTypeConstants.DATE, DateTimeFormatUtil.FormatDate((DateObject)innerResult.PastValue) },
                     };
                     value = innerResult;
                 }
@@ -53,38 +54,43 @@ namespace Microsoft.Recognizers.Text.DateTime
                 Type = er.Type,
                 Data = er.Data,
                 Value = value,
-                TimexStr = value == null ? "" : ((DateTimeResolutionResult) value).Timex,
-                ResolutionStr = ""
+                TimexStr = value == null ? string.Empty : ((DateTimeResolutionResult)value).Timex,
+                ResolutionStr = string.Empty,
             };
+
             return ret;
+        }
+
+        public List<DateTimeParseResult> FilterResults(string query, List<DateTimeParseResult> candidateResults)
+        {
+            return candidateResults;
         }
 
         private DateTimeResolutionResult ParseHolidayRegexMatch(string text, DateObject referenceDate)
         {
-            var trimedText = text.Trim();
             foreach (var regex in this.config.HolidayRegexList)
             {
-                var offset = 0;
-                var match = regex.Match(trimedText);
+                var match = regex.MatchExact(text, trim: true);
 
-                if (match.Success && match.Index == offset && match.Length == trimedText.Length)
+                if (match.Success)
                 {
-                    // LUIS value string will be set in Match2Date method
-                    var ret = Match2Date(match, referenceDate);
+                    // Value string will be set in Match2Date method
+                    var ret = Match2Date(match.Match, referenceDate);
                     return ret;
                 }
             }
+
             return new DateTimeResolutionResult();
         }
 
         private DateTimeResolutionResult Match2Date(Match match, DateObject referenceDate)
         {
             var ret = new DateTimeResolutionResult();
-            var holidayStr = this.config.SanitizeHolidayToken(match.Groups["holiday"].Value.ToLowerInvariant());
+            var holidayStr = this.config.SanitizeHolidayToken(match.Groups["holiday"].Value);
 
             // get year (if exist)
-            var yearStr = match.Groups["year"].Value.ToLower();
-            var orderStr = match.Groups["order"].Value.ToLower();
+            var yearStr = match.Groups["year"].Value;
+            var orderStr = match.Groups["order"].Value;
             int year;
             var hasYear = false;
 
@@ -100,6 +106,7 @@ namespace Microsoft.Recognizers.Text.DateTime
                 {
                     return ret;
                 }
+
                 year = referenceDate.Year + swift;
                 hasYear = true;
             }
@@ -117,7 +124,7 @@ namespace Microsoft.Recognizers.Text.DateTime
                     break;
                 }
             }
-            
+
             var timexStr = string.Empty;
             if (!string.IsNullOrEmpty(holidayKey))
             {
@@ -139,7 +146,7 @@ namespace Microsoft.Recognizers.Text.DateTime
 
                 if (value.Equals(DateObject.MinValue))
                 {
-                    ret.Timex = "";
+                    ret.Timex = string.Empty;
                     ret.FutureValue = ret.PastValue = DateObject.MinValue;
                     ret.Success = true;
                     return ret;
@@ -188,11 +195,6 @@ namespace Microsoft.Recognizers.Text.DateTime
             }
 
             return value;
-        }
-
-        public List<DateTimeParseResult> FilterResults(string query, List<DateTimeParseResult> candidateResults)
-        {
-            return candidateResults;
         }
     }
 }

@@ -4,6 +4,9 @@
 //     Changes to this file may cause incorrect behavior and will be lost if
 //     the code is regenerated.
 // </auto-generated>
+//
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 // ------------------------------------------------------------------------------
 
 package com.microsoft.recognizers.text.numberwithunit.resources;
@@ -18,7 +21,7 @@ public class JapaneseNumericWithUnit {
 
     public static final List<String> AgeAmbiguousValues = Arrays.asList("歳");
 
-    public static final Map<String, String> AgeSuffixList = ImmutableMap.<String, String>builder()
+    public static final ImmutableMap<String, String> AgeSuffixList = ImmutableMap.<String, String>builder()
         .put("Year", "歳")
         .put("Month", "ヶ月")
         .put("Week", "週間|週")
@@ -31,7 +34,7 @@ public class JapaneseNumericWithUnit {
 
     public static final String ConnectorToken = "";
 
-    public static final Map<String, String> CurrencySuffixList = ImmutableMap.<String, String>builder()
+    public static final ImmutableMap<String, String> CurrencySuffixList = ImmutableMap.<String, String>builder()
         .put("Afghan afghani", "アフガニ")
         .put("Pul", "プル")
         .put("Euro", "ユーロ")
@@ -113,7 +116,7 @@ public class JapaneseNumericWithUnit {
         .put("Halala", "ハララ")
         .put("Samoan tālā", "タラ|サモア・タラ|サモアタラ")
         .put("Sierra Leonean leone", "レオン|シエラレオネ・レオン|シエラレオネレオン")
-        .put("Peseta", "ユーロ")
+        .put("Peseta", "ペセタ")
         .put("Swazi lilangeni", "リランゲニ|スワジランド・リランゲニ|スワジランドリランゲニ")
         .put("Tajikistani somoni", "ソモニ|タジキスタン・ソモニ|タジキスタンソモニ")
         .put("Thai baht", "バーツ|タイ・バーツ|タイバーツ")
@@ -123,8 +126,8 @@ public class JapaneseNumericWithUnit {
         .put("Vanuatu vatu", "バツ|バヌアツ・バツ|バヌアツバツ")
         .put("Vietnamese dong", "ドン|ベトナム・ドン|ベトナムドン")
         .put("Indonesian rupiah", "ルピア|インドネシア・ルピア|インドネシアルピア")
-        .put("Netherlands guilder", "ユーロ|オランダ・ユーロ")
-        .put("Surinam florin", "スリナム・ドル")
+        .put("Netherlands guilder", "オランダ・ユーロ")
+        .put("Surinam florin", "スリナムフロリン")
         .put("Zambian kwacha", "ザンビア・クワチャ")
         .put("Moroccan dirham", "モロッコ・ディルハム")
         .put("United Arab Emirates dirham", "UAEディルハム")
@@ -155,8 +158,8 @@ public class JapaneseNumericWithUnit {
         .put("Swedish krona", "スウェーデン・クローナ")
         .put("Krone", "クローナ")
         .put("Øre", "オーレ")
-        .put("West African CFA franc", "CFAフラン")
-        .put("Central African CFA franc", "CFAフラン")
+        .put("West African CFA franc", "西アフリカCFAフラン")
+        .put("Central African CFA franc", "中央アフリカCFAフラン")
         .put("Comorian franc", "コモロ・フラン")
         .put("Congolese franc", "コンゴ・フラン")
         .put("Burundian franc", "ブルンジ・フラン")
@@ -186,7 +189,7 @@ public class JapaneseNumericWithUnit {
         .put("Fils", "フィルス")
         .put("Para", "パラ")
         .put("Millime", "ミリム")
-        .put("Argentine peso", "ペソ|アルゼンチン・ペソ")
+        .put("Argentine peso", "アルゼンチン・ペソ")
         .put("Chilean peso", "チリ・ペソ")
         .put("Colombian peso", "コロンビア・ペソ")
         .put("Cuban peso", "兌換ペソ")
@@ -196,7 +199,7 @@ public class JapaneseNumericWithUnit {
         .put("Uruguayan peso", "ウルグアイ・ペソ")
         .put("Peso", "ペソ")
         .put("Centavo", "センターボ")
-        .put("Alderney pound", "ガーンジー・ポンド")
+        .put("Alderney pound", "オルダニーポンド")
         .put("British pound", "UKポンド")
         .put("Guernsey pound", "ガーンジー・ポンド")
         .put("Saint Helena pound", "セントヘレナ・ポンド")
@@ -210,11 +213,11 @@ public class JapaneseNumericWithUnit {
         .put("Sudanese pound", "スーダン・ポンド")
         .put("Syrian pound", "シリア・ポンド")
         .put("Pound", "ポンド")
-        .put("Pence", "ペニー")
+        .put("Pence", "ペンス")
         .put("Shilling", "シリング")
         .put("United States dollar", "ドル|USドル")
         .put("East Caribbean dollar", "東カリブ・ドル")
-        .put("Australian dollar", "オーストラリア・ドル")
+        .put("Australian dollar", "オーストラリア・ドル|オーストラリアドル")
         .put("Bahamian dollar", "バハマ・ドル")
         .put("Barbadian dollar", "バルバドス・ドル")
         .put("Belize dollar", "ベリーズ・ドル")
@@ -224,14 +227,14 @@ public class JapaneseNumericWithUnit {
         .put("Canadian dollar", "カナダ・ドル")
         .put("Cayman Islands dollar", "ケイマン諸島・ドル")
         .put("New Zealand dollar", "ニュージーランド・ドル")
-        .put("Cook Islands dollar", "ニュージーランド・ドル|ニュージーランド・ドル")
+        .put("Cook Islands dollar", "クックアイランド・ドル")
         .put("Fijian dollar", "フィジー・ドル|フィジー・ドル")
         .put("Guyanese dollar", "ガイアナ・ドル|ガイアナ・ドル")
         .put("Hong Kong dollar", "香港ドル")
         .put("Macau Pataca", "マカオ・パタカ|マカオ・パタカ")
         .put("New Taiwan dollar", "ニュー台湾ドル|ニュー台湾ドル")
         .put("Jamaican dollar", "ジャマイカ・ドル|ジャマイカドル")
-        .put("Kiribati dollar", "オーストラリア・ドル|オーストラリアドル")
+        .put("Kiribati dollar", "キリバス・ドル")
         .put("Liberian dollar", "リベリア・ドル|リベリアドル")
         .put("Namibian dollar", "ナミビア・ドル|ナミビアドル")
         .put("Surinamese dollar", "スリナム・ドル|スリナムドル")
@@ -244,7 +247,7 @@ public class JapaneseNumericWithUnit {
         .put("Penni", "ペニー")
         .build();
 
-    public static final Map<String, String> CurrencyNameToIsoCodeMap = ImmutableMap.<String, String>builder()
+    public static final ImmutableMap<String, String> CurrencyNameToIsoCodeMap = ImmutableMap.<String, String>builder()
         .put("Afghan afghani", "AFN")
         .put("Euro", "EUR")
         .put("Albanian lek", "ALL")
@@ -432,7 +435,7 @@ public class JapaneseNumericWithUnit {
         .put("Abkhazian apsar", "_AA")
         .build();
 
-    public static final Map<String, String> FractionalUnitNameToCodeMap = ImmutableMap.<String, String>builder()
+    public static final ImmutableMap<String, String> FractionalUnitNameToCodeMap = ImmutableMap.<String, String>builder()
         .put("Jiao", "JIAO")
         .put("Kopek", "KOPEK")
         .put("Pul", "PUL")
@@ -510,7 +513,7 @@ public class JapaneseNumericWithUnit {
 
     public static final String CompoundUnitConnectorRegex = "(?<spacer>と)";
 
-    public static final Map<String, String> CurrencyPrefixList = ImmutableMap.<String, String>builder()
+    public static final ImmutableMap<String, String> CurrencyPrefixList = ImmutableMap.<String, String>builder()
         .put("Dollar", "$")
         .put("United States dollar", "us$")
         .put("British Virgin Islands dollar", "bvi$")
@@ -528,12 +531,12 @@ public class JapaneseNumericWithUnit {
         .put("New Taiwan dollar", "nt$|nt $")
         .put("Samoan tālā", "ws$")
         .put("Chinese yuan", "￥")
-        .put("Japanese yen", "¥|\\\\")
+        .put("Japanese yen", "¥|\\")
         .put("Turkish lira", "₺")
         .put("Euro", "€")
         .put("Pound", "£")
         .put("Costa Rican colón", "₡")
         .build();
 
-    public static final List<String> CurrencyAmbiguousValues = Arrays.asList("円", "銭", "\\\\");
+    public static final List<String> CurrencyAmbiguousValues = Arrays.asList("円", "銭", "\\");
 }

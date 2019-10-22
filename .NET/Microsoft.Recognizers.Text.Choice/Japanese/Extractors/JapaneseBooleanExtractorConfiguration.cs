@@ -8,18 +8,18 @@ namespace Microsoft.Recognizers.Text.Choice.Japanese
     public class JapaneseBooleanExtractorConfiguration : IBooleanExtractorConfiguration
     {
         public static readonly Regex TrueRegex =
-            new Regex(ChoiceDefinitions.TrueRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(ChoiceDefinitions.TrueRegex, RegexOptions.Singleline);
 
         public static readonly Regex FalseRegex =
-            new Regex(ChoiceDefinitions.FalseRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(ChoiceDefinitions.FalseRegex, RegexOptions.Singleline);
 
         public static readonly Regex TokenRegex =
-            new Regex(ChoiceDefinitions.TokenizerRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(ChoiceDefinitions.TokenizerRegex, RegexOptions.Singleline);
 
         public static readonly IDictionary<Regex, string> MapRegexes = new Dictionary<Regex, string>()
         {
-            {TrueRegex, Constants.SYS_BOOLEAN_TRUE },
-            {FalseRegex, Constants.SYS_BOOLEAN_FALSE }
+            { TrueRegex, Constants.SYS_BOOLEAN_TRUE },
+            { FalseRegex, Constants.SYS_BOOLEAN_FALSE },
         };
 
         public JapaneseBooleanExtractorConfiguration(bool onlyTopMatch = true)

@@ -1,7 +1,7 @@
 import { IExtractor, ExtractResult } from "@microsoft/recognizers-text";
 import { StringUtility, Match, RegExpUtility } from "@microsoft/recognizers-text-number";
-import { IDateTimeExtractor } from "../baseDateTime"
-import { Constants, TimeTypeConstants } from "../constants"
+import { IDateTimeExtractor } from "../baseDateTime";
+import { Constants, TimeTypeConstants } from "../constants";
 import { Token } from "../utilities";
 
 export interface DateTimeExtra<T> {
@@ -30,9 +30,11 @@ export abstract class BaseDateTimeExtractor<T> implements IDateTimeExtractor {
     constructor(regexesDictionary: Map<RegExp, T>) {
         this.regexesDictionary = regexesDictionary;
     }
-    
-    extract(source: string, refDate: Date): Array<ExtractResult> {
-        if (!refDate) refDate = new Date();
+
+    extract(source: string, refDate: Date): ExtractResult[] {
+        if (!refDate) {
+            refDate = new Date();
+        }
         let referenceDate = refDate;
 
         let results = new Array<ExtractResult>();
@@ -46,11 +48,11 @@ export abstract class BaseDateTimeExtractor<T> implements IDateTimeExtractor {
             matched[i] = false;
         }
 
-        let collections: Array<{ matches: Match[], value: T}> = [];
+        let collections: { matches: Match[], value: T }[] = [];
         this.regexesDictionary.forEach((value, regex) => {
             let matches = RegExpUtility.getMatches(regex, source);
             if (matches.length > 0) {
-                collections.push({ matches: matches, value: value});
+                collections.push({ matches: matches, value: value });
             }
         });
 
@@ -97,12 +99,20 @@ export abstract class BaseDateTimeExtractor<T> implements IDateTimeExtractor {
 
 export class TimeResolutionUtils {
     static addDescription(lowBoundMap: ReadonlyMap<string, number>, timeResult: TimeResult, description: string) {
+        description = TimeResolutionUtils.normalizeDesc(description);
         if (lowBoundMap.has(description) && timeResult.hour < lowBoundMap.get(description)) {
             timeResult.hour += 12;
             timeResult.lowBound = lowBoundMap.get(description);
-        } else {
+        }
+        else {
             timeResult.lowBound = 0;
         }
+    }
+
+    static normalizeDesc(description: string): string {
+        description = description.replace(/\s/g, '');
+        description = description.replace(/\./g, '');
+        return description;
     }
 
     static matchToValue(onlyDigitMatch: RegExp, numbersMap: ReadonlyMap<string, number>, source: string): number {
@@ -123,9 +133,11 @@ export class TimeResolutionUtils {
             let char = source.charAt(index);
             if (char === '十') {
                 value *= 10;
-            } else if (index === 0) {
+            }
+            else if (index === 0) {
                 value *= numbersMap.get(char);
-            } else {
+            }
+            else {
                 value += numbersMap.get(char);
             }
         }

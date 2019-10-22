@@ -1,10 +1,39 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.Recognizers.Text.DateTime.Italian
 {
-    public class ItalianSetParserConfiguration : BaseOptionsConfiguration, ISetParserConfiguration
+    public class ItalianSetParserConfiguration : BaseDateTimeOptionsConfiguration, ISetParserConfiguration
     {
+        public ItalianSetParserConfiguration(ICommonDateTimeParserConfiguration config)
+            : base(config)
+        {
+            DurationExtractor = config.DurationExtractor;
+            TimeExtractor = config.TimeExtractor;
+            DateExtractor = config.DateExtractor;
+            DateTimeExtractor = config.DateTimeExtractor;
+            DatePeriodExtractor = config.DatePeriodExtractor;
+            TimePeriodExtractor = config.TimePeriodExtractor;
+            DateTimePeriodExtractor = config.DateTimePeriodExtractor;
+
+            DurationParser = config.DurationParser;
+            TimeParser = config.TimeParser;
+            DateParser = config.DateParser;
+            DateTimeParser = config.DateTimeParser;
+            DatePeriodParser = config.DatePeriodParser;
+            TimePeriodParser = config.TimePeriodParser;
+            DateTimePeriodParser = config.DateTimePeriodParser;
+            UnitMap = config.UnitMap;
+
+            EachPrefixRegex = ItalianSetExtractorConfiguration.EachPrefixRegex;
+            PeriodicRegex = ItalianSetExtractorConfiguration.PeriodicRegex;
+            EachUnitRegex = ItalianSetExtractorConfiguration.EachUnitRegex;
+            EachDayRegex = ItalianSetExtractorConfiguration.EachDayRegex;
+            SetWeekDayRegex = ItalianSetExtractorConfiguration.SetWeekDayRegex;
+            SetEachRegex = ItalianSetExtractorConfiguration.SetEachRegex;
+        }
+
         public IDateTimeExtractor DurationExtractor { get; }
 
         public IDateTimeParser DurationParser { get; }
@@ -13,7 +42,7 @@ namespace Microsoft.Recognizers.Text.DateTime.Italian
 
         public IDateTimeParser TimeParser { get; }
 
-        public IDateTimeExtractor DateExtractor { get; }
+        public IDateExtractor DateExtractor { get; }
 
         public IDateTimeParser DateParser { get; }
 
@@ -47,55 +76,33 @@ namespace Microsoft.Recognizers.Text.DateTime.Italian
 
         public Regex SetEachRegex { get; }
 
-        public ItalianSetParserConfiguration(ICommonDateTimeParserConfiguration config) : base(config.Options)
-        {
-            DurationExtractor = config.DurationExtractor;
-            TimeExtractor = config.TimeExtractor;
-            DateExtractor = config.DateExtractor;
-            DateTimeExtractor = config.DateTimeExtractor;
-            DatePeriodExtractor = config.DatePeriodExtractor;
-            TimePeriodExtractor = config.TimePeriodExtractor;
-            DateTimePeriodExtractor = config.DateTimePeriodExtractor;
-
-            DurationParser = config.DurationParser;
-            TimeParser = config.TimeParser;
-            DateParser = config.DateParser;
-            DateTimeParser = config.DateTimeParser;
-            DatePeriodParser = config.DatePeriodParser;
-            TimePeriodParser = config.TimePeriodParser;
-            DateTimePeriodParser = config.DateTimePeriodParser;
-            UnitMap = config.UnitMap;
-
-            EachPrefixRegex = ItalianSetExtractorConfiguration.EachPrefixRegex;
-            PeriodicRegex = ItalianSetExtractorConfiguration.PeriodicRegex;
-            EachUnitRegex = ItalianSetExtractorConfiguration.EachUnitRegex;
-            EachDayRegex = ItalianSetExtractorConfiguration.EachDayRegex;
-            SetWeekDayRegex = ItalianSetExtractorConfiguration.SetWeekDayRegex;
-            SetEachRegex = ItalianSetExtractorConfiguration.SetEachRegex;
-        }
-
         public bool GetMatchedDailyTimex(string text, out string timex)
         {
-            var trimedText = text.Trim().ToLowerInvariant();
-            if (trimedText.Equals("quotidien") || trimedText.Equals("quotidienne") || 
-                trimedText.Equals("jours") || trimedText.Equals("journellement")) // daily
+            var trimmedText = text.Trim();
+            if (trimmedText.Equals("quotidianamente") || trimmedText.Equals("quotidiano") || trimmedText.Equals("quotidiana") ||
+                trimmedText.Equals("giornalmente") || trimmedText.Equals("giornaliero") || trimmedText.Equals("giornaliera"))
             {
+                // daily
                 timex = "P1D";
             }
-            else if (trimedText.Equals("hebdomadaire"))           // weekly
+            else if (trimmedText.Equals("settimanale") || trimmedText.Equals("settimanalmente"))
             {
+                // weekly
                 timex = "P1W";
             }
-            else if (trimedText.Equals("bihebdomadaire"))          // bi weekly
+            else if (trimmedText.Equals("bisettimanale"))
             {
+                // bi weekly
                 timex = "P2W";
             }
-            else if (trimedText.Equals("mensuel") || trimedText.Equals("mensuelle"))              // monthly
+            else if (trimmedText.Equals("mensile") || trimmedText.Equals("mensilmente"))
             {
+                // monthly
                 timex = "P1M";
             }
-            else if (trimedText.Equals("annuel") || trimedText.Equals("annuellement")) // yearly/annually
+            else if (trimmedText.Equals("annuale") || trimmedText.Equals("annualmente"))
             {
+                // yearly/annually
                 timex = "P1Y";
             }
             else
@@ -103,26 +110,28 @@ namespace Microsoft.Recognizers.Text.DateTime.Italian
                 timex = null;
                 return false;
             }
+
             return true;
         }
 
         public bool GetMatchedUnitTimex(string text, out string timex)
         {
-            var trimedText = text.Trim().ToLowerInvariant();
-            if (trimedText.Equals("jour")||trimedText.Equals("journee"))
+            var trimmedText = text.Trim();
+            if (trimmedText.Equals("giorno") || trimmedText.Equals("giornata") || trimmedText.Equals("giorni"))
             {
                 timex = "P1D";
             }
-            else if (trimedText.Equals("semaine"))
+            else if (trimmedText.Equals("settimana") || trimmedText.Equals("settimane"))
             {
                 timex = "P1W";
             }
-            else if (trimedText.Equals("mois"))
+            else if (trimmedText.Equals("mese") || trimmedText.Equals("mesi"))
             {
                 timex = "P1M";
             }
-            else if (trimedText.Equals("an")||trimedText.Equals("annee")) // year
+            else if (trimmedText.Equals("anno") || trimmedText.Equals("annata") || trimmedText.Equals("anni"))
             {
+                // year
                 timex = "P1Y";
             }
             else
@@ -134,5 +143,35 @@ namespace Microsoft.Recognizers.Text.DateTime.Italian
             return true;
         }
 
+        public string WeekDayGroupMatchString(Match match)
+        {
+            string weekday = string.Empty;
+            if (match.Groups["g0"].ToString() != string.Empty)
+            {
+                weekday = match.Groups["g0"].ToString() + "a";
+            }
+            else if (match.Groups["g1"].ToString() != string.Empty)
+            {
+                weekday = match.Groups["g1"].ToString() + "io";
+            }
+            else if (match.Groups["g2"].ToString() != string.Empty)
+            {
+                weekday = match.Groups["g2"].ToString() + "e";
+            }
+            else if (match.Groups["g3"].ToString() != string.Empty)
+            {
+                weekday = match.Groups["g3"].ToString() + "ì";
+            }
+            else if (match.Groups["g4"].ToString() != string.Empty)
+            {
+                weekday = match.Groups["g4"].ToString() + "a";
+            }
+            else if (match.Groups["g5"].ToString() != string.Empty)
+            {
+                weekday = match.Groups["g5"].ToString() + "o";
+            }
+
+            return weekday;
+        }
     }
 }

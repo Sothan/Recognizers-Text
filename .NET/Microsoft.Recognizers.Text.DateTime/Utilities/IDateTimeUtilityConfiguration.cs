@@ -10,6 +10,8 @@ namespace Microsoft.Recognizers.Text.DateTime.Utilities
 
         Regex InConnectorRegex { get; }
 
+        Regex SinceYearSuffixRegex { get; }
+
         Regex WithinNextPrefixRegex { get; }
 
         Regex RangeUnitRegex { get; }
@@ -25,5 +27,7 @@ namespace Microsoft.Recognizers.Text.DateTime.Utilities
         Regex AmPmDescRegex { get; }
 
         Regex CommonDatePrefixRegex { get; }
+
+        bool CheckBothBeforeAfter { get; }
     }
 }

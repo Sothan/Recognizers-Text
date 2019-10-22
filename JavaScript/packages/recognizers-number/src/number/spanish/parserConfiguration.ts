@@ -2,7 +2,7 @@ import { ParseResult } from "@microsoft/recognizers-text";
 import { INumberParserConfiguration } from "../parsers";
 import { CultureInfo, Culture } from "../../culture";
 import { SpanishNumeric } from "../../resources/spanishNumeric";
-import { RegExpUtility } from "@microsoft/recognizers-text"
+import { RegExpUtility } from "@microsoft/recognizers-text";
 
 export class SpanishNumberParserConfiguration implements INumberParserConfiguration {
 
@@ -19,10 +19,10 @@ export class SpanishNumberParserConfiguration implements INumberParserConfigurat
     readonly nonDecimalSeparatorChar: string;
     readonly decimalSeparatorChar: string;
     readonly wordSeparatorToken: string;
-    readonly writtenDecimalSeparatorTexts: ReadonlyArray<string>;
-    readonly writtenGroupSeparatorTexts: ReadonlyArray<string>;
-    readonly writtenIntegerSeparatorTexts: ReadonlyArray<string>;
-    readonly writtenFractionSeparatorTexts: ReadonlyArray<string>;
+    readonly writtenDecimalSeparatorTexts: readonly string[];
+    readonly writtenGroupSeparatorTexts: readonly string[];
+    readonly writtenIntegerSeparatorTexts: readonly string[];
+    readonly writtenFractionSeparatorTexts: readonly string[];
 
     constructor(ci?: CultureInfo) {
         if (!ci) {
@@ -43,10 +43,10 @@ export class SpanishNumberParserConfiguration implements INumberParserConfigurat
         this.writtenIntegerSeparatorTexts = SpanishNumeric.WrittenIntegerSeparatorTexts;
         this.writtenFractionSeparatorTexts = SpanishNumeric.WrittenFractionSeparatorTexts;
 
-        let ordinalNumberMap = new Map<string, number>(SpanishNumeric.SimpleOrdinalNumberMap);
+        let ordinalNumberMap = new Map<string, number>(SpanishNumeric.OrdinalNumberMap);
 
-        SpanishNumeric.PrefixCardinalDictionary.forEach((prefixValue: number, prefixKey: string) => {
-            SpanishNumeric.SufixOrdinalDictionary.forEach((suffixValue: number, suffixKey: string) => {
+        SpanishNumeric.PrefixCardinalMap.forEach((prefixValue: number, prefixKey: string) => {
+            SpanishNumeric.SuffixOrdinalMap.forEach((suffixValue: number, suffixKey: string) => {
                 if (!ordinalNumberMap.has(prefixKey + suffixKey)) {
                     ordinalNumberMap.set(prefixKey + suffixKey, prefixValue * suffixValue);
                 }
@@ -61,7 +61,7 @@ export class SpanishNumberParserConfiguration implements INumberParserConfigurat
         this.digitalNumberRegex = RegExpUtility.getSafeRegExp(SpanishNumeric.DigitalNumberRegex);
     }
 
-    normalizeTokenSet(tokens: ReadonlyArray<string>, context: ParseResult): ReadonlyArray<string> {
+    normalizeTokenSet(tokens: readonly string[], context: ParseResult): readonly string[] {
         let result = new Array<string>();
 
         tokens.forEach((token: string) => {

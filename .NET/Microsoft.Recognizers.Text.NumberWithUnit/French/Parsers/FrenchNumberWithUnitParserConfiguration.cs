@@ -8,10 +8,12 @@ namespace Microsoft.Recognizers.Text.NumberWithUnit.French
 {
     public class FrenchNumberWithUnitParserConfiguration : BaseNumberWithUnitParserConfiguration
     {
-        public FrenchNumberWithUnitParserConfiguration(CultureInfo ci) : base(ci)
+        public FrenchNumberWithUnitParserConfiguration(CultureInfo ci)
+            : base(ci)
         {
             this.InternalNumberExtractor = NumberExtractor.GetInstance();
-            this.InternalNumberParser = AgnosticNumberParserFactory.GetParser(AgnosticNumberParserType.Number, new FrenchNumberParserConfiguration());
+            this.InternalNumberParser = AgnosticNumberParserFactory.GetParser(AgnosticNumberParserType.Number, new FrenchNumberParserConfiguration(
+                                                                                  new BaseNumberOptionsConfiguration(ci.Name)));
             this.ConnectorToken = NumbersWithUnitDefinitions.ConnectorToken;
         }
 

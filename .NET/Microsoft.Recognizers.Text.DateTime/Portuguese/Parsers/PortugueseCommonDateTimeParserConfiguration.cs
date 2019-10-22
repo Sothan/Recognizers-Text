@@ -9,13 +9,15 @@ namespace Microsoft.Recognizers.Text.DateTime.Portuguese
 {
     public class PortugueseCommonDateTimeParserConfiguration : BaseDateParserConfiguration
     {
-        public PortugueseCommonDateTimeParserConfiguration(IOptionsConfiguration config) : base(config)
+        public PortugueseCommonDateTimeParserConfiguration(IDateTimeOptionsConfiguration config)
+            : base(config)
         {
             UtilityConfiguration = new PortugueseDatetimeUtilityConfiguration();
 
             UnitMap = DateTimeDefinitions.UnitMap.ToImmutableDictionary();
             UnitValueMap = DateTimeDefinitions.UnitValueMap.ToImmutableDictionary();
             SeasonMap = DateTimeDefinitions.SeasonMap.ToImmutableDictionary();
+            SpecialYearPrefixesMap = DateTimeDefinitions.SpecialYearPrefixesMap.ToImmutableDictionary();
             CardinalMap = DateTimeDefinitions.CardinalMap.ToImmutableDictionary();
             DayOfWeek = DateTimeDefinitions.DayOfWeek.ToImmutableDictionary();
             MonthOfYear = DateTimeDefinitions.MonthOfYear.ToImmutableDictionary();
@@ -25,10 +27,10 @@ namespace Microsoft.Recognizers.Text.DateTime.Portuguese
             SpecialDecadeCases = DateTimeDefinitions.SpecialDecadeCases.ToImmutableDictionary();
 
             CardinalExtractor = Number.Portuguese.CardinalExtractor.GetInstance();
-            IntegerExtractor = new IntegerExtractor();
-            OrdinalExtractor = new OrdinalExtractor();
+            IntegerExtractor = Number.Portuguese.IntegerExtractor.GetInstance();
+            OrdinalExtractor = Number.Portuguese.OrdinalExtractor.GetInstance();
 
-            NumberParser = new BaseNumberParser(new PortugueseNumberParserConfiguration());
+            NumberParser = new BaseNumberParser(new PortugueseNumberParserConfiguration(new BaseNumberOptionsConfiguration(config.Culture)));
             DateExtractor = new BaseDateExtractor(new PortugueseDateExtractorConfiguration(this));
             TimeExtractor = new BaseTimeExtractor(new PortugueseTimeExtractorConfiguration(this));
             DateTimeExtractor = new BaseDateTimeExtractor(new PortugueseDateTimeExtractorConfiguration(this));

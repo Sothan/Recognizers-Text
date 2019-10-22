@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/recognizers-text-data-types-timex-expression",
-  "version": "1.0.1",
+  "version": "1.2.7",
   "description": "Support for TIMEX representation of data time",
   "author": "Microsoft",
   "license": "MIT",
@@ -20,7 +20,7 @@
     "url": "https://github.com/Microsoft/Recognizers-Text/issues"
   },
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=10.3.0"
   },
   "scripts": {
     "test": "mocha",

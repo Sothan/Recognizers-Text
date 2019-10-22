@@ -3,35 +3,73 @@
 using Microsoft.Recognizers.Definitions.Portuguese;
 using Microsoft.Recognizers.Text.DateTime.Portuguese.Utilities;
 using Microsoft.Recognizers.Text.DateTime.Utilities;
-using Microsoft.Recognizers.Text.Number;
-using Microsoft.Recognizers.Text.Number.Portuguese;
 
 namespace Microsoft.Recognizers.Text.DateTime.Portuguese
 {
-    public class PortugueseDateTimeExtractorConfiguration : BaseOptionsConfiguration, IDateTimeExtractorConfiguration
+    public class PortugueseDateTimeExtractorConfiguration : BaseDateTimeOptionsConfiguration, IDateTimeExtractorConfiguration
     {
-        public static readonly Regex PrepositionRegex = new Regex(DateTimeDefinitions.PrepositionRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        public static readonly Regex NowRegex = new Regex(DateTimeDefinitions.NowRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        public static readonly Regex SuffixRegex = new Regex(DateTimeDefinitions.SuffixRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex PrepositionRegex =
+            new Regex(DateTimeDefinitions.PrepositionRegex, RegexFlags);
 
-        //TODO: modify it according to the corresponding English regex
-        public static readonly Regex TimeOfDayRegex = new Regex(DateTimeDefinitions.TimeOfDayRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        public static readonly Regex SpecificTimeOfDayRegex = new Regex(DateTimeDefinitions.SpecificTimeOfDayRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        public static readonly Regex TimeOfTodayAfterRegex = new Regex(DateTimeDefinitions.TimeOfTodayAfterRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        public static readonly Regex TimeOfTodayBeforeRegex = new Regex(DateTimeDefinitions.TimeOfTodayBeforeRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        public static readonly Regex SimpleTimeOfTodayAfterRegex = new Regex(DateTimeDefinitions.SimpleTimeOfTodayAfterRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        public static readonly Regex SimpleTimeOfTodayBeforeRegex = new Regex(DateTimeDefinitions.SimpleTimeOfTodayBeforeRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        public static readonly Regex TheEndOfRegex = new Regex(DateTimeDefinitions.TheEndOfRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex NowRegex =
+            new Regex(DateTimeDefinitions.NowRegex, RegexFlags);
 
-        //TODO: add this for Portuguese
-        public static readonly Regex UnitRegex = new Regex(DateTimeDefinitions.UnitRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        public static readonly Regex ConnectorRegex = new Regex(DateTimeDefinitions.ConnectorRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        public static readonly Regex NumberAsTimeRegex = new Regex(DateTimeDefinitions.NumberAsTimeRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        public static readonly Regex DateNumberConnectorRegex = new Regex(DateTimeDefinitions.DateNumberConnectorRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex SuffixRegex =
+            new Regex(DateTimeDefinitions.SuffixRegex, RegexFlags);
 
-        public PortugueseDateTimeExtractorConfiguration(IOptionsConfiguration config) : base(config)
+        // TODO: modify it according to the corresponding English regex
+        public static readonly Regex TimeOfDayRegex =
+            new Regex(DateTimeDefinitions.TimeOfDayRegex, RegexFlags);
+
+        public static readonly Regex SpecificTimeOfDayRegex =
+            new Regex(DateTimeDefinitions.SpecificTimeOfDayRegex, RegexFlags);
+
+        public static readonly Regex TimeOfTodayAfterRegex =
+            new Regex(DateTimeDefinitions.TimeOfTodayAfterRegex, RegexFlags);
+
+        public static readonly Regex TimeOfTodayBeforeRegex =
+            new Regex(DateTimeDefinitions.TimeOfTodayBeforeRegex, RegexFlags);
+
+        public static readonly Regex SimpleTimeOfTodayAfterRegex =
+            new Regex(DateTimeDefinitions.SimpleTimeOfTodayAfterRegex, RegexFlags);
+
+        public static readonly Regex SimpleTimeOfTodayBeforeRegex =
+            new Regex(DateTimeDefinitions.SimpleTimeOfTodayBeforeRegex, RegexFlags);
+
+        public static readonly Regex SpecificEndOfRegex =
+            new Regex(DateTimeDefinitions.SpecificEndOfRegex, RegexFlags);
+
+        public static readonly Regex UnspecificEndOfRegex =
+            new Regex(DateTimeDefinitions.UnspecificEndOfRegex, RegexFlags);
+
+        public static readonly Regex YearRegex =
+            new Regex(DateTimeDefinitions.YearRegex, RegexFlags);
+
+        public static readonly Regex YearSuffix =
+            new Regex(DateTimeDefinitions.YearSuffix, RegexFlags);
+
+        // TODO: add this for Portuguese
+        public static readonly Regex UnitRegex =
+            new Regex(DateTimeDefinitions.UnitRegex, RegexFlags);
+
+        public static readonly Regex ConnectorRegex =
+            new Regex(DateTimeDefinitions.ConnectorRegex, RegexFlags);
+
+        public static readonly Regex NumberAsTimeRegex =
+            new Regex(DateTimeDefinitions.NumberAsTimeRegex, RegexFlags);
+
+        public static readonly Regex DateNumberConnectorRegex =
+            new Regex(DateTimeDefinitions.DateNumberConnectorRegex, RegexFlags);
+
+        public static readonly Regex SuffixAfterRegex =
+            new Regex(DateTimeDefinitions.SuffixAfterRegex, RegexFlags);
+
+        private const RegexOptions RegexFlags = RegexOptions.Singleline | RegexOptions.ExplicitCapture;
+
+        public PortugueseDateTimeExtractorConfiguration(IDateTimeOptionsConfiguration config)
+            : base(config)
         {
-            IntegerExtractor = new IntegerExtractor();
+            IntegerExtractor = Number.Portuguese.IntegerExtractor.GetInstance();
             DatePointExtractor = new BaseDateExtractor(new PortugueseDateExtractorConfiguration(this));
             TimePointExtractor = new BaseTimeExtractor(new PortugueseTimeExtractorConfiguration(this));
             DurationExtractor = new BaseDurationExtractor(new PortugueseDurationExtractorConfiguration(this));
@@ -40,7 +78,7 @@ namespace Microsoft.Recognizers.Text.DateTime.Portuguese
 
         public IExtractor IntegerExtractor { get; }
 
-        public IDateTimeExtractor DatePointExtractor { get; }
+        public IDateExtractor DatePointExtractor { get; }
 
         public IDateTimeExtractor TimePointExtractor { get; }
 
@@ -62,7 +100,9 @@ namespace Microsoft.Recognizers.Text.DateTime.Portuguese
 
         Regex IDateTimeExtractorConfiguration.TimeOfDayRegex => TimeOfDayRegex;
 
-        Regex IDateTimeExtractorConfiguration.TheEndOfRegex => TheEndOfRegex;
+        Regex IDateTimeExtractorConfiguration.SpecificEndOfRegex => SpecificEndOfRegex;
+
+        Regex IDateTimeExtractorConfiguration.UnspecificEndOfRegex => UnspecificEndOfRegex;
 
         Regex IDateTimeExtractorConfiguration.UnitRegex => UnitRegex;
 
@@ -70,12 +110,18 @@ namespace Microsoft.Recognizers.Text.DateTime.Portuguese
 
         Regex IDateTimeExtractorConfiguration.DateNumberConnectorRegex => DateNumberConnectorRegex;
 
+        Regex IDateTimeExtractorConfiguration.YearRegex => YearRegex;
+
+        Regex IDateTimeExtractorConfiguration.YearSuffix => YearSuffix;
+
+        Regex IDateTimeExtractorConfiguration.SuffixAfterRegex => SuffixAfterRegex;
+
         public bool IsConnector(string text)
         {
             text = text.Trim();
-            return (string.IsNullOrEmpty(text)
+            return string.IsNullOrEmpty(text)
                     || PrepositionRegex.IsMatch(text)
-                    || ConnectorRegex.IsMatch(text));
+                    || ConnectorRegex.IsMatch(text);
         }
     }
 }

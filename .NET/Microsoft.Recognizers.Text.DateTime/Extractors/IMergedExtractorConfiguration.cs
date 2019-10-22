@@ -2,14 +2,12 @@
 using System.Text.RegularExpressions;
 
 using Microsoft.Recognizers.Text.Matcher;
-using Microsoft.Recognizers.Text.Number;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
-    public interface IMergedExtractorConfiguration : IOptionsConfiguration
+    public interface IMergedExtractorConfiguration : IDateTimeOptionsConfiguration
     {
-
-        IDateTimeExtractor DateExtractor { get; }
+        IDateExtractor DateExtractor { get; }
 
         IDateTimeExtractor TimeExtractor { get; }
 
@@ -33,7 +31,7 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         IExtractor IntegerExtractor { get; }
 
-        IEnumerable<Regex> FilterWordRegexList { get; }
+        IEnumerable<Regex> TermFilterRegexes { get; }
 
         Regex AfterRegex { get; }
 
@@ -43,21 +41,31 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         Regex AroundRegex { get; }
 
+        Regex EqualRegex { get; }
+
         Regex FromToRegex { get; }
 
         Regex SingleAmbiguousMonthRegex { get; }
+
+        Regex AmbiguousRangeModifierPrefix { get; }
+
+        Regex PotentialAmbiguousRangeRegex { get; }
 
         Regex PrepositionSuffixRegex { get; }
 
         Regex NumberEndingPattern { get; }
 
-        Regex YearAfterRegex { get; }
+        Regex SuffixAfterRegex { get; }
 
         Regex UnspecificDatePeriodRegex { get; }
+
+        Regex UnspecificTimePeriodRegex { get; }
+
+        // Regex to act as umbrella for key terms so that sentences that clearly don't have entities can be rejected quickly
+        Regex FailFastRegex { get; }
 
         StringMatcher SuperfluousWordMatcher { get; }
 
         Dictionary<Regex, Regex> AmbiguityFiltersDict { get; }
-
     }
 }

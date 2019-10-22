@@ -1,22 +1,23 @@
 ﻿using System.Collections.Immutable;
-
-using Microsoft.Recognizers.Text.DateTime.German.Utilities;
-using Microsoft.Recognizers.Definitions.German;
 using Microsoft.Recognizers.Definitions;
-using Microsoft.Recognizers.Text.Number.German;
+using Microsoft.Recognizers.Definitions.German;
+using Microsoft.Recognizers.Text.DateTime.German.Utilities;
 using Microsoft.Recognizers.Text.Number;
+using Microsoft.Recognizers.Text.Number.German;
 
 namespace Microsoft.Recognizers.Text.DateTime.German
 {
     public class GermanCommonDateTimeParserConfiguration : BaseDateParserConfiguration
     {
-        public GermanCommonDateTimeParserConfiguration(IOptionsConfiguration config) : base(config)
+        public GermanCommonDateTimeParserConfiguration(IDateTimeOptionsConfiguration config)
+            : base(config)
         {
             UtilityConfiguration = new GermanDatetimeUtilityConfiguration();
 
             UnitMap = DateTimeDefinitions.UnitMap.ToImmutableDictionary();
             UnitValueMap = DateTimeDefinitions.UnitValueMap.ToImmutableDictionary();
             SeasonMap = DateTimeDefinitions.SeasonMap.ToImmutableDictionary();
+            SpecialYearPrefixesMap = DateTimeDefinitions.SpecialYearPrefixesMap.ToImmutableDictionary();
             CardinalMap = DateTimeDefinitions.CardinalMap.ToImmutableDictionary();
             DayOfWeek = DateTimeDefinitions.DayOfWeek.ToImmutableDictionary();
             MonthOfYear = DateTimeDefinitions.MonthOfYear.ToImmutableDictionary();
@@ -29,7 +30,7 @@ namespace Microsoft.Recognizers.Text.DateTime.German
             IntegerExtractor = Number.German.IntegerExtractor.GetInstance();
             OrdinalExtractor = Number.German.OrdinalExtractor.GetInstance();
 
-            NumberParser = new BaseNumberParser(new GermanNumberParserConfiguration());
+            NumberParser = new BaseNumberParser(new GermanNumberParserConfiguration(new BaseNumberOptionsConfiguration(config.Culture)));
             DateExtractor = new BaseDateExtractor(new GermanDateExtractorConfiguration(this));
             TimeExtractor = new BaseTimeExtractor(new GermanTimeExtractorConfiguration(this));
             DateTimeExtractor = new BaseDateTimeExtractor(new GermanDateTimeExtractorConfiguration(this));

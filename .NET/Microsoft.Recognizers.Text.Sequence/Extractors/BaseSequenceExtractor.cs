@@ -9,7 +9,7 @@ namespace Microsoft.Recognizers.Text.Sequence
     {
         internal abstract ImmutableDictionary<Regex, string> Regexes { get; }
 
-        protected virtual string ExtractType { get; } = "";
+        protected virtual string ExtractType { get; } = string.Empty;
 
         public virtual List<ExtractResult> Extract(string text)
         {
@@ -23,23 +23,26 @@ namespace Microsoft.Recognizers.Text.Sequence
             var matchSource = new Dictionary<Match, string>();
             var matched = new bool[text.Length];
 
-            //Traverse every match results to see each position in the text is matched or not.
+            // Traverse every match results to see each position in the text is matched or not.
             var collections = Regexes.ToDictionary(o => o.Key.Matches(text), p => p.Value);
             foreach (var collection in collections)
             {
                 foreach (Match m in collection.Key)
                 {
-                    for (var j = 0; j < m.Length; j++)
+                    if (IsValidMatch(m))
                     {
-                        matched[m.Index + j] = true;
-                    }
+                        for (var j = 0; j < m.Length; j++)
+                        {
+                            matched[m.Index + j] = true;
+                        }
 
-                    // Keep Source Data for extra information
-                    matchSource.Add(m, collection.Value);
+                        // Keep Source Data for extra information
+                        matchSource.Add(m, collection.Value);
+                    }
                 }
             }
 
-            //Form the extracted results from all the matched intervals in the text.
+            // Form the extracted results mark all the matched intervals in the text.
             var lastNotMatched = -1;
             for (var i = 0; i < text.Length; i++)
             {
@@ -50,18 +53,18 @@ namespace Microsoft.Recognizers.Text.Sequence
                         var start = lastNotMatched + 1;
                         var length = i - lastNotMatched;
                         var substr = text.Substring(start, length);
-                        bool matchFunc(Match o) => o.Index == start && o.Length == length;
+                        bool MatchFunc(Match o) => o.Index == start && o.Length == length;
 
-                        if (matchSource.Keys.Any(matchFunc))
+                        if (matchSource.Keys.Any(MatchFunc))
                         {
-                            var srcMatch = matchSource.Keys.First(matchFunc);
+                            var srcMatch = matchSource.Keys.First(MatchFunc);
                             result.Add(new ExtractResult
                             {
                                 Start = start,
                                 Length = length,
                                 Text = substr,
                                 Type = ExtractType,
-                                Data = matchSource.ContainsKey(srcMatch) ? matchSource[srcMatch] : null
+                                Data = matchSource.ContainsKey(srcMatch) ? matchSource[srcMatch] : null,
                             });
                         }
                     }
@@ -73,6 +76,11 @@ namespace Microsoft.Recognizers.Text.Sequence
             }
 
             return result;
+        }
+
+        public virtual bool IsValidMatch(Match match)
+        {
+            return true;
         }
     }
 }

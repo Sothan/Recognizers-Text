@@ -25,14 +25,15 @@ export class FrenchDateTimeExtractorConfiguration implements IDateTimeExtractorC
     readonly nightRegex: RegExp;
     readonly timeOfTodayBeforeRegex: RegExp;
     readonly simpleTimeOfTodayBeforeRegex: RegExp;
-    readonly theEndOfRegex: RegExp;
+    readonly specificEndOfRegex: RegExp;
+    readonly unspecificEndOfRegex: RegExp;
     readonly unitRegex: RegExp;
     readonly utilityConfiguration: IDateTimeUtilityConfiguration;
     readonly prepositionRegex: RegExp;
     readonly connectorRegex: RegExp;
 
 
-    constructor() {
+    constructor(dmyDateFormat: boolean) {
         this.prepositionRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.PrepositionRegex, "gis");
         this.nowRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.NowRegex, "gis");
         this.suffixRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.SuffixRegex, "gis");
@@ -43,24 +44,23 @@ export class FrenchDateTimeExtractorConfiguration implements IDateTimeExtractorC
         this.timeOfTodayBeforeRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.TimeOfTodayBeforeRegex, "gis");
         this.simpleTimeOfTodayAfterRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.SimpleTimeOfTodayAfterRegex, "gis");
         this.simpleTimeOfTodayBeforeRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.SimpleTimeOfTodayBeforeRegex, "gis");
-        this.theEndOfRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.TheEndOfRegex, "gis");
+        this.specificEndOfRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.SpecificEndOfRegex, "gis");
+        this.unspecificEndOfRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.UnspecificEndOfRegex, "gis");
         this.unitRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.TimeUnitRegex, "gis");
         this.connectorRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.ConnectorRegex, "gis");
         this.nightRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.NightRegex, "gis");
 
-        this.datePointExtractor = new BaseDateExtractor(new FrenchDateExtractorConfiguration());
+        this.datePointExtractor = new BaseDateExtractor(new FrenchDateExtractorConfiguration(dmyDateFormat));
         this.timePointExtractor = new BaseTimeExtractor(new FrenchTimeExtractorConfiguration());
         this.durationExtractor = new BaseDurationExtractor(new FrenchDurationExtractorConfiguration());
         this.utilityConfiguration = new FrenchDateTimeUtilityConfiguration();
     }
 
     isConnectorToken(source: string): boolean {
-        
-        return (source === "" || source === "," ||
+
+        return (source === "" ||
             RegExpUtility.getFirstMatchIndex(this.prepositionRegex, source).matched ||
-            source === "t" || 
-            source === "pour" ||
-            source === "vers");
+            RegExpUtility.getFirstMatchIndex(this.connectorRegex, source).matched);
     }
 }
 
@@ -81,14 +81,15 @@ export class FrenchDateTimeParserConfiguration implements IDateTimeParserConfigu
     readonly simpleTimeOfTodayAfterRegex: RegExp;
     readonly simpleTimeOfTodayBeforeRegex: RegExp;
     readonly specificTimeOfDayRegex: RegExp;
-    readonly theEndOfRegex: RegExp;
+    readonly specificEndOfRegex: RegExp;
+    readonly unspecificEndOfRegex: RegExp;
     readonly unitRegex: RegExp;
     readonly unitMap: ReadonlyMap<string, string>;
     readonly numbers: ReadonlyMap<string, number>;
     readonly utilityConfiguration: IDateTimeUtilityConfiguration;
 
     readonly nextPrefixRegex: RegExp;
-    readonly pastPrefixRegex: RegExp;
+    readonly previousPrefixRegex: RegExp;
 
     constructor(config: ICommonDateTimeParserConfiguration) {
         this.tokenBeforeDate = FrenchDateTime.TokenBeforeDate;
@@ -96,10 +97,11 @@ export class FrenchDateTimeParserConfiguration implements IDateTimeParserConfigu
         this.nowRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.NowRegex, "gis");
         this.amTimeRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.AMTimeRegex, "gis");
         this.pmTimeRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.PMTimeRegex, "gis");
-        this.simpleTimeOfTodayAfterRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.SimpleTimeOfTodayAfterRegex, "gis")
-        this.simpleTimeOfTodayBeforeRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.SimpleTimeOfTodayBeforeRegex, "gis")
+        this.simpleTimeOfTodayAfterRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.SimpleTimeOfTodayAfterRegex, "gis");
+        this.simpleTimeOfTodayBeforeRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.SimpleTimeOfTodayBeforeRegex, "gis");
         this.specificTimeOfDayRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.SpecificTimeOfDayRegex, "gis");
-        this.theEndOfRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.TheEndOfRegex, "gis")
+        this.specificEndOfRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.SpecificEndOfRegex, "gis");
+        this.unspecificEndOfRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.UnspecificEndOfRegex, "gis");
         this.unitRegex = RegExpUtility.getSafeRegExp(FrenchDateTime.TimeUnitRegex, "gis");
 
         this.dateExtractor = config.dateExtractor;
@@ -125,12 +127,12 @@ export class FrenchDateTimeParserConfiguration implements IDateTimeParserConfigu
         if (trimedText.endsWith("maintenant")) {
             timex = "PRESENT_REF";
         }
-        else if (trimedText === "récemment" || 
+        else if (trimedText === "récemment" ||
             trimedText === "précédemment" ||
             trimedText === "auparavant") {
             timex = "PAST_REF";
         }
-        else if (trimedText === "dès que possible" || 
+        else if (trimedText === "dès que possible" ||
             trimedText === "dqp") {
             timex = "FUTURE_REF";
         }
@@ -151,15 +153,15 @@ export class FrenchDateTimeParserConfiguration implements IDateTimeParserConfigu
         let trimedText = text.trim().toLowerCase();
         let swift = 0;
 
-        if (trimedText.startsWith("prochain") || 
+        if (trimedText.startsWith("prochain") ||
             trimedText.endsWith("prochain") ||
-            trimedText.startsWith("prochaine") || 
+            trimedText.startsWith("prochaine") ||
             trimedText.endsWith("prochaine")) {
             swift = 1;
         }
-        else if (trimedText.startsWith("dernier") || 
+        else if (trimedText.startsWith("dernier") ||
             trimedText.startsWith("dernière") ||
-            trimedText.endsWith("dernier") || 
+            trimedText.endsWith("dernier") ||
             trimedText.endsWith("dernière")) {
             swift = -1;
         }

@@ -138,13 +138,13 @@
     ]
   },
   {
-    "Input": "I'll go back Monday January 12th, 2016",
+    "Input": "i'll go back monday january 12th, 2016",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
     "Results": [
       {
-        "Text": "Monday January 12th, 2016",
+        "Text": "monday january 12th, 2016",
         "Type": "date",
         "Value": {
           "Timex": "2016-01-12",
@@ -326,23 +326,14 @@
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
-    "Results": [
-      {
-        "Text": "4-22",
-        "Type": "date",
-        "Value": {
-          "Timex": "XXXX-04-22",
-          "FutureResolution": {
-            "date": "2017-04-22"
-          },
-          "PastResolution": {
-            "date": "2016-04-22"
-          }
-        },
-        "Start": 16,
-        "Length": 4
-      }
-    ]
+    "Results": []
+  },
+  {
+    "Input": "I'll go back at 4.22",
+    "Context": {
+      "ReferenceDateTime": "2016-11-07T00:00:00"
+    },
+    "Results": []
   },
   {
     "Input": "I'll go back on    4/22",
@@ -1490,7 +1481,7 @@
           }
         },
         "Start": 16,
-        "Length": 6 
+        "Length": 6
       }
     ]
   },
@@ -2238,14 +2229,14 @@
     ]
   },
   {
-    "Input": "Monday, Jan twenty two, 2018",
+    "Input": "monday, jan twenty two, 2018",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
     "NotSupported": "javascript, python",
     "Results": [
       {
-        "Text": "Monday, Jan twenty two, 2018",
+        "Text": "monday, jan twenty two, 2018",
         "Type": "date",
         "Value": {
           "Timex": "2018-01-22",
@@ -2262,14 +2253,14 @@
     ]
   },
   {
-    "Input": "on Sunday Jan twenty one two thousand and eighteen",
+    "Input": "on sunday jan twenty one two thousand and eighteen",
     "Context": {
       "ReferenceDateTime": "2016-11-07T00:00:00"
     },
     "NotSupported": "javascript, python",
     "Results": [
       {
-        "Text": "Sunday Jan twenty one two thousand and eighteen",
+        "Text": "sunday jan twenty one two thousand and eighteen",
         "Type": "date",
         "Value": {
           "Timex": "2018-01-21",
@@ -2809,7 +2800,7 @@
     "Context": {
       "ReferenceDateTime": "2018-07-05T00:00:00"
     },
-    "NotSupported": "java, javascript, python",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "in 3 weeks",
@@ -2833,7 +2824,7 @@
     "Context": {
       "ReferenceDateTime": "2018-08-21T08:00:00"
     },
-    "NotSupported": "java, javascript, python",
+    "NotSupported": "javascript, python",
     "Results": [
       {
         "Text": "in four business days",
@@ -2849,6 +2840,76 @@
         },
         "Start": 45,
         "Length": 21
+      }
+    ]
+  },
+  {
+    "Input": "I'll go back twenty second of June 2017",
+    "Context": {
+      "ReferenceDateTime": "2018-08-21T08:00:00"
+    },
+    "NotSupported": "python,javascript",
+    "Results": [
+      {
+        "Text": "twenty second of june 2017",
+        "Type": "date",
+        "Value": {
+          "Timex": "2017-06-22",
+          "FutureResolution": {
+            "date": "2017-06-22"
+          },
+          "PastResolution": {
+            "date": "2017-06-22"
+          }
+        },
+        "Start": 13,
+        "Length": 26
+      }
+    ]
+  },
+  {
+    "Input": "i'll go back 2019-sep-1.",
+    "Context": {
+      "ReferenceDateTime": "2018-08-21T08:00:00"
+    },
+    "Results": [
+      {
+        "Text": "2019-sep-1",
+        "Type": "date",
+        "Value": {
+          "Timex": "2019-09-01",
+          "FutureResolution": {
+            "date": "2019-09-01"
+          },
+          "PastResolution": {
+            "date": "2019-09-01"
+          }
+        },
+        "Start": 13,
+        "Length": 10
+      }
+    ]
+  },
+  {
+    "Input": "i'll go back 2019/sep/01.",
+    "Context": {
+      "ReferenceDateTime": "2018-08-21T08:00:00"
+    },
+    "Results": [
+      {
+        "Text": "2019/sep/01",
+        "Type": "date",
+        "Value": {
+          "Timex": "2019-09-01",
+          "FutureResolution": {
+            "date": "2019-09-01"
+          },
+          "PastResolution": {
+            "date": "2019-09-01"
+          }
+        },
+        "Start": 13,
+        "Length": 11
       }
     ]
   }

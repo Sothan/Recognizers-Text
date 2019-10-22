@@ -1,17 +1,16 @@
 ﻿using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using Microsoft.Recognizers.Text.DateTime.Utilities;
-using Microsoft.Recognizers.Text.Number;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
-    public interface IDateTimeParserConfiguration : IOptionsConfiguration
+    public interface IDateTimeParserConfiguration : IDateTimeOptionsConfiguration
     {
         string TokenBeforeDate { get; }
 
         string TokenBeforeTime { get; }
 
-        IDateTimeExtractor DateExtractor { get; }
+        IDateExtractor DateExtractor { get; }
 
         IDateTimeExtractor TimeExtractor { get; }
 
@@ -41,15 +40,21 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         Regex SpecificTimeOfDayRegex { get; }
 
-        Regex TheEndOfRegex { get; }
+        Regex SpecificEndOfRegex { get; }
+
+        Regex UnspecificEndOfRegex { get; }
 
         Regex UnitRegex { get; }
 
         Regex DateNumberConnectorRegex { get; }
 
+        Regex YearRegex { get; }
+
         IImmutableDictionary<string, string> UnitMap { get; }
 
         IImmutableDictionary<string, int> Numbers { get; }
+
+        IDateTimeUtilityConfiguration UtilityConfiguration { get; }
 
         bool ContainsAmbiguousToken(string text, string matchedText);
 
@@ -58,7 +63,5 @@ namespace Microsoft.Recognizers.Text.DateTime
         int GetSwiftDay(string text);
 
         int GetHour(string text, int hour);
-
-        IDateTimeUtilityConfiguration UtilityConfiguration { get; }
     }
 }

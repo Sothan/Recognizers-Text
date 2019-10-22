@@ -1,12 +1,14 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Recognizers.Text.Utilities;
 
 namespace Microsoft.Recognizers.Text.Sequence
 {
     public class PhoneNumberModel : AbstractSequenceModel
     {
-        public PhoneNumberModel(IParser parser, IExtractor extractor) : base(parser, extractor)
+        public PhoneNumberModel(IParser parser, IExtractor extractor)
+            : base(parser, extractor)
         {
         }
 
@@ -16,6 +18,9 @@ namespace Microsoft.Recognizers.Text.Sequence
         {
             var parsedSequences = new List<ParseResult>();
 
+            // Preprocess the query
+            query = QueryProcessor.Preprocess(query);
+
             try
             {
                 var extractResults = Extractor.Extract(query);
@@ -24,14 +29,13 @@ namespace Microsoft.Recognizers.Text.Sequence
                 {
                     parsedSequences.Add(Parser.Parse(result));
                 }
-
             }
             catch (Exception)
             {
                 // Nothing to do. Exceptions in parse should not break users of recognizers.
                 // No result.
             }
-            
+
             return parsedSequences.Select(o => new ModelResult
             {
                 Start = o.Start.Value,
@@ -43,12 +47,11 @@ namespace Microsoft.Recognizers.Text.Sequence
                     },
                     {
                         ResolutionKey.Score, o.Value.ToString()
-                    }
+                    },
                 },
                 Text = o.Text,
-                TypeName = ModelTypeName
+                TypeName = ModelTypeName,
             }).ToList();
         }
-
     }
 }

@@ -1,16 +1,17 @@
 ﻿using System.Globalization;
-
-using Microsoft.Recognizers.Text.Number.Chinese;
 using Microsoft.Recognizers.Text.Number;
+using Microsoft.Recognizers.Text.Number.Chinese;
 
 namespace Microsoft.Recognizers.Text.NumberWithUnit.Chinese
 {
     public class ChineseNumberWithUnitParserConfiguration : BaseNumberWithUnitParserConfiguration
     {
-        public ChineseNumberWithUnitParserConfiguration(CultureInfo ci) : base(ci)
+        public ChineseNumberWithUnitParserConfiguration(CultureInfo ci)
+            : base(ci)
         {
             this.InternalNumberExtractor = new NumberExtractor();
-            this.InternalNumberParser = AgnosticNumberParserFactory.GetParser(AgnosticNumberParserType.Number, new ChineseNumberParserConfiguration());
+            this.InternalNumberParser = AgnosticNumberParserFactory.GetParser(AgnosticNumberParserType.Number, new ChineseNumberParserConfiguration(
+                                                                                  new BaseNumberOptionsConfiguration(Culture.Chinese)));
             this.ConnectorToken = string.Empty;
         }
 

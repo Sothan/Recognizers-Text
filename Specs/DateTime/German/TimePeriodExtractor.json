@@ -1,37 +1,49 @@
 [
   {
-    "Input": "Ich werde von 5 bis 6 weg sein",
-    "NotSupported": "javascript, python",
-    "Results": [
-      {
-        "Text": "5 bis 6",
-        "Type": "timerange",
-        "Start": 14,
-        "Length": 7
-      }
-    ]
-  },
-  {
     "Input": "Ich werde von 5 bis 6 Uhr weg sein",
     "NotSupported": "javascript, python",
     "Results": [
       {
-        "Text": "5 bis 6 Uhr",
+        "Text": "von 5 bis 6 Uhr",
         "Type": "timerange",
-        "Start": 14,
-        "Length": 11
+        "Start": 10,
+        "Length": 15
       }
     ]
   },
   {
-    "Input": "Ich werde von 5 bis 6 Uhr Nachmittags",
+    "Input": "Ich werde von 5 bis 6 Uhr Nachmittags weg sein",
     "NotSupported": "javascript, python",
     "Results": [
       {
-        "Text": "5 bis 6 Uhr Nachmittags",
+        "Text": "von 5 bis 6 Uhr Nachmittags",
         "Type": "timerange",
-        "Start": 14,
-        "Length": 23
+        "Start": 10,
+        "Length": 27
+      }
+    ]
+  },
+  {
+    "Input": "Ich werde von 17 bis 18 Uhr weg sein",
+    "NotSupported": "javascript, python",
+    "Results": [
+      {
+        "Text": "von 17 bis 18 Uhr",
+        "Type": "timerange",
+        "Start": 10,
+        "Length": 17
+      }
+    ]
+  },
+  {
+    "Input": "Ich werde von 17 Uhr bis 18 Uhr weg sein",
+    "NotSupported": "javascript, python",
+    "Results": [
+      {
+        "Text": "von 17 Uhr bis 18 Uhr",
+        "Type": "timerange",
+        "Start": 10,
+        "Length": 21
       }
     ]
   },
@@ -40,10 +52,10 @@
     "NotSupported": "javascript, python",
     "Results": [
       {
-        "Text": "5 bis 6 Uhr Abends",
+        "Text": "von 5 bis 6 Uhr Abends",
         "Type": "timerange",
-        "Start": 12,
-        "Length": 18
+        "Start": 8,
+        "Length": 22
       }
     ]
   },
@@ -52,10 +64,10 @@
     "NotSupported": "javascript, python",
     "Results": [
       {
-        "Text": "5 bis 6 Uhr Nachmittags",
+        "Text": "von 5 bis 6 Uhr Nachmittags",
         "Type": "timerange",
-        "Start": 12,
-        "Length": 23
+        "Start": 8,
+        "Length": 27
       }
     ]
   },
@@ -72,26 +84,14 @@
     ]
   },
   {
-    "Input": "Ich bin von 5 bis 6 weg",
-    "NotSupported": "javascript, python",
-    "Results": [
-      {
-        "Text": "5 bis 6",
-        "Type": "timerange",
-        "Start": 12,
-        "Length": 7
-      }
-    ]
-  },
-  {
     "Input": "Ich bin von vier bis halb 5 weg",
     "NotSupported": "javascript, python",
     "Results": [
       {
-        "Text": "vier bis halb 5",
+        "Text": "von vier bis halb 5",
         "Type": "timerange",
-        "Start": 12,
-        "Length": 15
+        "Start": 8,
+        "Length": 19
       }
     ]
   },
@@ -100,10 +100,10 @@
     "NotSupported": "javascript, python",
     "Results": [
       {
-        "Text": "3 bis 5 Uhr Morgens",
+        "Text": "von 3 bis 5 Uhr Morgens",
         "Type": "timerange",
-        "Start": 13,
-        "Length": 19
+        "Start": 9,
+        "Length": 23
       }
     ]
   },

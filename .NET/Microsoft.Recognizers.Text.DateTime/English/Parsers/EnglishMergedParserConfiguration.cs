@@ -1,40 +1,21 @@
 ﻿using System.Text.RegularExpressions;
-
 using Microsoft.Recognizers.Text.Matcher;
 
 namespace Microsoft.Recognizers.Text.DateTime.English
 {
     public sealed class EnglishMergedParserConfiguration : EnglishCommonDateTimeParserConfiguration, IMergedParserConfiguration
     {
-
-        public Regex BeforeRegex { get; }
-
-        public Regex AfterRegex { get; }
-
-        public Regex SinceRegex { get; }
-
-        public Regex AroundRegex { get; }
-
-        public Regex YearAfterRegex { get; }
-
-        public Regex YearRegex { get; }
-
-        public IDateTimeParser SetParser { get; }
-
-        public IDateTimeParser HolidayParser { get; }
-
-        public IDateTimeParser TimeZoneParser { get; }
-
-        public StringMatcher SuperfluousWordMatcher { get; }
-
-        public EnglishMergedParserConfiguration(IOptionsConfiguration config) : base(config)
+        public EnglishMergedParserConfiguration(IDateTimeOptionsConfiguration config)
+            : base(config)
         {
             BeforeRegex = EnglishMergedExtractorConfiguration.BeforeRegex;
             AfterRegex = EnglishMergedExtractorConfiguration.AfterRegex;
             SinceRegex = EnglishMergedExtractorConfiguration.SinceRegex;
             AroundRegex = EnglishMergedExtractorConfiguration.AroundRegex;
-            YearAfterRegex = EnglishMergedExtractorConfiguration.YearAfterRegex;
+            EqualRegex = EnglishMergedExtractorConfiguration.EqualRegex;
+            SuffixAfter = EnglishMergedExtractorConfiguration.SuffixAfterRegex;
             YearRegex = EnglishDatePeriodExtractorConfiguration.YearRegex;
+
             SuperfluousWordMatcher = EnglishMergedExtractorConfiguration.SuperfluousWordMatcher;
 
             DatePeriodParser = new BaseDatePeriodParser(new EnglishDatePeriodParserConfiguration(this));
@@ -44,5 +25,25 @@ namespace Microsoft.Recognizers.Text.DateTime.English
             HolidayParser = new BaseHolidayParser(new EnglishHolidayParserConfiguration(this));
             TimeZoneParser = new BaseTimeZoneParser();
         }
+
+        public Regex BeforeRegex { get; }
+
+        public Regex AfterRegex { get; }
+
+        public Regex SinceRegex { get; }
+
+        public Regex AroundRegex { get; }
+
+        public Regex EqualRegex { get; }
+
+        public Regex SuffixAfter { get; }
+
+        public Regex YearRegex { get; }
+
+        public IDateTimeParser SetParser { get; }
+
+        public IDateTimeParser HolidayParser { get; }
+
+        public StringMatcher SuperfluousWordMatcher { get; }
     }
 }

@@ -24,7 +24,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.2</version>
+            <version>2.9.9.1</version>
         </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
@@ -59,6 +59,8 @@
                     <arguments>
                         <argument>libraries/recognizers-text-number/resource-definitions.json</argument>
                         <argument>libraries/recognizers-text-number-with-unit/resource-definitions.json</argument>
+                        <argument>libraries/recognizers-text-choice/resource-definitions.json</argument>
+                        <argument>libraries/recognizers-text-date-time/resource-definitions.json</argument>
                     </arguments>
                 </configuration>
             </plugin>

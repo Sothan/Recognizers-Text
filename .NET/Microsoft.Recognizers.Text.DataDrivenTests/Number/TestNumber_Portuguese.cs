@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Microsoft.Recognizers.Text.DataDrivenTests;
+﻿using Microsoft.Recognizers.Text.DataDrivenTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Recognizers.Text.Number.Tests
@@ -7,40 +6,25 @@ namespace Microsoft.Recognizers.Text.Number.Tests
     [TestClass]
     public class TestNumber_Portuguese : TestBase
     {
-        public static TestResources TestResources { get; protected set; }
-
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            TestResources = new TestResources();
-            TestResources.InitFromTestContext(context);
-        }
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            base.TestSpecInitialize(TestResources);
-        }
-
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "NumberModel-Portuguese.csv", "NumberModel-Portuguese#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void NumberModel()
+        public void NumberModel(TestModel testSpec)
         {
-            base.TestNumber();
+            TestNumber(testSpec);
         }
 
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "OrdinalModel-Portuguese.csv", "OrdinalModel-Portuguese#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void OrdinalModel()
+        public void OrdinalModel(TestModel testSpec)
         {
-            base.TestNumber();
+            TestNumber(testSpec);
         }
 
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "PercentModel-Portuguese.csv", "PercentModel-Portuguese#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void PercentModel()
+        public void PercentModel(TestModel testSpec)
         {
-            base.TestNumber();
+            TestNumber(testSpec);
         }
     }
 }

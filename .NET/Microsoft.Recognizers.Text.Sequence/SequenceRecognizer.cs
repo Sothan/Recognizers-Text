@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using Microsoft.Recognizers.Text.Sequence;
+using Microsoft.Recognizers.Text.Sequence.Chinese;
 using Microsoft.Recognizers.Text.Sequence.English;
 
 namespace Microsoft.Recognizers.Text.Sequence
@@ -25,36 +26,6 @@ namespace Microsoft.Recognizers.Text.Sequence
         public SequenceRecognizer(int options, bool lazyInitialization = true)
             : this(null, GetOptions(options), lazyInitialization)
         {
-        }
-
-        public IModel GetPhoneNumberModel(string culture = null, bool fallbackToDefaultCulture = true)
-        {
-            return GetModel<PhoneNumberModel>(Culture.English, fallbackToDefaultCulture);
-        }
-
-        public IModel GetIpAddressModel(string culture = null, bool fallbackToDefaultCulture = true)
-        {
-            return GetModel<IpAddressModel>(Culture.English, fallbackToDefaultCulture);
-        }
-
-        public IModel GetMentionModel(string culture = null, bool fallbackToDefaultCulture = true)
-        {
-            return GetModel<MentionModel>(Culture.English, fallbackToDefaultCulture);
-        }
-
-        public IModel GetHashtagModel(string culture = null, bool fallbackToDefaultCulture = true)
-        {
-            return GetModel<HashtagModel>(Culture.English, fallbackToDefaultCulture);
-        }
-
-        public IModel GetEmailModel(string culture = null, bool fallbackToDefaultCulture = true)
-        {
-            return GetModel<EmailModel>(Culture.English, fallbackToDefaultCulture);
-        }
-
-        public IModel GetURLModel(string culture = null, bool fallbackToDefaultCulture = true)
-        {
-            return GetModel<URLModel>(Culture.English, fallbackToDefaultCulture);
         }
 
         public static List<ModelResult> RecognizePhoneNumber(string query, string culture, SequenceOptions options = SequenceOptions.None, bool fallbackToDefaultCulture = true)
@@ -87,22 +58,91 @@ namespace Microsoft.Recognizers.Text.Sequence
             return RecognizeByModel(recognizer => recognizer.GetURLModel(culture, fallbackToDefaultCulture), query, options);
         }
 
-        private static List<ModelResult> RecognizeByModel(Func<SequenceRecognizer, IModel> getModelFunc, string query, SequenceOptions options)
+        public static List<ModelResult> RecognizeGUID(string query, string culture, SequenceOptions options = SequenceOptions.None, bool fallbackToDefaultCulture = true)
         {
-            var recognizer = new SequenceRecognizer(options);
-            var model = getModelFunc(recognizer);
-            return model.Parse(query);
+            return RecognizeByModel(recognizer => recognizer.GetGUIDModel(culture, fallbackToDefaultCulture), query, options);
+        }
+
+        public IModel GetPhoneNumberModel(string culture = null, bool fallbackToDefaultCulture = true)
+        {
+            if (culture != null && (
+                culture.ToLowerInvariant().StartsWith("zh-", StringComparison.Ordinal) ||
+                culture.ToLowerInvariant().StartsWith("ja-", StringComparison.Ordinal)))
+            {
+                return GetModel<PhoneNumberModel>(Culture.Chinese, fallbackToDefaultCulture);
+            }
+
+            return GetModel<PhoneNumberModel>(Culture.English, fallbackToDefaultCulture);
+        }
+
+        public IModel GetIpAddressModel(string culture = null, bool fallbackToDefaultCulture = true)
+        {
+            if (culture != null && (
+                    culture.ToLowerInvariant().StartsWith("zh-", StringComparison.Ordinal) ||
+                    culture.ToLowerInvariant().StartsWith("ja-", StringComparison.Ordinal)))
+            {
+                return GetModel<IpAddressModel>(Culture.Chinese, fallbackToDefaultCulture);
+            }
+
+            return GetModel<IpAddressModel>(Culture.English, fallbackToDefaultCulture);
+        }
+
+        public IModel GetMentionModel(string culture = null, bool fallbackToDefaultCulture = true)
+        {
+            return GetModel<MentionModel>(Culture.English, fallbackToDefaultCulture);
+        }
+
+        public IModel GetHashtagModel(string culture = null, bool fallbackToDefaultCulture = true)
+        {
+            return GetModel<HashtagModel>(Culture.English, fallbackToDefaultCulture);
+        }
+
+        public IModel GetEmailModel(string culture = null, bool fallbackToDefaultCulture = true)
+        {
+            return GetModel<EmailModel>(Culture.English, fallbackToDefaultCulture);
+        }
+
+        public IModel GetURLModel(string culture = null, bool fallbackToDefaultCulture = true)
+        {
+            if (culture.ToLowerInvariant().StartsWith("zh-", StringComparison.Ordinal) ||
+                culture.ToLowerInvariant().StartsWith("ja-", StringComparison.Ordinal))
+            {
+                return GetModel<URLModel>(Culture.Chinese, fallbackToDefaultCulture);
+            }
+
+            return GetModel<URLModel>(Culture.English, fallbackToDefaultCulture);
+        }
+
+        public IModel GetGUIDModel(string culture = null, bool fallbackToDefaultCulture = true)
+        {
+            return GetModel<GUIDModel>(Culture.English, fallbackToDefaultCulture);
         }
 
         protected override void InitializeConfiguration()
         {
             RegisterModel<PhoneNumberModel>(
                 Culture.English,
-                (options) => new PhoneNumberModel(new PhoneNumberParser(), new PhoneNumberExtractor()));
+                (options) => new PhoneNumberModel(
+                    new PhoneNumberParser(),
+                    new BasePhoneNumberExtractor(new EnglishPhoneNumberExtractorConfiguration(options))));
+
+            RegisterModel<PhoneNumberModel>(
+                Culture.Chinese,
+                (options) => new PhoneNumberModel(
+                    new PhoneNumberParser(),
+                    new BasePhoneNumberExtractor(new ChinesePhoneNumberExtractorConfiguration(options))));
 
             RegisterModel<IpAddressModel>(
                 Culture.English,
-                (options) => new IpAddressModel(new IpParser(), new IpExtractor()));
+                (options) => new IpAddressModel(
+                    new IpParser(),
+                    new BaseIpExtractor(new EnglishIpExtractorConfiguration(options))));
+
+            RegisterModel<IpAddressModel>(
+                Culture.Chinese,
+                (options) => new IpAddressModel(
+                    new IpParser(),
+                    new BaseIpExtractor(new ChineseIpExtractorConfiguration(options))));
 
             RegisterModel<MentionModel>(
                 Culture.English,
@@ -118,7 +158,26 @@ namespace Microsoft.Recognizers.Text.Sequence
 
             RegisterModel<URLModel>(
                 Culture.English,
-                (options) => new URLModel(new URLParser(), new URLExtractor()));
+                (options) => new URLModel(
+                    new URLParser(),
+                    new BaseURLExtractor(new EnglishURLExtractorConfiguration(options))));
+
+            RegisterModel<URLModel>(
+                Culture.Chinese,
+                options => new URLModel(
+                    new URLParser(),
+                    new BaseURLExtractor(new ChineseURLExtractorConfiguration(options))));
+
+            RegisterModel<GUIDModel>(
+                Culture.English,
+                (options) => new GUIDModel(new GUIDParser(), new GUIDExtractor()));
+        }
+
+        private static List<ModelResult> RecognizeByModel(Func<SequenceRecognizer, IModel> getModelFunc, string query, SequenceOptions options)
+        {
+            var recognizer = new SequenceRecognizer(options);
+            var model = getModelFunc(recognizer);
+            return model.Parse(query);
         }
     }
 }

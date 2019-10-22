@@ -1,8 +1,9 @@
-import { BaseNumberExtractor, RegExpValue, BasePercentageExtractor } from "../extractors";
+import { BaseNumberExtractor, RegExpValue, RegExpRegExp, BasePercentageExtractor } from "../extractors";
 import { Constants } from "../constants";
 import { NumberMode, LongFormatType } from "../models";
 import { PortugueseNumeric } from "../../resources/portugueseNumeric";
-import { RegExpUtility } from "@microsoft/recognizers-text"
+import { BaseNumbers } from "../../resources/baseNumbers";
+import { RegExpUtility } from "@microsoft/recognizers-text";
 
 export class PortugueseNumberExtractor extends BaseNumberExtractor {
     protected extractType: string = Constants.SYS_NUM;
@@ -18,7 +19,7 @@ export class PortugueseNumberExtractor extends BaseNumberExtractor {
                 cardExtract = new PortugueseCardinalExtractor(PortugueseNumeric.PlaceHolderPureNumber);
                 break;
             case NumberMode.Currency:
-                regexes.push({ regExp: RegExpUtility.getSafeRegExp(PortugueseNumeric.CurrencyRegex, "gs"), value: "IntegerNum" });
+                regexes.push({ regExp: RegExpUtility.getSafeRegExp(BaseNumbers.CurrencyRegex, "gs"), value: "IntegerNum" });
                 break;
             case NumberMode.Default:
                 break;
@@ -31,10 +32,21 @@ export class PortugueseNumberExtractor extends BaseNumberExtractor {
         cardExtract.regexes.forEach(r => regexes.push(r));
 
         // Add Fraction
-        let fracExtract = new PortugueseFractionExtractor();
+        let fracExtract = new PortugueseFractionExtractor(mode);
         fracExtract.regexes.forEach(r => regexes.push(r));
 
         this.regexes = regexes;
+
+        // Add filter
+        let ambiguityFiltersDict = new Array<RegExpRegExp>();
+
+        if (mode != NumberMode.Unit) {            
+            for (let [ key, value ] of PortugueseNumeric.AmbiguityFiltersDict){
+                ambiguityFiltersDict.push({ regExpKey: RegExpUtility.getSafeRegExp(key, "gs"), regExpValue: RegExpUtility.getSafeRegExp(value, "gs")})
+            }
+        }
+
+        this.ambiguityFiltersDict = ambiguityFiltersDict;
     }
 }
 
@@ -163,7 +175,7 @@ export class PortugueseFractionExtractor extends BaseNumberExtractor {
 
     protected extractType: string = Constants.SYS_NUM_FRACTION;
 
-    constructor() {
+    constructor(mode: NumberMode = NumberMode.Default) {
         super();
 
         let regexes = new Array<RegExpValue>(
@@ -182,12 +194,16 @@ export class PortugueseFractionExtractor extends BaseNumberExtractor {
             {
                 regExp: RegExpUtility.getSafeRegExp(PortugueseNumeric.FractionNounWithArticleRegex),
                 value: "FracPor"
-            },
-            {
-                regExp: RegExpUtility.getSafeRegExp(PortugueseNumeric.FractionPrepositionRegex),
-                value: "FracPor"
             }
         );
+
+        // Not add FractionPrepositionRegex when the mode is Unit to avoid wrong recognize cases like "$1000 over 3"
+        if (mode != NumberMode.Unit) {
+            regexes.push({
+                regExp: RegExpUtility.getSafeRegExp(PortugueseNumeric.FractionPrepositionRegex),
+                value: "FracPor"
+                });
+        };
 
         this.regexes = regexes;
     }
@@ -215,10 +231,10 @@ export class PortugueseOrdinalExtractor extends BaseNumberExtractor {
 
 export class PortuguesePercentageExtractor extends BasePercentageExtractor {
     constructor() {
-        super(new PortugueseNumberExtractor())
+        super(new PortugueseNumberExtractor());
     }
 
-    protected initRegexes(): Array<RegExp> {
+    protected initRegexes(): RegExp[] {
         let regexStrs = [
             PortugueseNumeric.NumberWithSuffixPercentage
         ];

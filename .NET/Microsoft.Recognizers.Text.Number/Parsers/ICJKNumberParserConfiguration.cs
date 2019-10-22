@@ -5,8 +5,6 @@ namespace Microsoft.Recognizers.Text.Number
 {
     public interface ICJKNumberParserConfiguration : INumberParserConfiguration
     {
-        #region language dictionaries
-
         ImmutableDictionary<char, double> ZeroToNineMap { get; }
 
         ImmutableDictionary<char, long> RoundNumberMapChar { get; }
@@ -16,16 +14,10 @@ namespace Microsoft.Recognizers.Text.Number
         ImmutableDictionary<string, string> UnitMap { get; }
 
         ImmutableDictionary<char, char> TratoSimMap { get; }
-        
-        #endregion
-
-        #region language lists
 
         ImmutableList<char> RoundDirectList { get; }
 
-        #endregion
-
-        #region language settings
+        ImmutableList<char> TenChars { get; }
 
         Regex FracSplitRegex { get; }
 
@@ -45,6 +37,8 @@ namespace Microsoft.Recognizers.Text.Number
 
         Regex RoundNumberIntegerRegex { get; }
 
-        #endregion
+        char ZeroChar { get; }
+
+        char PairChar { get; }
     }
 }

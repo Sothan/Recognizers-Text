@@ -1,12 +1,37 @@
 ﻿using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
-using Microsoft.Recognizers.Text.Number;
-
 namespace Microsoft.Recognizers.Text.DateTime.Portuguese
 {
-    public class PortugueseDurationParserConfiguration : BaseOptionsConfiguration, IDurationParserConfiguration
+    public class PortugueseDurationParserConfiguration : BaseDateTimeOptionsConfiguration, IDurationParserConfiguration
     {
+        public PortugueseDurationParserConfiguration(ICommonDateTimeParserConfiguration config)
+            : base(config)
+        {
+            CardinalExtractor = config.CardinalExtractor;
+            NumberParser = config.NumberParser;
+            DurationExtractor = new BaseDurationExtractor(new PortugueseDurationExtractorConfiguration(this), false);
+
+            NumberCombinedWithUnit = PortugueseDurationExtractorConfiguration.NumberCombinedWithUnit;
+
+            AnUnitRegex = PortugueseDurationExtractorConfiguration.AnUnitRegex;
+            DuringRegex = PortugueseDurationExtractorConfiguration.DuringRegex;
+            AllDateUnitRegex = PortugueseDurationExtractorConfiguration.AllRegex;
+            HalfDateUnitRegex = PortugueseDurationExtractorConfiguration.HalfRegex;
+            SuffixAndRegex = PortugueseDurationExtractorConfiguration.SuffixAndRegex;
+
+            UnitMap = config.UnitMap;
+            UnitValueMap = config.UnitValueMap;
+            DoubleNumbers = config.DoubleNumbers;
+            FollowedUnit = PortugueseDurationExtractorConfiguration.FollowedUnit;
+
+            ConjunctionRegex = PortugueseDurationExtractorConfiguration.ConjunctionRegex;
+            InexactNumberRegex = PortugueseDurationExtractorConfiguration.InexactNumberRegex;
+            InexactNumberUnitRegex = PortugueseDurationExtractorConfiguration.InexactNumberUnitRegex;
+            DurationUnitRegex = PortugueseDurationExtractorConfiguration.DurationUnitRegex;
+            SpecialNumberUnitRegex = PortugueseDurationExtractorConfiguration.SpecialNumberUnitRegex;
+        }
+
         public IExtractor CardinalExtractor { get; }
 
         public IParser NumberParser { get; }
@@ -35,31 +60,12 @@ namespace Microsoft.Recognizers.Text.DateTime.Portuguese
 
         public Regex DurationUnitRegex { get; }
 
+        public Regex SpecialNumberUnitRegex { get; }
+
         public IImmutableDictionary<string, string> UnitMap { get; }
 
         public IImmutableDictionary<string, long> UnitValueMap { get; }
 
         public IImmutableDictionary<string, double> DoubleNumbers { get; }
-
-        public PortugueseDurationParserConfiguration(ICommonDateTimeParserConfiguration config) : base(config)
-        {
-            CardinalExtractor = config.CardinalExtractor;
-            NumberParser = config.NumberParser;
-            DurationExtractor = new BaseDurationExtractor(new PortugueseDurationExtractorConfiguration(this), false);
-            NumberCombinedWithUnit = PortugueseDurationExtractorConfiguration.NumberCombinedWithUnit;
-            AnUnitRegex = PortugueseDurationExtractorConfiguration.AnUnitRegex;
-            DuringRegex = PortugueseDurationExtractorConfiguration.DuringRegex;
-            AllDateUnitRegex = PortugueseDurationExtractorConfiguration.AllRegex;
-            HalfDateUnitRegex = PortugueseDurationExtractorConfiguration.HalfRegex;
-            SuffixAndRegex = PortugueseDurationExtractorConfiguration.SuffixAndRegex;
-            UnitMap = config.UnitMap;
-            UnitValueMap = config.UnitValueMap;
-            DoubleNumbers = config.DoubleNumbers;
-            FollowedUnit = PortugueseDurationExtractorConfiguration.FollowedUnit;
-            ConjunctionRegex = PortugueseDurationExtractorConfiguration.ConjunctionRegex;
-            InexactNumberRegex = PortugueseDurationExtractorConfiguration.InexactNumberRegex;
-            InexactNumberUnitRegex = PortugueseDurationExtractorConfiguration.InexactNumberUnitRegex;
-            DurationUnitRegex = PortugueseDurationExtractorConfiguration.DurationUnitRegex;
-        }
     }
 }

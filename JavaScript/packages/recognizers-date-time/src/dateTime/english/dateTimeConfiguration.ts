@@ -1,16 +1,16 @@
-import { IDateTimeExtractor, IDateTimeExtractorConfiguration, IDateTimeParserConfiguration } from "../baseDateTime"
+import { IDateTimeExtractor, IDateTimeExtractorConfiguration, IDateTimeParserConfiguration } from "../baseDateTime";
 import { BaseDateExtractor, BaseDateParser } from "../baseDate";
 import { BaseTimeExtractor, BaseTimeParser } from "../baseTime";
 import { RegExpUtility, StringUtility } from "@microsoft/recognizers-text";
-import { BaseNumberExtractor, BaseNumberParser } from "@microsoft/recognizers-text-number"
-import { BaseDurationExtractor, BaseDurationParser } from "../baseDuration"
+import { BaseNumberExtractor, BaseNumberParser } from "@microsoft/recognizers-text-number";
+import { BaseDurationExtractor, BaseDurationParser } from "../baseDuration";
 import { EnglishDateTime } from "../../resources/englishDateTime";
-import { ICommonDateTimeParserConfiguration, IDateTimeParser } from "../parsers"
-import { EnglishDateTimeUtilityConfiguration } from "./baseConfiguration"
+import { ICommonDateTimeParserConfiguration, IDateTimeParser } from "../parsers";
+import { EnglishDateTimeUtilityConfiguration } from "./baseConfiguration";
 import { IDateTimeUtilityConfiguration } from "../utilities";
-import { EnglishDurationExtractorConfiguration } from "./durationConfiguration"
-import { EnglishDateExtractorConfiguration } from "./dateConfiguration"
-import { EnglishTimeExtractorConfiguration } from "./timeConfiguration"
+import { EnglishDurationExtractorConfiguration } from "./durationConfiguration";
+import { EnglishDateExtractorConfiguration } from "./dateConfiguration";
+import { EnglishTimeExtractorConfiguration } from "./timeConfiguration";
 
 export class EnglishDateTimeExtractorConfiguration implements IDateTimeExtractorConfiguration {
     readonly datePointExtractor: IDateTimeExtractor
@@ -23,14 +23,15 @@ export class EnglishDateTimeExtractorConfiguration implements IDateTimeExtractor
     readonly nightRegex: RegExp
     readonly timeOfTodayBeforeRegex: RegExp
     readonly simpleTimeOfTodayBeforeRegex: RegExp
-    readonly theEndOfRegex: RegExp
+    readonly specificEndOfRegex: RegExp
+    readonly unspecificEndOfRegex: RegExp
     readonly unitRegex: RegExp
     readonly prepositionRegex: RegExp
     readonly connectorRegex: RegExp
     readonly utilityConfiguration: IDateTimeUtilityConfiguration
 
-    constructor() {
-        this.datePointExtractor = new BaseDateExtractor(new EnglishDateExtractorConfiguration());
+    constructor(dmyDateFormat: boolean) {
+        this.datePointExtractor = new BaseDateExtractor(new EnglishDateExtractorConfiguration(dmyDateFormat));
         this.timePointExtractor = new BaseTimeExtractor(new EnglishTimeExtractorConfiguration());
         this.durationExtractor = new BaseDurationExtractor(new EnglishDurationExtractorConfiguration());
         this.suffixRegex = RegExpUtility.getSafeRegExp(EnglishDateTime.SuffixRegex);
@@ -40,20 +41,21 @@ export class EnglishDateTimeExtractorConfiguration implements IDateTimeExtractor
         this.nightRegex = RegExpUtility.getSafeRegExp(EnglishDateTime.TimeOfDayRegex);
         this.timeOfTodayBeforeRegex = RegExpUtility.getSafeRegExp(EnglishDateTime.TimeOfTodayBeforeRegex);
         this.simpleTimeOfTodayBeforeRegex = RegExpUtility.getSafeRegExp(EnglishDateTime.SimpleTimeOfTodayBeforeRegex);
-        this.theEndOfRegex = RegExpUtility.getSafeRegExp(EnglishDateTime.TheEndOfRegex);
+        this.specificEndOfRegex = RegExpUtility.getSafeRegExp(EnglishDateTime.SpecificEndOfRegex);
+        this.unspecificEndOfRegex = RegExpUtility.getSafeRegExp(EnglishDateTime.UnspecificEndOfRegex);
         this.unitRegex = RegExpUtility.getSafeRegExp(EnglishDateTime.TimeUnitRegex);
         this.prepositionRegex = RegExpUtility.getSafeRegExp(EnglishDateTime.PrepositionRegex);
         this.connectorRegex = RegExpUtility.getSafeRegExp(EnglishDateTime.ConnectorRegex);
         this.utilityConfiguration = new EnglishDateTimeUtilityConfiguration();
     }
-            
+
     isConnectorToken(source: string): boolean {
         return (StringUtility.isNullOrWhitespace(source)
-                    || RegExpUtility.getMatches(this.connectorRegex, source).length > 0
-                    || RegExpUtility.getMatches(this.prepositionRegex, source).length > 0);
-            }
+            || RegExpUtility.getMatches(this.connectorRegex, source).length > 0
+            || RegExpUtility.getMatches(this.prepositionRegex, source).length > 0);
+    }
 }
-  
+
 
 export class EnglishDateTimeParserConfiguration implements IDateTimeParserConfiguration {
     tokenBeforeDate: string;
@@ -72,7 +74,8 @@ export class EnglishDateTimeParserConfiguration implements IDateTimeParserConfig
     simpleTimeOfTodayAfterRegex: RegExp;
     simpleTimeOfTodayBeforeRegex: RegExp;
     specificTimeOfDayRegex: RegExp;
-    theEndOfRegex: RegExp;
+    specificEndOfRegex: RegExp;
+    unspecificEndOfRegex: RegExp;
     unitRegex: RegExp;
     unitMap: ReadonlyMap<string, string>;
     numbers: ReadonlyMap<string, number>;
@@ -91,7 +94,8 @@ export class EnglishDateTimeParserConfiguration implements IDateTimeParserConfig
         this.simpleTimeOfTodayAfterRegex = RegExpUtility.getSafeRegExp(EnglishDateTime.SimpleTimeOfTodayAfterRegex);
         this.simpleTimeOfTodayBeforeRegex = RegExpUtility.getSafeRegExp(EnglishDateTime.SimpleTimeOfTodayBeforeRegex);
         this.specificTimeOfDayRegex = RegExpUtility.getSafeRegExp(EnglishDateTime.SpecificTimeOfDayRegex);
-        this.theEndOfRegex = RegExpUtility.getSafeRegExp(EnglishDateTime.TheEndOfRegex);
+        this.specificEndOfRegex = RegExpUtility.getSafeRegExp(EnglishDateTime.SpecificEndOfRegex);
+        this.unspecificEndOfRegex = RegExpUtility.getSafeRegExp(EnglishDateTime.UnspecificEndOfRegex);
         this.unitRegex = RegExpUtility.getSafeRegExp(EnglishDateTime.TimeUnitRegex);
         this.numbers = config.numbers;
         this.cardinalExtractor = config.cardinalExtractor;
@@ -145,5 +149,7 @@ export class EnglishDateTimeParserConfiguration implements IDateTimeParserConfig
         return swift;
     }
 
-    public haveAmbiguousToken(text: string, matchedText: string): boolean { return false; }
+    public haveAmbiguousToken(text: string, matchedText: string): boolean {
+        return false;
+    }
 }

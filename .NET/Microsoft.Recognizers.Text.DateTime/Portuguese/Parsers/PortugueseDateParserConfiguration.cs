@@ -1,15 +1,68 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
-
 using Microsoft.Recognizers.Definitions.Portuguese;
 using Microsoft.Recognizers.Text.DateTime.Utilities;
-using Microsoft.Recognizers.Text.Number;
 
 namespace Microsoft.Recognizers.Text.DateTime.Portuguese
 {
-    public class PortugueseDateParserConfiguration : BaseOptionsConfiguration, IDateParserConfiguration
+    public class PortugueseDateParserConfiguration : BaseDateTimeOptionsConfiguration, IDateParserConfiguration
     {
+
+        private const RegexOptions RegexFlags = RegexOptions.Singleline | RegexOptions.ExplicitCapture;
+
+        public PortugueseDateParserConfiguration(ICommonDateTimeParserConfiguration config)
+            : base(config)
+        {
+            DateTokenPrefix = DateTimeDefinitions.DateTokenPrefix;
+
+            DateRegexes = new PortugueseDateExtractorConfiguration(this).DateRegexList;
+            OnRegex = PortugueseDateExtractorConfiguration.OnRegex;
+            SpecialDayRegex = PortugueseDateExtractorConfiguration.SpecialDayRegex;
+            SpecialDayWithNumRegex = PortugueseDateExtractorConfiguration.SpecialDayWithNumRegex;
+            NextRegex = PortugueseDateExtractorConfiguration.NextDateRegex;
+            ThisRegex = PortugueseDateExtractorConfiguration.ThisRegex;
+            LastRegex = PortugueseDateExtractorConfiguration.LastDateRegex;
+            UnitRegex = PortugueseDateExtractorConfiguration.DateUnitRegex;
+            WeekDayRegex = PortugueseDateExtractorConfiguration.WeekDayRegex;
+            MonthRegex = PortugueseDateExtractorConfiguration.MonthRegex;
+            WeekDayOfMonthRegex = PortugueseDateExtractorConfiguration.WeekDayOfMonthRegex;
+            ForTheRegex = PortugueseDateExtractorConfiguration.ForTheRegex;
+            WeekDayAndDayOfMothRegex = PortugueseDateExtractorConfiguration.WeekDayAndDayOfMothRegex;
+            WeekDayAndDayRegex = PortugueseDateExtractorConfiguration.WeekDayAndDayRegex;
+            RelativeMonthRegex = PortugueseDateExtractorConfiguration.RelativeMonthRegex;
+            StrictRelativeRegex = PortugueseDateExtractorConfiguration.StrictRelativeRegex;
+            YearSuffix = PortugueseDateExtractorConfiguration.YearSuffix;
+            RelativeWeekDayRegex = PortugueseDateExtractorConfiguration.RelativeWeekDayRegex;
+
+            RelativeDayRegex = new Regex(DateTimeDefinitions.RelativeDayRegex, RegexFlags);
+            NextPrefixRegex = new Regex(DateTimeDefinitions.NextPrefixRegex, RegexFlags);
+            PreviousPrefixRegex = new Regex(DateTimeDefinitions.PreviousPrefixRegex, RegexFlags);
+            UpcomingPrefixRegex = new Regex(DateTimeDefinitions.UpcomingPrefixRegex, RegexFlags);
+            PastPrefixRegex = new Regex(DateTimeDefinitions.PastPrefixRegex, RegexFlags);
+
+            DayOfMonth = config.DayOfMonth;
+            DayOfWeek = config.DayOfWeek;
+            MonthOfYear = config.MonthOfYear;
+            CardinalMap = config.CardinalMap;
+            IntegerExtractor = config.IntegerExtractor;
+            OrdinalExtractor = config.OrdinalExtractor;
+            CardinalExtractor = config.CardinalExtractor;
+            NumberParser = config.NumberParser;
+            DurationExtractor = config.DurationExtractor;
+            DateExtractor = config.DateExtractor;
+            DurationParser = config.DurationParser;
+            UnitMap = config.UnitMap;
+            UtilityConfiguration = config.UtilityConfiguration;
+
+            SameDayTerms = DateTimeDefinitions.SameDayTerms.ToImmutableList();
+            PlusOneDayTerms = DateTimeDefinitions.PlusOneDayTerms.ToImmutableList();
+            PlusTwoDayTerms = DateTimeDefinitions.PlusTwoDayTerms.ToImmutableList();
+            MinusOneDayTerms = DateTimeDefinitions.MinusOneDayTerms.ToImmutableList();
+            MinusTwoDayTerms = DateTimeDefinitions.MinusTwoDayTerms.ToImmutableList();
+        }
+
         public string DateTokenPrefix { get; }
 
         public IExtractor IntegerExtractor { get; }
@@ -22,7 +75,7 @@ namespace Microsoft.Recognizers.Text.DateTime.Portuguese
 
         public IDateTimeExtractor DurationExtractor { get; }
 
-        public IDateTimeExtractor DateExtractor { get; }
+        public IDateExtractor DateExtractor { get; }
 
         public IDateTimeParser DurationParser { get; }
 
@@ -54,18 +107,25 @@ namespace Microsoft.Recognizers.Text.DateTime.Portuguese
 
         public Regex WeekDayAndDayOfMothRegex { get; }
 
+        public Regex WeekDayAndDayRegex { get; }
+
         public Regex RelativeMonthRegex { get; }
+
+        public Regex StrictRelativeRegex { get; }
 
         public Regex YearSuffix { get; }
 
         public Regex RelativeWeekDayRegex { get; }
 
-        //TODO: implement the relative day regex if needed. If yes, they should be abstracted
-        public static readonly Regex RelativeDayRegex = new Regex("", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public Regex RelativeDayRegex { get; }
 
-        public static readonly Regex NextPrefixRegex = new Regex(DateTimeDefinitions.NextPrefixRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public Regex NextPrefixRegex { get; }
 
-        public static readonly Regex PastPrefixRegex = new Regex(DateTimeDefinitions.PastPrefixRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public Regex PreviousPrefixRegex { get; }
+
+        public Regex UpcomingPrefixRegex { get; }
+
+        public Regex PastPrefixRegex { get; }
 
         public IImmutableDictionary<string, int> DayOfMonth { get; }
 
@@ -75,93 +135,31 @@ namespace Microsoft.Recognizers.Text.DateTime.Portuguese
 
         public IImmutableDictionary<string, int> CardinalMap { get; }
 
+        public IImmutableList<string> SameDayTerms { get; }
+
+        public IImmutableList<string> PlusOneDayTerms { get; }
+
+        public IImmutableList<string> MinusOneDayTerms { get; }
+
+        public IImmutableList<string> PlusTwoDayTerms { get; }
+
+        public IImmutableList<string> MinusTwoDayTerms { get; }
+
+        bool IDateParserConfiguration.CheckBothBeforeAfter => DateTimeDefinitions.CheckBothBeforeAfter;
+
         public IDateTimeUtilityConfiguration UtilityConfiguration { get; }
 
-        public PortugueseDateParserConfiguration(ICommonDateTimeParserConfiguration config) : base(config)
+        public int GetSwiftMonthOrYear(string text)
         {
-            DateTokenPrefix = DateTimeDefinitions.DateTokenPrefix;
-            DateRegexes = new PortugueseDateExtractorConfiguration(this).DateRegexList;
-            OnRegex = PortugueseDateExtractorConfiguration.OnRegex;
-            SpecialDayRegex = PortugueseDateExtractorConfiguration.SpecialDayRegex;
-            SpecialDayWithNumRegex = PortugueseDateExtractorConfiguration.SpecialDayWithNumRegex;
-            NextRegex = PortugueseDateExtractorConfiguration.NextDateRegex;
-            ThisRegex = PortugueseDateExtractorConfiguration.ThisRegex;
-            LastRegex = PortugueseDateExtractorConfiguration.LastDateRegex;
-            UnitRegex = PortugueseDateExtractorConfiguration.DateUnitRegex;
-            WeekDayRegex = PortugueseDateExtractorConfiguration.WeekDayRegex;
-            MonthRegex = PortugueseDateExtractorConfiguration.MonthRegex;
-            WeekDayOfMonthRegex = PortugueseDateExtractorConfiguration.WeekDayOfMonthRegex;
-            ForTheRegex = PortugueseDateExtractorConfiguration.ForTheRegex;
-            WeekDayAndDayOfMothRegex = PortugueseDateExtractorConfiguration.WeekDayAndDayOfMothRegex;
-            RelativeMonthRegex = PortugueseDateExtractorConfiguration.RelativeMonthRegex;
-            YearSuffix = PortugueseDateExtractorConfiguration.YearSuffix;
-            RelativeWeekDayRegex = PortugueseDateExtractorConfiguration.RelativeWeekDayRegex;
-            DayOfMonth = config.DayOfMonth;
-            DayOfWeek = config.DayOfWeek;
-            MonthOfYear = config.MonthOfYear;
-            CardinalMap = config.CardinalMap;
-            IntegerExtractor = config.IntegerExtractor;
-            OrdinalExtractor = config.OrdinalExtractor;
-            CardinalExtractor = config.CardinalExtractor;
-            NumberParser = config.NumberParser;
-            DurationExtractor = config.DurationExtractor;
-            DateExtractor = config.DateExtractor;
-            DurationParser = config.DurationParser;
-            UnitMap = config.UnitMap;
-            UtilityConfiguration = config.UtilityConfiguration;
-        }
-
-        public int GetSwiftDay(string text)
-        {
-            var trimedText = text.Trim().ToLowerInvariant().Normalized();
+            var trimmedText = text.Trim();
             var swift = 0;
 
-            //TODO: add the relative day logic if needed. If yes, the whole method should be abstracted.
-            if (trimedText.Equals("hoje") || trimedText.Equals("este dia") || trimedText.Equals("esse dia") || trimedText.Equals("o dia"))
-            {
-                swift = 0;
-            }
-            else if (trimedText.Equals("amanha") ||
-                     trimedText.Equals("de amanha") ||
-                     trimedText.EndsWith("dia seguinte") ||
-                     trimedText.EndsWith("o dia de amanha") ||
-                     trimedText.EndsWith("proximo dia"))
-            {
-                swift = 1;
-            }
-            else if (trimedText.Equals("ontem"))
-            {
-                swift = -1;
-            }
-            else if (trimedText.EndsWith("depois de amanha") ||
-                     trimedText.EndsWith("dia depois de amanha"))
-            {
-                swift = 2;
-            }
-            else if (trimedText.EndsWith("anteontem") || 
-                     trimedText.EndsWith("dia antes de ontem"))
-            {
-                swift = -2;
-            }
-            else if (trimedText.EndsWith("ultimo dia"))
-            {
-                swift = -1;
-            }
-
-            return swift;
-        }
-
-        public int GetSwiftMonth(string text)
-        {
-            var trimedText = text.Trim().ToLowerInvariant();
-            var swift = 0;
-
-            if (NextPrefixRegex.IsMatch(trimedText))
+            if (NextPrefixRegex.IsMatch(trimmedText))
             {
                 swift = 1;
             }
 
-            if (PastPrefixRegex.IsMatch(trimedText))
+            if (PreviousPrefixRegex.IsMatch(trimmedText))
             {
                 swift = -1;
             }
@@ -171,28 +169,13 @@ namespace Microsoft.Recognizers.Text.DateTime.Portuguese
 
         public bool IsCardinalLast(string text)
         {
-            var trimedText = text.Trim().ToLowerInvariant();
-            return PastPrefixRegex.IsMatch(trimedText);
+            var trimmedText = text.Trim();
+            return PreviousPrefixRegex.IsMatch(trimmedText);
         }
 
-    }
-
-    public static class StringExtension
-    {
-        public static string Normalized(this string text)
+        public string Normalize(string text)
         {
-            return text
-                .Replace('á', 'a')
-                .Replace('é', 'e')
-                .Replace('í', 'i')
-                .Replace('ó', 'o')
-                .Replace('ú', 'u')
-                .Replace("ê", "e")
-                .Replace("ô", "o")
-                .Replace("ü", "u")
-                .Replace("ã", "a")
-                .Replace("õ", "o")
-                .Replace("ç", "c");
+            return text.Normalized(DateTimeDefinitions.SpecialCharactersEquivalent);
         }
     }
 }

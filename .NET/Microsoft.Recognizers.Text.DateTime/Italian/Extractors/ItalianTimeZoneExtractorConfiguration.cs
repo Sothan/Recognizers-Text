@@ -5,19 +5,21 @@ using Microsoft.Recognizers.Text.Matcher;
 
 namespace Microsoft.Recognizers.Text.DateTime.Italian
 {
-    public class ItalianTimeZoneExtractorConfiguration : BaseOptionsConfiguration, ITimeZoneExtractorConfiguration
+    public class ItalianTimeZoneExtractorConfiguration : BaseDateTimeOptionsConfiguration, ITimeZoneExtractorConfiguration
     {
-        public static readonly Regex[] TimeZoneRegexList =
-        {
-        };
-
-        public ItalianTimeZoneExtractorConfiguration(IOptionsConfiguration config) : base(config)
+        public ItalianTimeZoneExtractorConfiguration(IDateTimeOptionsConfiguration config)
+            : base(config)
         {
         }
 
-        public IEnumerable<Regex> TimeZoneRegexes => TimeZoneRegexList;
+        public Regex DirectUtcRegex { get; }
+
         public Regex LocationTimeSuffixRegex { get; } = null;
-        public StringMatcher CityMatcher { get; } = new StringMatcher();
+
+        public StringMatcher LocationMatcher { get; } = new StringMatcher();
+
+        public StringMatcher TimeZoneMatcher { get; }
+
         public List<string> AmbiguousTimezoneList => new List<string>();
     }
 }

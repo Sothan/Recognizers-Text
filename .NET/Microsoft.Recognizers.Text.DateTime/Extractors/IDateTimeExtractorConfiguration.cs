@@ -1,10 +1,9 @@
 ﻿using System.Text.RegularExpressions;
 using Microsoft.Recognizers.Text.DateTime.Utilities;
-using Microsoft.Recognizers.Text.Number;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
-    public interface IDateTimeExtractorConfiguration : IOptionsConfiguration
+    public interface IDateTimeExtractorConfiguration : IDateTimeOptionsConfiguration
     {
         Regex NowRegex { get; }
 
@@ -20,7 +19,9 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         Regex TimeOfDayRegex { get; }
 
-        Regex TheEndOfRegex { get; }
+        Regex SpecificEndOfRegex { get; }
+
+        Regex UnspecificEndOfRegex { get; }
 
         Regex UnitRegex { get; }
 
@@ -28,16 +29,22 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         Regex DateNumberConnectorRegex { get; }
 
+        Regex YearRegex { get; }
+
+        Regex YearSuffix { get; }
+
+        Regex SuffixAfterRegex { get; }
+
         IDateTimeExtractor DurationExtractor { get; }
 
-        IDateTimeExtractor DatePointExtractor { get; }
+        IDateExtractor DatePointExtractor { get; }
 
         IDateTimeExtractor TimePointExtractor { get; }
 
         IExtractor IntegerExtractor { get; }
 
-        bool IsConnector(string text);
-
         IDateTimeUtilityConfiguration UtilityConfiguration { get; }
+
+        bool IsConnector(string text);
     }
 }

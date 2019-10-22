@@ -1,29 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
+
 using DateObject = System.DateTime;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
     internal class DurationParsingUtil
     {
+        /// <summary>
+        /// Represents multi duration.
+        /// </summary>
+        public enum MultiDurationType
+        {
+            /// <summary>
+            /// Represents a date
+            /// </summary>
+            Date = 0,
+
+            /// <summary>
+            /// Represents a time
+            /// </summary>
+            Time,
+
+            /// <summary>
+            /// Represents the time of the date
+            /// </summary>
+            DateTime,
+        }
+
         public static bool IsTimeDurationUnit(string unitStr)
         {
-            var ret = false;
+            bool result;
+
             switch (unitStr)
             {
                 case "H":
-                    ret = true;
+                    result = true;
                     break;
                 case "M":
-                    ret = true;
+                    result = true;
                     break;
                 case "S":
-                    ret = true;
+                    result = true;
+                    break;
+                default:
+                    result = false;
                     break;
             }
 
-            return ret;
+            return result;
         }
 
         public static bool IsMultipleDuration(string timex)
@@ -37,71 +64,20 @@ namespace Microsoft.Recognizers.Text.DateTime
         {
             var dict = ResolveDurationTimex(timex);
 
-            foreach (var unit in dict.Keys)
-            {
-                if (IsTimeDurationUnit(unit))
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return dict.Keys.All(unit => !IsTimeDurationUnit(unit));
         }
 
         public static DateObject ShiftDateTime(string timex, DateObject referenceDateTime, bool future)
         {
             var timexUnitMap = ResolveDurationTimex(timex);
-            var ret = GetShiftResult(timexUnitMap, referenceDateTime, future);
-            return ret;
-        }
-
-        private static DateObject GetShiftResult(IImmutableDictionary<string, double> timexUnitMap, DateObject referenceDate, bool future)
-        {
-            var ret = referenceDate;
-            var futureOrPast = future ? 1 : -1;
-
-            foreach (var pair in timexUnitMap)
-            {
-                var unitStr = pair.Key;
-                var number = pair.Value;
-                switch (unitStr)
-                {
-                    case "H":
-                        ret = ret.AddHours(number * futureOrPast);
-                        break;
-                    case "M":
-                        ret = ret.AddMinutes(number * futureOrPast);
-                        break;
-                    case "S":
-                        ret = ret.AddSeconds(number * futureOrPast);
-                        break;
-                    case Constants.TimexDay:
-                        ret = ret.AddDays(number * futureOrPast);
-                        break;
-                    case Constants.TimexWeek:
-                        ret = ret.AddDays(7 * number * futureOrPast);
-                        break;
-                    case Constants.TimexMonthFull:
-                        ret = ret.AddMonths(Convert.ToInt32(number) * futureOrPast);
-                        break;
-                    case Constants.TimexYear:
-                        ret = ret.AddYears(Convert.ToInt32(number) * futureOrPast);
-                        break;
-                    case Constants.TimexBusinessDay:
-                        ret = GetNthBusinessDay(ret, Convert.ToInt32(number), future, out _);
-                        break;
-                    default:
-                        return ret;
-                }
-            }
-
-            return ret;
+            var result = GetShiftResult(timexUnitMap, referenceDateTime, future);
+            return result;
         }
 
         public static DateObject GetNthBusinessDay(DateObject startDate, int n, bool isFuture, out List<DateObject> dateList)
         {
             var date = startDate;
-            dateList = new List<DateObject> {date};
+            dateList = new List<DateObject> { date };
 
             for (var i = 0; i < n; i++)
             {
@@ -117,10 +93,12 @@ namespace Microsoft.Recognizers.Text.DateTime
             return date;
         }
 
+        // By design it currently does not take holidays into account
         public static DateObject GetNextBusinessDay(DateObject startDate, bool isFuture = true)
         {
             var dateIncrement = isFuture ? 1 : -1;
             var date = startDate.AddDays(dateIncrement);
+
             while (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
             {
                 date = date.AddDays(dateIncrement);
@@ -129,12 +107,55 @@ namespace Microsoft.Recognizers.Text.DateTime
             return date;
         }
 
+        private static DateObject GetShiftResult(IImmutableDictionary<string, double> timexUnitMap, DateObject referenceDate, bool future)
+        {
+            var result = referenceDate;
+            var futureOrPast = future ? 1 : -1;
+
+            foreach (var pair in timexUnitMap)
+            {
+                var unitStr = pair.Key;
+                var number = pair.Value;
+                switch (unitStr)
+                {
+                    case "H":
+                        result = result.AddHours(number * futureOrPast);
+                        break;
+                    case "M":
+                        result = result.AddMinutes(number * futureOrPast);
+                        break;
+                    case "S":
+                        result = result.AddSeconds(number * futureOrPast);
+                        break;
+                    case Constants.TimexDay:
+                        result = result.AddDays(number * futureOrPast);
+                        break;
+                    case Constants.TimexWeek:
+                        result = result.AddDays(7 * number * futureOrPast);
+                        break;
+                    case Constants.TimexMonthFull:
+                        result = result.AddMonths(Convert.ToInt32(number) * futureOrPast);
+                        break;
+                    case Constants.TimexYear:
+                        result = result.AddYears(Convert.ToInt32(number) * futureOrPast);
+                        break;
+                    case Constants.TimexBusinessDay:
+                        result = GetNthBusinessDay(result, Convert.ToInt32(number), future, out _);
+                        break;
+                    default:
+                        return result;
+                }
+            }
+
+            return result;
+        }
+
         private static ImmutableDictionary<string, double> ResolveDurationTimex(string timexStr)
         {
             var ret = new Dictionary<string, double>();
 
-            // Resolve duration timex, such as P21DT2H(21 days 2 hours)
-            var durationStr = timexStr.Replace("P", "");
+            // Resolve duration timex, such as P21DT2H (21 days 2 hours)
+            var durationStr = timexStr.Replace(Constants.GeneralPeriodPrefix, string.Empty);
             var numberStart = 0;
             var isTime = false;
 
@@ -179,13 +200,6 @@ namespace Microsoft.Recognizers.Text.DateTime
             }
 
             return ret.ToImmutableDictionary();
-        }
-
-        public enum MultiDurationType
-        {
-            Date = 0,
-            Time,
-            DateTime,
         }
     }
 }

@@ -1,15 +1,14 @@
 ﻿using System.Collections.Immutable;
-using System.Text.RegularExpressions;
 
 using Microsoft.Recognizers.Definitions;
 using Microsoft.Recognizers.Text.DateTime.Utilities;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
-    public abstract class BaseDateParserConfiguration : BaseOptionsConfiguration, ICommonDateTimeParserConfiguration
+    public abstract class BaseDateParserConfiguration : BaseDateTimeOptionsConfiguration, ICommonDateTimeParserConfiguration
     {
-
-        protected BaseDateParserConfiguration(IOptionsConfiguration config) : base(config)
+        protected BaseDateParserConfiguration(IDateTimeOptionsConfiguration config)
+            : base(config)
         {
         }
 
@@ -21,7 +20,7 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         public virtual IParser NumberParser { get; protected set; }
 
-        public virtual IDateTimeExtractor DateExtractor { get; protected set; }
+        public virtual IDateExtractor DateExtractor { get; protected set; }
 
         public virtual IDateTimeExtractor TimeExtractor { get; protected set; }
 
@@ -51,6 +50,8 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         public virtual IDateTimeParser DateTimeAltParser { get; protected set; }
 
+        public virtual IDateTimeParser TimeZoneParser { get; protected set; }
+
         public virtual IImmutableDictionary<string, int> MonthOfYear { get; protected set; }
 
         public virtual IImmutableDictionary<string, int> Numbers { get; protected set; }
@@ -60,6 +61,8 @@ namespace Microsoft.Recognizers.Text.DateTime
         public virtual IImmutableDictionary<string, long> UnitValueMap { get; protected set; }
 
         public virtual IImmutableDictionary<string, string> SeasonMap { get; protected set; }
+
+        public virtual IImmutableDictionary<string, string> SpecialYearPrefixesMap { get; protected set; }
 
         public virtual IImmutableDictionary<string, string> UnitMap { get; protected set; }
 
@@ -74,6 +77,5 @@ namespace Microsoft.Recognizers.Text.DateTime
         public virtual IImmutableDictionary<string, int> SpecialDecadeCases { get; protected set; }
 
         public virtual IDateTimeUtilityConfiguration UtilityConfiguration { get; protected set; }
-
     }
 }

@@ -13,8 +13,10 @@ MODELFUNCTION = {
 
 @pytest.mark.parametrize('culture, model, options, context, source, expected_results',
                          get_specs(recognizer='NumberWithUnit', entity='Model'))
-def test_number_with_unit_recognizer(culture, model, options, context, source, expected_results):
+def test_number_with_unit_recognizer(
+        culture, model, options, context, source, expected_results):
     results = get_results(culture, model, source)
+
     assert len(results) == len(expected_results)
     for actual, expected in zip(results, expected_results):
         assert actual.text == expected['Text']

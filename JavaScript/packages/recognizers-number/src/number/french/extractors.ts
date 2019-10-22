@@ -1,8 +1,9 @@
-import { BaseNumberExtractor, RegExpValue, BasePercentageExtractor } from "../extractors";
+import { BaseNumberExtractor, RegExpValue, RegExpRegExp, BasePercentageExtractor } from "../extractors";
 import { Constants } from "../constants";
 import { NumberMode, LongFormatType } from "../models";
 import { FrenchNumeric } from "../../resources/frenchNumeric";
-import { RegExpUtility } from "@microsoft/recognizers-text"
+import { BaseNumbers } from "../../resources/baseNumbers";
+import { RegExpUtility } from "@microsoft/recognizers-text";
 
 export class FrenchNumberExtractor extends BaseNumberExtractor {
     protected extractType: string = Constants.SYS_NUM;
@@ -18,7 +19,7 @@ export class FrenchNumberExtractor extends BaseNumberExtractor {
                 cardExtract = new FrenchCardinalExtractor(FrenchNumeric.PlaceHolderPureNumber);
                 break;
             case NumberMode.Currency:
-                regexes.push({ regExp: RegExpUtility.getSafeRegExp(FrenchNumeric.CurrencyRegex, "gs"), value: "IntegerNum" });
+                regexes.push({ regExp: RegExpUtility.getSafeRegExp(BaseNumbers.CurrencyRegex, "gs"), value: "IntegerNum" });
                 break;
             case NumberMode.Default:
                 break;
@@ -31,10 +32,22 @@ export class FrenchNumberExtractor extends BaseNumberExtractor {
         cardExtract.regexes.forEach(r => regexes.push(r));
 
         // Add Fraction
-        let fracExtract = new FrenchFractionExtractor();
+        let fracExtract = new FrenchFractionExtractor(mode);
         fracExtract.regexes.forEach(r => regexes.push(r));
 
         this.regexes = regexes;
+
+        // Add filter
+        let ambiguityFiltersDict = new Array<RegExpRegExp>();
+
+        if (mode != NumberMode.Unit) {            
+            for (let [ key, value ] of FrenchNumeric.AmbiguityFiltersDict){
+                ambiguityFiltersDict.push({ regExpKey: RegExpUtility.getSafeRegExp(key, "gs"), regExpValue: RegExpUtility.getSafeRegExp(value, "gs")})
+            }
+            
+        }
+
+        this.ambiguityFiltersDict = ambiguityFiltersDict;
     }
 }
 
@@ -159,7 +172,7 @@ export class FrenchFractionExtractor extends BaseNumberExtractor {
 
     protected extractType: string = Constants.SYS_NUM_FRACTION;
 
-    constructor() {
+    constructor(mode: NumberMode = NumberMode.Default) {
         super();
 
         let regexes = new Array<RegExpValue>(
@@ -178,12 +191,16 @@ export class FrenchFractionExtractor extends BaseNumberExtractor {
             {
                 regExp: RegExpUtility.getSafeRegExp(FrenchNumeric.FractionNounWithArticleRegex),
                 value: "FracFr"
-            },
-            {
-                regExp: RegExpUtility.getSafeRegExp(FrenchNumeric.FractionPrepositionRegex),
-                value: "FracFr"
             }
         );
+
+        // Not add FractionPrepositionRegex when the mode is Unit to avoid wrong recognize cases like "$1000 over 3"
+        if (mode != NumberMode.Unit) {
+            regexes.push({
+                regExp: RegExpUtility.getSafeRegExp(FrenchNumeric.FractionPrepositionRegex),
+                value: "FracFr"
+                });
+        };
 
         this.regexes = regexes;
     }
@@ -211,10 +228,10 @@ export class FrenchOrdinalExtractor extends BaseNumberExtractor {
 
 export class FrenchPercentageExtractor extends BasePercentageExtractor {
     constructor() {
-        super(new FrenchNumberExtractor())
+        super(new FrenchNumberExtractor());
     }
 
-    protected initRegexes(): Array<RegExp> {
+    protected initRegexes(): RegExp[] {
         let regexStrs = [
             FrenchNumeric.NumberWithSuffixPercentage,
             FrenchNumeric.NumberWithPrefixPercentage

@@ -6,7 +6,6 @@ namespace Microsoft.Recognizers.Text.DateTime
 {
     public interface IMergedParserConfiguration : ICommonDateTimeParserConfiguration
     {
-
         Regex BeforeRegex { get; }
 
         Regex AfterRegex { get; }
@@ -15,15 +14,15 @@ namespace Microsoft.Recognizers.Text.DateTime
 
         Regex AroundRegex { get; }
 
-        Regex YearAfterRegex { get; }
+        Regex EqualRegex { get; }
+
+        Regex SuffixAfter { get; }
 
         Regex YearRegex { get; }
 
         IDateTimeParser SetParser { get; }
 
         IDateTimeParser HolidayParser { get; }
-
-        IDateTimeParser TimeZoneParser { get; }
 
         StringMatcher SuperfluousWordMatcher { get; }
     }

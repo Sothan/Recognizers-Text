@@ -1,171 +1,179 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
+using Microsoft.Recognizers.Definitions;
 using Microsoft.Recognizers.Definitions.Spanish;
 using Microsoft.Recognizers.Text.Number;
 using Microsoft.Recognizers.Text.Number.Spanish;
 
 namespace Microsoft.Recognizers.Text.DateTime.Spanish
 {
-    public class SpanishDatePeriodExtractorConfiguration : BaseOptionsConfiguration, IDatePeriodExtractorConfiguration
+    public class SpanishDatePeriodExtractorConfiguration : BaseDateTimeOptionsConfiguration, IDatePeriodExtractorConfiguration
     {
         // base regexes
-        public static readonly Regex TillRegex = 
-            new Regex(DateTimeDefinitions.TillRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex TillRegex =
+            new Regex(DateTimeDefinitions.TillRegex, RegexFlags);
 
-        public static readonly Regex AndRegex = 
-            new Regex(DateTimeDefinitions.AndRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex AndRegex =
+            new Regex(DateTimeDefinitions.AndRegex, RegexFlags);
 
-        public static readonly Regex DayRegex = 
-            new Regex(DateTimeDefinitions.DayRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex DayRegex =
+            new Regex(DateTimeDefinitions.DayRegex, RegexFlags);
 
-        public static readonly Regex MonthNumRegex = 
-            new Regex(DateTimeDefinitions.MonthNumRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex MonthNumRegex =
+            new Regex(DateTimeDefinitions.MonthNumRegex, RegexFlags);
 
-        public static readonly Regex YearRegex = 
-            new Regex(DateTimeDefinitions.YearRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex IllegalYearRegex =
+            new Regex(BaseDateTime.IllegalYearRegex, RegexFlags);
 
-        public static readonly Regex RelativeMonthRegex = 
-            new Regex(DateTimeDefinitions.RelativeMonthRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex YearRegex =
+            new Regex(DateTimeDefinitions.YearRegex, RegexFlags);
 
-        public static readonly Regex MonthRegex = 
-            new Regex(DateTimeDefinitions.MonthRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex RelativeMonthRegex =
+            new Regex(DateTimeDefinitions.RelativeMonthRegex, RegexFlags);
 
-        public static readonly Regex MonthSuffixRegex = 
-            new Regex(DateTimeDefinitions.MonthSuffixRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex MonthRegex =
+            new Regex(DateTimeDefinitions.MonthRegex, RegexFlags);
 
-        public static readonly Regex DateUnitRegex = 
-            new Regex(DateTimeDefinitions.DateUnitRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex MonthSuffixRegex =
+            new Regex(DateTimeDefinitions.MonthSuffixRegex, RegexFlags);
+
+        public static readonly Regex DateUnitRegex =
+            new Regex(DateTimeDefinitions.DateUnitRegex, RegexFlags);
 
         public static readonly Regex TimeUnitRegex =
-            new Regex(DateTimeDefinitions.TimeUnitRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.TimeUnitRegex, RegexFlags);
 
-        public static readonly Regex PastRegex = 
-            new Regex(DateTimeDefinitions.PastRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex PastRegex =
+            new Regex(DateTimeDefinitions.PastRegex, RegexFlags);
 
-        public static readonly Regex FutureRegex = 
-            new Regex(DateTimeDefinitions.FutureRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex FutureRegex =
+            new Regex(DateTimeDefinitions.FutureRegex, RegexFlags);
 
         public static readonly Regex FutureSuffixRegex =
-            new Regex(DateTimeDefinitions.FutureSuffixRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.FutureSuffixRegex, RegexFlags);
 
         // composite regexes
-        public static readonly Regex SimpleCasesRegex = 
-            new Regex(DateTimeDefinitions.SimpleCasesRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex SimpleCasesRegex =
+            new Regex(DateTimeDefinitions.SimpleCasesRegex, RegexFlags);
 
-        public static readonly Regex MonthFrontSimpleCasesRegex = 
-            new Regex(DateTimeDefinitions.MonthFrontSimpleCasesRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex MonthFrontSimpleCasesRegex =
+            new Regex(DateTimeDefinitions.MonthFrontSimpleCasesRegex, RegexFlags);
 
-        public static readonly Regex MonthFrontBetweenRegex = 
-            new Regex(DateTimeDefinitions.MonthFrontBetweenRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex MonthFrontBetweenRegex =
+            new Regex(DateTimeDefinitions.MonthFrontBetweenRegex, RegexFlags);
 
-        public static readonly Regex DayBetweenRegex = 
-            new Regex(DateTimeDefinitions.DayBetweenRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex DayBetweenRegex =
+            new Regex(DateTimeDefinitions.DayBetweenRegex, RegexFlags);
 
-        //TODO: modify it according to the related regex in English
-        public static readonly Regex OneWordPeriodRegex = 
-            new Regex(DateTimeDefinitions.OneWordPeriodRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        // TODO: modify it according to the related regex in English
+        public static readonly Regex OneWordPeriodRegex =
+            new Regex(DateTimeDefinitions.OneWordPeriodRegex, RegexFlags);
 
-        public static readonly Regex MonthWithYearRegex = 
-            new Regex(DateTimeDefinitions.MonthWithYearRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex MonthWithYearRegex =
+            new Regex(DateTimeDefinitions.MonthWithYearRegex, RegexFlags);
 
-        public static readonly Regex MonthNumWithYearRegex = 
-            new Regex(DateTimeDefinitions.MonthNumWithYearRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex MonthNumWithYearRegex =
+            new Regex(DateTimeDefinitions.MonthNumWithYearRegex, RegexFlags);
 
-        public static readonly Regex WeekOfMonthRegex = 
-            new Regex(DateTimeDefinitions.WeekOfMonthRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex WeekOfMonthRegex =
+            new Regex(DateTimeDefinitions.WeekOfMonthRegex, RegexFlags);
 
-        public static readonly Regex WeekOfYearRegex = 
-            new Regex(DateTimeDefinitions.WeekOfYearRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex WeekOfYearRegex =
+            new Regex(DateTimeDefinitions.WeekOfYearRegex, RegexFlags);
 
-        public static readonly Regex FollowedDateUnit = 
-            new Regex(DateTimeDefinitions.FollowedDateUnit, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex FollowedDateUnit =
+            new Regex(DateTimeDefinitions.FollowedDateUnit, RegexFlags);
 
-        public static readonly Regex NumberCombinedWithDateUnit = 
-            new Regex(DateTimeDefinitions.NumberCombinedWithDateUnit, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex NumberCombinedWithDateUnit =
+            new Regex(DateTimeDefinitions.NumberCombinedWithDateUnit, RegexFlags);
 
-        public static readonly Regex QuarterRegex = 
-            new Regex(DateTimeDefinitions.QuarterRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex QuarterRegex =
+            new Regex(DateTimeDefinitions.QuarterRegex, RegexFlags);
 
-        public static readonly Regex QuarterRegexYearFront = 
-            new Regex(DateTimeDefinitions.QuarterRegexYearFront, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex QuarterRegexYearFront =
+            new Regex(DateTimeDefinitions.QuarterRegexYearFront, RegexFlags);
 
-        public static readonly Regex AllHalfYearRegex = 
-            new Regex(DateTimeDefinitions.AllHalfYearRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex AllHalfYearRegex =
+            new Regex(DateTimeDefinitions.AllHalfYearRegex, RegexFlags);
 
-        public static readonly Regex SeasonRegex = 
-            new Regex(DateTimeDefinitions.SeasonRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex SeasonRegex =
+            new Regex(DateTimeDefinitions.SeasonRegex, RegexFlags);
 
-        public static readonly Regex WhichWeekRegex = 
-            new Regex(DateTimeDefinitions.WhichWeekRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex WhichWeekRegex =
+            new Regex(DateTimeDefinitions.WhichWeekRegex, RegexFlags);
 
-        public static readonly Regex WeekOfRegex = 
-            new Regex(DateTimeDefinitions.WeekOfRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex WeekOfRegex =
+            new Regex(DateTimeDefinitions.WeekOfRegex, RegexFlags);
 
-        public static readonly Regex MonthOfRegex = 
-            new Regex(DateTimeDefinitions.MonthOfRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex MonthOfRegex =
+            new Regex(DateTimeDefinitions.MonthOfRegex, RegexFlags);
 
-        public static readonly Regex RangeUnitRegex = 
-            new Regex(DateTimeDefinitions.RangeUnitRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex RangeUnitRegex =
+            new Regex(DateTimeDefinitions.RangeUnitRegex, RegexFlags);
 
-        public static readonly Regex InConnectorRegex = 
-            new Regex(DateTimeDefinitions.InConnectorRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex InConnectorRegex =
+            new Regex(DateTimeDefinitions.InConnectorRegex, RegexFlags);
 
         public static readonly Regex WithinNextPrefixRegex =
-            new Regex(DateTimeDefinitions.WithinNextPrefixRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.WithinNextPrefixRegex, RegexFlags);
 
-        public static readonly Regex LaterEarlyPeriodRegex = 
-            new Regex(DateTimeDefinitions.LaterEarlyPeriodRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        public static readonly Regex LaterEarlyPeriodRegex =
+            new Regex(DateTimeDefinitions.LaterEarlyPeriodRegex, RegexFlags);
 
-        private static readonly Regex FromRegex = 
-            new Regex(DateTimeDefinitions.FromRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-        private static readonly Regex ConnectorAndRegex = 
-            new Regex(DateTimeDefinitions.ConnectorAndRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-        private static readonly Regex BetweenRegex = 
-            new Regex(DateTimeDefinitions.BetweenRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-        //TODO: add this regex, let it correspond to the one in English
+        // TODO: add this regex, let it correspond to the one in English
         public static readonly Regex RestOfDateRegex =
-            new Regex(@"^[.]", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.RestOfDateRegex, RegexFlags);
 
-        //TODO: add this regex, let it correspond to the one in English
+        // TODO: add this regex, let it correspond to the one in English
         public static readonly Regex WeekWithWeekDayRangeRegex =
-            new Regex(DateTimeDefinitions.WeekWithWeekDayRangeRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.WeekWithWeekDayRangeRegex, RegexFlags);
 
         public static readonly Regex YearPlusNumberRegex =
-            new Regex(DateTimeDefinitions.YearPlusNumberRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.YearPlusNumberRegex, RegexFlags);
 
         public static readonly Regex DecadeWithCenturyRegex =
-            new Regex(DateTimeDefinitions.DecadeWithCenturyRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.DecadeWithCenturyRegex, RegexFlags);
 
         public static readonly Regex YearPeriodRegex =
-            new Regex(DateTimeDefinitions.YearPeriodRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.YearPeriodRegex, RegexFlags);
 
         public static readonly Regex ComplexDatePeriodRegex =
-            new Regex(DateTimeDefinitions.ComplexDatePeriodRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.ComplexDatePeriodRegex, RegexFlags);
 
         public static readonly Regex RelativeDecadeRegex =
-            new Regex(DateTimeDefinitions.RelativeDecadeRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        
+            new Regex(DateTimeDefinitions.RelativeDecadeRegex, RegexFlags);
+
         public static readonly Regex ReferenceDatePeriodRegex =
-            new Regex(DateTimeDefinitions.ReferenceDatePeriodRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.ReferenceDatePeriodRegex, RegexFlags);
 
         public static readonly Regex AgoRegex =
-            new Regex(DateTimeDefinitions.AgoRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.AgoRegex, RegexFlags);
 
         public static readonly Regex LaterRegex =
-            new Regex(DateTimeDefinitions.LaterRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.LaterRegex, RegexFlags);
 
         public static readonly Regex LessThanRegex =
-            new Regex(DateTimeDefinitions.LessThanRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.LessThanRegex, RegexFlags);
 
         public static readonly Regex MoreThanRegex =
-            new Regex(DateTimeDefinitions.MoreThanRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.MoreThanRegex, RegexFlags);
 
         public static readonly Regex CenturySuffixRegex =
-            new Regex(DateTimeDefinitions.CenturySuffixRegex, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            new Regex(DateTimeDefinitions.CenturySuffixRegex, RegexFlags);
+
+        public static readonly Regex NowRegex =
+            new Regex(DateTimeDefinitions.NowRegex, RegexFlags);
+
+        private const RegexOptions RegexFlags = RegexOptions.Singleline | RegexOptions.ExplicitCapture;
+
+        private static readonly Regex FromRegex =
+            new Regex(DateTimeDefinitions.FromRegex, RegexFlags);
+
+        private static readonly Regex ConnectorAndRegex =
+            new Regex(DateTimeDefinitions.ConnectorAndRegex, RegexFlags);
+
+        private static readonly Regex BetweenRegex =
+            new Regex(DateTimeDefinitions.BetweenRegex, RegexFlags);
 
         private static readonly Regex[] SimpleCasesRegexes =
         {
@@ -188,19 +196,22 @@ namespace Microsoft.Recognizers.Text.DateTime.Spanish
             WeekWithWeekDayRangeRegex,
             YearPlusNumberRegex,
             DecadeWithCenturyRegex,
-            RelativeDecadeRegex
+            RelativeDecadeRegex,
+            WhichWeekRegex,
+            ReferenceDatePeriodRegex,
         };
 
-        public SpanishDatePeriodExtractorConfiguration(IOptionsConfiguration config) : base(config)
+        public SpanishDatePeriodExtractorConfiguration(IDateTimeOptionsConfiguration config)
+            : base(config)
         {
             DatePointExtractor = new BaseDateExtractor(new SpanishDateExtractorConfiguration(this));
             CardinalExtractor = Number.Spanish.CardinalExtractor.GetInstance();
-            OrdinalExtractor = new Number.Spanish.OrdinalExtractor();
+            OrdinalExtractor = Number.Spanish.OrdinalExtractor.GetInstance();
             DurationExtractor = new BaseDurationExtractor(new SpanishDurationExtractorConfiguration(this));
-            NumberParser = new BaseNumberParser(new SpanishNumberParserConfiguration());
+            NumberParser = new BaseNumberParser(new SpanishNumberParserConfiguration(new BaseNumberOptionsConfiguration(config.Culture)));
         }
 
-        public IDateTimeExtractor DatePointExtractor { get; }
+        public IDateExtractor DatePointExtractor { get; }
 
         public IExtractor CardinalExtractor { get; }
 
@@ -211,6 +222,8 @@ namespace Microsoft.Recognizers.Text.DateTime.Spanish
         public IParser NumberParser { get; }
 
         IEnumerable<Regex> IDatePeriodExtractorConfiguration.SimpleCasesRegexes => SimpleCasesRegexes;
+
+        Regex IDatePeriodExtractorConfiguration.IllegalYearRegex => IllegalYearRegex;
 
         Regex IDatePeriodExtractorConfiguration.YearRegex => YearRegex;
 
@@ -224,7 +237,7 @@ namespace Microsoft.Recognizers.Text.DateTime.Spanish
 
         Regex IDatePeriodExtractorConfiguration.NumberCombinedWithDateUnit => NumberCombinedWithDateUnit;
 
-        Regex IDatePeriodExtractorConfiguration.PastRegex => PastRegex;
+        Regex IDatePeriodExtractorConfiguration.PreviousPrefixRegex => PastRegex;
 
         Regex IDatePeriodExtractorConfiguration.FutureRegex => FutureRegex;
 
@@ -257,6 +270,12 @@ namespace Microsoft.Recognizers.Text.DateTime.Spanish
         Regex IDatePeriodExtractorConfiguration.MoreThanRegex => MoreThanRegex;
 
         Regex IDatePeriodExtractorConfiguration.CenturySuffixRegex => CenturySuffixRegex;
+
+        Regex IDatePeriodExtractorConfiguration.MonthNumRegex => MonthNumRegex;
+
+        Regex IDatePeriodExtractorConfiguration.NowRegex => NowRegex;
+
+        bool IDatePeriodExtractorConfiguration.CheckBothBeforeAfter => DateTimeDefinitions.CheckBothBeforeAfter;
 
         string[] IDatePeriodExtractorConfiguration.DurationDateRestrictions => DateTimeDefinitions.DurationDateRestrictions;
 

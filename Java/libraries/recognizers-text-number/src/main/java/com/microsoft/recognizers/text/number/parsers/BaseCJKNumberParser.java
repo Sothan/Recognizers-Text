@@ -1,16 +1,13 @@
 package com.microsoft.recognizers.text.number.parsers;
 
-import com.google.common.collect.Iterables;
 import com.microsoft.recognizers.text.ExtractResult;
 import com.microsoft.recognizers.text.ParseResult;
 import com.microsoft.recognizers.text.utilities.Match;
 import com.microsoft.recognizers.text.utilities.RegExpUtility;
 import com.microsoft.recognizers.text.utilities.StringUtility;
 
-import javax.annotation.RegEx;
-import java.util.Arrays;
+import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BaseCJKNumberParser extends BaseNumberParser {
@@ -19,23 +16,24 @@ public class BaseCJKNumberParser extends BaseNumberParser {
 
     public BaseCJKNumberParser(INumberParserConfiguration config) {
         super(config);
-        this.cjkConfig = (ICJKNumberParserConfiguration) config;
+        this.cjkConfig = (ICJKNumberParserConfiguration)config;
     }
 
     @Override
     public ParseResult parse(ExtractResult extResult) {
+
         // check if the parser is configured to support specific types
-        if (supportedTypes.isPresent() && !supportedTypes.get().stream().anyMatch(t -> extResult.type.equals(t))) {
+        if (supportedTypes.isPresent() && !supportedTypes.get().stream().anyMatch(t -> extResult.getType().equals(t))) {
             return null;
         }
 
-        String extra = extResult.data instanceof String ? (String) extResult.data : null;
+        String extra = extResult.getData() instanceof String ? (String)extResult.getData() : null;
         ParseResult ret = null;
 
-        ExtractResult getExtResult = new ExtractResult(extResult.start, extResult.length, extResult.text, extResult.type, extResult.data);
+        ExtractResult getExtResult = new ExtractResult(extResult.getStart(), extResult.getLength(), extResult.getText(), extResult.getType(), extResult.getData());
 
         if (config.getCultureInfo().cultureCode.equalsIgnoreCase("zh-CN")) {
-            getExtResult = getExtResult.withText(replaceTraWithSim(getExtResult.text));
+            getExtResult.setText(replaceTraWithSim(getExtResult.getText()));
         }
 
         if (extra == null) {
@@ -45,17 +43,17 @@ public class BaseCJKNumberParser extends BaseNumberParser {
         if (extra.contains("Per")) {
             ret = parsePercentage(getExtResult);
         } else if (extra.contains("Num")) {
-            getExtResult = getExtResult.withText(normalizeCharWidth(getExtResult.text));
+            getExtResult.setText(normalizeCharWidth(getExtResult.getText()));
             ret = digitNumberParse(getExtResult);
-            if (config.getNegativeNumberSignRegex().matcher(getExtResult.text).find() && (double) ret.value > 0) {
-                ret = ret.withValue(-(double) ret.value);
+            if (config.getNegativeNumberSignRegex().matcher(getExtResult.getText()).find() && (double)ret.getValue() > 0) {
+                ret.setValue(-(double)ret.getValue());
             }
 
-            ret = ret.withResolutionStr(getResolutionString((double) ret.value));
+            ret.setResolutionStr(getResolutionString((double)ret.getValue()));
         } else if (extra.contains("Pow")) {
-            getExtResult = getExtResult.withText(normalizeCharWidth(getExtResult.text));
+            getExtResult.setText(normalizeCharWidth(getExtResult.getText()));
             ret = powerNumberParse(getExtResult);
-            ret = ret.withResolutionStr(getResolutionString((double) ret.value));
+            ret.setResolutionStr(getResolutionString((double)ret.getValue()));
         } else if (extra.contains("Frac")) {
             ret = parseFraction(getExtResult);
         } else if (extra.contains("Dou")) {
@@ -67,7 +65,7 @@ public class BaseCJKNumberParser extends BaseNumberParser {
         }
 
         if (ret != null) {
-            ret = ret.withText(extResult.text);
+            ret.setText(extResult.getText().toLowerCase(Locale.ROOT));
         }
 
         return ret;
@@ -75,61 +73,64 @@ public class BaseCJKNumberParser extends BaseNumberParser {
 
     // Parse Fraction phrase.
     protected ParseResult parseFraction(ExtractResult extResult) {
-        ParseResult result = new ParseResult(extResult.start, extResult.length, extResult.text, extResult.type, null, null, null);
+        ParseResult result = new ParseResult(extResult.getStart(), extResult.getLength(), extResult.getText(), extResult.getType(), null, null, null);
 
-        String resultText = extResult.text;
+        String resultText = extResult.getText();
         String[] splitResult = cjkConfig.getFracSplitRegex().split(resultText);
-        String intPart = "", demoPart = "", numPart = "";
+        String intPart = "";
+        String demoPart = "";
+        String numPart = "";
+        
         if (splitResult.length == 3) {
             intPart = splitResult[0];
             demoPart = splitResult[1];
             numPart = splitResult[2];
         } else {
-            intPart = "零";
+            intPart = String.valueOf(cjkConfig.getZeroChar());
             demoPart = splitResult[0];
             numPart = splitResult[1];
         }
 
         Pattern digitNumRegex = cjkConfig.getDigitNumRegex();
 
-        double intValue = digitNumRegex.matcher(intPart).find()
-                ? getDigitValue(intPart, 1.0)
-                : getIntValue(intPart);
+        double intValue = digitNumRegex.matcher(intPart).find() ?
+                getDigitValue(intPart, 1.0) :
+                getIntValue(intPart);
 
-        double numValue = digitNumRegex.matcher(numPart).find()
-                ? getDigitValue(numPart, 1.0)
-                : getIntValue(numPart);
+        double numValue = digitNumRegex.matcher(numPart).find() ?
+                getDigitValue(numPart, 1.0) :
+                getIntValue(numPart);
 
-        double demoValue = digitNumRegex.matcher(demoPart).find()
-                ? getDigitValue(demoPart, 1.0)
-                : getIntValue(demoPart);
+        double demoValue = digitNumRegex.matcher(demoPart).find() ?
+                getDigitValue(demoPart, 1.0) :
+                getIntValue(demoPart);
 
         if (cjkConfig.getNegativeNumberSignRegex().matcher(intPart).find()) {
-            result = result.withValue(intValue - numValue / demoValue);
+            result.setValue(intValue - numValue / demoValue);
         } else {
-            result = result.withValue(intValue + numValue / demoValue);
+            result.setValue(intValue + numValue / demoValue);
         }
 
-        result = result.withResolutionStr(getResolutionString((double) result.value));
+        result.setResolutionStr(getResolutionString((double)result.getValue()));
         return result;
     }
 
     // Parse percentage phrase.
     protected ParseResult parsePercentage(ExtractResult extResult) {
-        ParseResult result = new ParseResult(extResult.start, extResult.length, extResult.text, extResult.type, null, null, null);
+        ParseResult result = new ParseResult(extResult.getStart(), extResult.getLength(), extResult.getText(), extResult.getType(), null, null, null);
         Map<Character, Double> zeroToNineMap = cjkConfig.getZeroToNineMap();
 
-        String resultText = extResult.text;
+        String resultText = extResult.getText();
         long power = 1;
 
-        if (extResult.data.toString().contains("Spe")) {
+        if (extResult.getData().toString().contains("Spe")) {
             resultText = normalizeCharWidth(resultText);
             resultText = replaceUnit(resultText);
 
             if (resultText.equals("半額") || resultText.equals("半値") || resultText.equals("半折")) {
-                result = result.withValue(50);
+                result.setValue(50);
             } else if (resultText.equals("10成") || resultText.equals("10割") || resultText.equals("十割")) {
-                result = result.withValue(100);
+                result.setValue(100);
             } else {
                 Match[] matches = RegExpUtility.getMatches(this.cjkConfig.getSpeGetNumberRegex(), resultText);
                 double intNumber;
@@ -137,9 +138,9 @@ public class BaseCJKNumberParser extends BaseNumberParser {
                 if (matches.length == 2) {
                     char intNumberChar = matches[0].value.charAt(0);
 
-                    if (intNumberChar == '対' || intNumberChar == '对') {
+                    if (intNumberChar == cjkConfig.getPairChar()) {
                         intNumber = 5;
-                    } else if (intNumberChar == '十' || intNumberChar == '拾') {
+                    } else if (cjkConfig.getTenChars().contains(intNumberChar)) {
                         intNumber = 10;
                     } else {
                         intNumber = zeroToNineMap.get(intNumberChar);
@@ -153,7 +154,7 @@ public class BaseCJKNumberParser extends BaseNumberParser {
                         pointNumber = zeroToNineMap.get(pointNumberChar) * 0.1;
                     }
 
-                    result = result.withValue((intNumber + pointNumber) * 10);
+                    result.setValue((intNumber + pointNumber) * 10);
                 } else if (matches.length == 5) {
                     // Deal the Japanese percentage case like "xxx割xxx分xxx厘", get the integer value and convert into result.
                     char intNumberChar = matches[0].value.charAt(0);
@@ -165,28 +166,28 @@ public class BaseCJKNumberParser extends BaseNumberParser {
 
                     intNumber = zeroToNineMap.get(intNumberChar);
 
-                    result = result.withValue((intNumber + pointNumber + dotNumber) * 10);
+                    result.setValue((intNumber + pointNumber + dotNumber) * 10);
                 } else {
                     char intNumberChar = matches[0].value.charAt(0);
 
-                    if (intNumberChar == '対' || intNumberChar == '对') {
+                    if (intNumberChar == cjkConfig.getPairChar()) {
                         intNumber = 5;
-                    } else if (intNumberChar == '十' || intNumberChar == '拾') {
+                    } else if (cjkConfig.getTenChars().contains(intNumberChar)) {
                         intNumber = 10;
                     } else {
                         intNumber = zeroToNineMap.get(intNumberChar);
                     }
 
-                    result = result.withValue(intNumber * 10);
+                    result.setValue(intNumber * 10);
                 }
             }
-        } else if (extResult.data.toString().contains("Num")) {
+        } else if (extResult.getData().toString().contains("Num")) {
 
             Match[] doubleMatches = RegExpUtility.getMatches(cjkConfig.getPercentageRegex(), resultText);
             String doubleText = doubleMatches[doubleMatches.length - 1].value;
 
             if (doubleText.contains("k") || doubleText.contains("K") || doubleText.contains("ｋ") ||
-                    doubleText.contains("Ｋ")) {
+                doubleText.contains("Ｋ")) {
                 power = 1000;
             }
 
@@ -202,7 +203,7 @@ public class BaseCJKNumberParser extends BaseNumberParser {
                 power = 1000000000000L;
             }
 
-            result = result.withValue(getDigitValue(resultText, power));
+            result.setValue(getDigitValue(resultText, power));
         } else {
             Match[] doubleMatches = RegExpUtility.getMatches(cjkConfig.getPercentageRegex(), resultText);
             String doubleText = doubleMatches[doubleMatches.length - 1].value;
@@ -211,7 +212,7 @@ public class BaseCJKNumberParser extends BaseNumberParser {
 
             String[] splitResult = cjkConfig.getPointRegex().split(doubleText);
             if (splitResult[0].equals("")) {
-                splitResult[0] = "零";
+                splitResult[0] = String.valueOf(cjkConfig.getZeroChar());
             }
 
             double doubleValue = getIntValue(splitResult[0]);
@@ -223,13 +224,13 @@ public class BaseCJKNumberParser extends BaseNumberParser {
                 }
             }
 
-            result = result.withValue(doubleValue);
+            result.setValue(doubleValue);
         }
 
-        if (result.value instanceof Double) {
-            result = result.withResolutionStr(getResolutionString((double) result.value) + "%");
-        } else if (result.value instanceof Integer) {
-            result = result.withResolutionStr(getResolutionString((int) result.value) + "%");
+        if (result.getValue() instanceof Double) {
+            result.setResolutionStr(getResolutionString((double)result.getValue()) + "%");
+        } else if (result.getValue() instanceof Integer) {
+            result.setResolutionStr(getResolutionString((int)result.getValue()) + "%");
         }
 
         return result;
@@ -237,9 +238,9 @@ public class BaseCJKNumberParser extends BaseNumberParser {
 
     // Parse ordinal phrase.
     protected ParseResult parseOrdinal(ExtractResult extResult) {
-        ParseResult result = new ParseResult(extResult.start, extResult.length, extResult.text, extResult.type, null, null, null);
+        ParseResult result = new ParseResult(extResult.getStart(), extResult.getLength(), extResult.getText(), extResult.getType(), null, null, null);
 
-        String resultText = extResult.text;
+        String resultText = extResult.getText();
         resultText = resultText.substring(1);
 
         boolean isDigit = cjkConfig.getDigitNumRegex().matcher(resultText).find();
@@ -247,20 +248,20 @@ public class BaseCJKNumberParser extends BaseNumberParser {
 
         double newValue = isDigit && !isRoundInt ? getDigitValue(resultText, 1) : getIntValue(resultText);
 
-        result = result.withValue(newValue)
-                .withResolutionStr(getResolutionString(newValue));
+        result.setValue(newValue);
+        result.setResolutionStr(getResolutionString(newValue));
 
         return result;
     }
 
     // Parse double phrase
     protected ParseResult parseDouble(ExtractResult extResult) {
-        ParseResult result = new ParseResult(extResult.start, extResult.length, extResult.text, extResult.type, null, null, null);
-        String resultText = extResult.text;
+        ParseResult result = new ParseResult(extResult.getStart(), extResult.getLength(), extResult.getText(), extResult.getType(), null, null, null);
+        String resultText = extResult.getText();
 
         if (cjkConfig.getDoubleAndRoundRegex().matcher(resultText).find()) {
             resultText = replaceUnit(resultText);
-            result = result.withValue(getDigitValue(
+            result.setValue(getDigitValue(
                     resultText.substring(0, resultText.length() - 1),
                     cjkConfig.getRoundNumberMapChar().get(resultText.charAt(resultText.length() - 1))));
         } else {
@@ -268,24 +269,24 @@ public class BaseCJKNumberParser extends BaseNumberParser {
             String[] splitResult = cjkConfig.getPointRegex().split(resultText);
 
             if (splitResult[0].equals("")) {
-                splitResult[0] = "零";
+                splitResult[0] = String.valueOf(cjkConfig.getZeroChar());
             }
 
             if (cjkConfig.getNegativeNumberSignRegex().matcher(splitResult[0]).find()) {
-                result = result.withValue(getIntValue(splitResult[0]) - getPointValue(splitResult[1]));
+                result.setValue(getIntValue(splitResult[0]) - getPointValue(splitResult[1]));
             } else {
-                result = result.withValue(getIntValue(splitResult[0]) + getPointValue(splitResult[1]));
+                result.setValue(getIntValue(splitResult[0]) + getPointValue(splitResult[1]));
             }
         }
 
-        result = result.withResolutionStr(getResolutionString((double) result.value));
+        result.setResolutionStr(getResolutionString((double)result.getValue()));
         return result;
     }
 
     // Parse integer phrase
     protected ParseResult parseInteger(ExtractResult extResult) {
-        double value = getIntValue(extResult.text);
-        return new ParseResult(extResult.start, extResult.length, extResult.text, extResult.type, extResult.text, value, getResolutionString(value));
+        double value = getIntValue(extResult.getText());
+        return new ParseResult(extResult.getStart(), extResult.getLength(), extResult.getText(), extResult.getType(), extResult.getText(), value, getResolutionString(value));
     }
 
     // Replace traditional Chinese characters with simpilified Chinese ones.
@@ -297,7 +298,7 @@ public class BaseCJKNumberParser extends BaseNumberParser {
         Map<Character, Character> tratoSimMap = cjkConfig.getTratoSimMap();
 
         StringBuilder builder = new StringBuilder();
-        text.chars().mapToObj(i -> (char) i).forEach(c -> {
+        text.chars().mapToObj(i -> (char)i).forEach(c -> {
             builder.append(tratoSimMap.containsKey(c) ? tratoSimMap.get(c) : c);
         });
 
@@ -312,7 +313,7 @@ public class BaseCJKNumberParser extends BaseNumberParser {
 
         Map<Character, Character> fullToHalfMap = cjkConfig.getFullToHalfMap();
         StringBuilder builder = new StringBuilder();
-        text.chars().mapToObj(i -> (char) i).forEach(c -> {
+        text.chars().mapToObj(i -> (char)i).forEach(c -> {
             builder.append(fullToHalfMap.containsKey(c) ? fullToHalfMap.get(c) : c);
         });
 
@@ -349,9 +350,13 @@ public class BaseCJKNumberParser extends BaseNumberParser {
         Map<Character, Long> roundNumberMapChar = cjkConfig.getRoundNumberMapChar();
 
         intStr = replaceUnit(intStr);
-        double intValue = 0, partValue = 0, beforeValue = 1;
+        double intValue = 0;
+        double partValue = 0;
+        double beforeValue = 1;
+
         boolean isRoundBefore = false;
-        long roundBefore = -1, roundDefault = 1;
+        long roundBefore = -1;
+        long roundDefault = 1;
         boolean isNegative = false;
 
         boolean isDozen = false;
@@ -403,7 +408,8 @@ public class BaseCJKNumberParser extends BaseNumberParser {
                 roundDefault = roundRecent / 10;
             } else if (cjkConfig.getZeroToNineMap().containsKey(intStr.charAt(i))) {
                 if (i != intStr.length() - 1) {
-                    if (intStr.charAt(i) == '零' && !roundNumberMapChar.containsKey(intStr.charAt(i + 1))) {
+                    boolean isNotRoundNext = cjkConfig.getTenChars().contains(intStr.charAt(i + 1)) || !roundNumberMapChar.containsKey(intStr.charAt(i + 1));
+                    if (intStr.charAt(i) == cjkConfig.getZeroChar() && isNotRoundNext) {
                         beforeValue = 1;
                         roundDefault = 1;
                     } else {
@@ -438,7 +444,7 @@ public class BaseCJKNumberParser extends BaseNumberParser {
         Map<Character, Double> zeroToNineMap = cjkConfig.getZeroToNineMap();
 
         for (int i : pointStr.chars().toArray()) {
-            char c = (char) i;
+            char c = (char)i;
             pointValue += scale * zeroToNineMap.get(c);
             scale *= 0.1;
         }
@@ -447,8 +453,8 @@ public class BaseCJKNumberParser extends BaseNumberParser {
     }
 
     private String getResolutionString(double value) {
-        return config.getCultureInfo() != null
-                ? NumberFormatUtility.format(value, config.getCultureInfo())
-                : String.valueOf(value);
+        return config.getCultureInfo() != null ?
+                NumberFormatUtility.format(value, config.getCultureInfo()) :
+                String.valueOf(value);
     }
 }

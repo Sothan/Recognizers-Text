@@ -1,29 +1,53 @@
 ﻿using System.Collections.Generic;
 
-using Microsoft.Recognizers.Text.Number.Chinese;
-using Microsoft.Recognizers.Text.Number.Japanese;
-using Microsoft.Recognizers.Text.Number.Korean;
-
 namespace Microsoft.Recognizers.Text.Number
 {
     public enum AgnosticNumberParserType
     {
+        /// <summary>
+        /// Type Cardinal
+        /// </summary>
         Cardinal,
+
+        /// <summary>
+        /// type Double
+        /// </summary>
         Double,
+
+        /// <summary>
+        /// Type Fraction
+        /// </summary>
         Fraction,
+
+        /// <summary>
+        /// Type Integer
+        /// </summary>
         Integer,
+
+        /// <summary>
+        /// Type Number
+        /// </summary>
         Number,
+
+        /// <summary>
+        /// Tyoe Ordinal
+        /// </summary>
         Ordinal,
-        Percentage
+
+        /// <summary>
+        /// Type Percentage
+        /// </summary>
+        Percentage,
     }
 
     public static class AgnosticNumberParserFactory
     {
         public static BaseNumberParser GetParser(AgnosticNumberParserType type, INumberParserConfiguration languageConfiguration)
         {
-            var isChinese = languageConfiguration.CultureInfo.Name.ToLowerInvariant() == Culture.Chinese;
-            var isJapanese = languageConfiguration.CultureInfo.Name.ToLowerInvariant() == Culture.Japanese;
-            var isKorean = languageConfiguration.CultureInfo.Name.ToLowerInvariant() == Culture.Korean;
+            var culture = languageConfiguration.CultureInfo.Name.ToLowerInvariant();
+            var isChinese = culture == Culture.Chinese;
+            var isJapanese = culture == Culture.Japanese;
+            var isKorean = culture == Culture.Korean;
 
             BaseNumberParser parser;
 
@@ -54,10 +78,11 @@ namespace Microsoft.Recognizers.Text.Number
                     parser.SupportedTypes = new List<string> { Constants.SYS_NUM_ORDINAL };
                     break;
                 case AgnosticNumberParserType.Percentage:
-                    if (!isChinese && !isJapanese || isKorean)
+                    if ((!isChinese && !isJapanese) || isKorean)
                     {
                         parser = new BasePercentageParser(languageConfiguration);
                     }
+
                     break;
             }
 

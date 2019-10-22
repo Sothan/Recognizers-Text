@@ -23,12 +23,12 @@ export interface INumberParserConfiguration {
     readonly nonDecimalSeparatorChar: string;
     readonly decimalSeparatorChar: string;
     readonly wordSeparatorToken: string;
-    readonly writtenDecimalSeparatorTexts: ReadonlyArray<string>;
-    readonly writtenGroupSeparatorTexts: ReadonlyArray<string>;
-    readonly writtenIntegerSeparatorTexts: ReadonlyArray<string>;
-    readonly writtenFractionSeparatorTexts: ReadonlyArray<string>;
+    readonly writtenDecimalSeparatorTexts: readonly string[];
+    readonly writtenGroupSeparatorTexts: readonly string[];
+    readonly writtenIntegerSeparatorTexts: readonly string[];
+    readonly writtenFractionSeparatorTexts: readonly string[];
 
-    normalizeTokenSet(tokens: ReadonlyArray<string>, context: ParseResult): ReadonlyArray<string>;
+    normalizeTokenSet(tokens: readonly string[], context: ParseResult): readonly string[];
     resolveCompositeNumber(numberStr: string): number;
 }
 
@@ -38,7 +38,7 @@ export class BaseNumberParser implements IParser {
     protected readonly arabicNumberRegex: RegExp;
     protected readonly roundNumberSet: Set<string>;
 
-    supportedTypes: ReadonlyArray<string>;
+    supportedTypes: readonly string[];
 
     constructor(config: INumberParserConfiguration) {
         this.config = config;
@@ -65,17 +65,17 @@ export class BaseNumberParser implements IParser {
         if (!extra) {
             if (this.arabicNumberRegex.test(extResult.text)) {
                 extra = "Num";
-            } else {
+            }
+            else {
                 extra = this.config.langMarker;
             }
         }
-        
+
         // Resolve symbol prefix
         let isNegative = false;
         let matchNegative = extResult.text.match(this.config.negativeNumberSignRegex);
 
-        if (matchNegative)
-        {
+        if (matchNegative) {
             isNegative = true;
             extResult.text = extResult.text.substr(matchNegative[1].length);
         }
@@ -95,8 +95,7 @@ export class BaseNumberParser implements IParser {
         }
 
         if (ret && ret.value !== null) {
-            if (isNegative)
-            {
+            if (isNegative) {
                 // Recover to the original extracted Text
                 ret.text = matchNegative[1] + extResult.text;
                 // Check if ret.value is a BigNumber
@@ -111,6 +110,8 @@ export class BaseNumberParser implements IParser {
             ret.resolutionStr = this.config.cultureInfo
                 ? this.config.cultureInfo.format(ret.value)
                 : ret.value.toString();
+
+            ret.text = ret.text.toLowerCase();
         }
 
         return ret;
@@ -139,9 +140,9 @@ export class BaseNumberParser implements IParser {
         // [6] 2 hundred
         // dot occured.
 
-        let power: number = 1;
-        let tmpIndex: number = -1;
-        let startIndex: number = 0;
+        let power = 1;
+        let tmpIndex = -1;
+        let startIndex = 0;
         let handle = extResult.text.toLowerCase();
 
         let matches = RegExpUtility.getMatches(this.config.digitalNumberRegex, handle);
@@ -208,6 +209,11 @@ export class BaseNumberParser implements IParser {
             let splitIndex = fracWords.length - 1;
             let currentValue = this.config.resolveCompositeNumber(fracWords[splitIndex]);
             let roundValue = 1;
+
+            if (fracWords.length == 1) {
+                result.value = 1 / this.getIntValue(fracWords);
+                return result;
+            }
 
             for (splitIndex = fracWords.length - 2; splitIndex >= 0; splitIndex--) {
 
@@ -296,7 +302,7 @@ export class BaseNumberParser implements IParser {
             }
             else {
                 // (intValue + numerValue) / denomiValue
-                result.value = new BigNumber(intValue + numerValue).dividedBy(denomiValue)
+                result.value = new BigNumber(intValue + numerValue).dividedBy(denomiValue);
             }
         }
 
@@ -314,13 +320,13 @@ export class BaseNumberParser implements IParser {
 
         let handle = extResult.text.toLowerCase();
 
-        handle = handle.replace(this.config.halfADozenRegex, this.config.halfADozenText)
+        handle = handle.replace(this.config.halfADozenRegex, this.config.halfADozenText);
 
         let numGroup = this.splitMulti(handle, Array.from(this.config.writtenDecimalSeparatorTexts)).filter(s => s && s.length > 0);
 
         let intPart = numGroup[0];
 
-        let matchStrs = intPart
+        let matchStrs = (intPart && intPart.match(this.textNumberRegex))
             ? intPart.match(this.textNumberRegex).map(s => s.toLowerCase())
             : new Array<string>();
 
@@ -421,7 +427,7 @@ export class BaseNumberParser implements IParser {
         return result;
     }
 
-    private splitMulti(str: string, tokens: Array<string>): Array<string> {
+    private splitMulti(str: string, tokens: string[]): string[] {
         let tempChar = tokens[0]; // We can use the first token as a temporary join character
         for (let i = 0; i < tokens.length; i++) {
             str = str.split(tokens[i]).join(tempChar);
@@ -429,7 +435,7 @@ export class BaseNumberParser implements IParser {
         return str.split(tempChar);
     }
 
-    private getMatches(input: string): Array<string> {
+    private getMatches(input: string): string[] {
         let matches = input.match(this.textNumberRegex);
         return (matches || []).map(match => {
             return match.toLowerCase();
@@ -448,7 +454,7 @@ export class BaseNumberParser implements IParser {
         return false;
     }
 
-    private getIntValue(matchStrs: Array<string>): number {
+    private getIntValue(matchStrs: string[]): number {
         let isEnd = new Array<boolean>(matchStrs.length);
         for (let i = 0; i < isEnd.length; i++) {
             isEnd[i] = false;
@@ -562,7 +568,7 @@ export class BaseNumberParser implements IParser {
         return tempValue;
     }
 
-    private getPointValue(matchStrs: Array<string>): number {
+    private getPointValue(matchStrs: string[]): number {
         let ret = 0;
         let firstMatch = matchStrs[0];
 
@@ -584,18 +590,33 @@ export class BaseNumberParser implements IParser {
         return ret;
     }
 
-    protected getDigitalValue(digitStr: string, power: number): number {
+    private skipNonDecimalSeparator(ch: string, distance: number, culture: CultureInfo) {
+        let decimalLength = 3;
+
+        // Special cases for multi-language countries where decimal separators can be used interchangeably. Mostly informally.
+        // Ex: South Africa, Namibia; Puerto Rico in ES; or in Canada for EN and FR.
+        // "me pidio $5.00 prestados" and "me pidio $5,00 prestados" -> currency $5
+        let cultureRegex = RegExpUtility.getSafeRegExp(String.raw`^(en|es|fr)(-)?\b`, "is");
+
+        return (ch == this.config.nonDecimalSeparatorChar && !(distance <= decimalLength && (cultureRegex.exec(culture.code) !== null)));
+    }
+
+    protected getDigitalValue(digitsStr: string, power: number): number {
         let tmp = new BigNumber(0);
         let scale = new BigNumber(10);
-        let dot = false;
+        let decimalSeparator = false;
+        let strLength = digitsStr.length;
         let isNegative = false;
-        let isFrac = digitStr.includes('/');
+        let isFrac = digitsStr.includes('/');
 
         let calStack = new Array<BigNumber>();
 
-        for (let i = 0; i < digitStr.length; i++) {
-            let ch = digitStr[i];
-            if (!isFrac && (ch === this.config.nonDecimalSeparatorChar || ch === ' ')) {
+        for (let i = 0; i < digitsStr.length; i++) {
+
+            let ch = digitsStr[i];
+            let skippableNonDecimal = this.skipNonDecimalSeparator(ch, strLength - i, this.config.cultureInfo);
+
+            if (!isFrac && (ch === ' ' || skippableNonDecimal)) {
                 continue;
             }
 
@@ -604,7 +625,7 @@ export class BaseNumberParser implements IParser {
                 tmp = new BigNumber(0);
             }
             else if (ch >= '0' && ch <= '9') {
-                if (dot) {
+                if (decimalSeparator) {
                     // tmp = tmp + scale * (ch.charCodeAt(0) - 48);
                     // scale *= 0.1;
                     tmp = tmp.plus(scale.times(ch.charCodeAt(0) - 48));
@@ -615,8 +636,8 @@ export class BaseNumberParser implements IParser {
                     tmp = tmp.times(scale).plus(ch.charCodeAt(0) - 48);
                 }
             }
-            else if (ch === this.config.decimalSeparatorChar) {
-                dot = true;
+            else if (ch === this.config.decimalSeparatorChar || (!skippableNonDecimal && ch == this.config.nonDecimalSeparatorChar)) {
+                decimalSeparator = true;
                 scale = new BigNumber(0.1);
             }
             else if (ch === '-') {
@@ -625,7 +646,7 @@ export class BaseNumberParser implements IParser {
         }
         calStack.push(tmp);
 
-        // is the number is a fraction.
+        // if the number is a fraction.
         let calResult = new BigNumber(0);
         if (isFrac) {
             let deno = calStack.pop();

@@ -4,19 +4,19 @@ import com.microsoft.recognizers.text.number.Constants;
 import com.microsoft.recognizers.text.number.NumberMode;
 import com.microsoft.recognizers.text.number.NumberOptions;
 import com.microsoft.recognizers.text.number.extractors.BaseNumberExtractor;
+import com.microsoft.recognizers.text.number.resources.BaseNumbers;
 import com.microsoft.recognizers.text.number.resources.FrenchNumeric;
-import org.javatuples.Pair;
-
+import com.microsoft.recognizers.text.utilities.RegExpUtility;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
-
-import static com.microsoft.recognizers.text.number.NumberMode.Default;
+import org.javatuples.Pair;
 
 public class NumberExtractor extends BaseNumberExtractor {
     private final Map<Pattern, String> regexes;
+    private final Map<Pattern, Pattern> ambiguityFiltersDict;
     private final NumberOptions options;
 
     @Override
@@ -27,6 +27,11 @@ public class NumberExtractor extends BaseNumberExtractor {
     @Override
     protected String getExtractType() {
         return Constants.SYS_NUM;
+    }
+
+    @Override
+    protected Map<Pattern, Pattern> getAmbiguityFiltersDict() {
+        return this.ambiguityFiltersDict;
     }
 
     @Override
@@ -63,28 +68,39 @@ public class NumberExtractor extends BaseNumberExtractor {
         HashMap<Pattern, String> builder = new HashMap<>();
 
         CardinalExtractor cardExtract = null;
-        switch(mode)
-        {
+        switch (mode) {
             case PureNumber:
                 cardExtract = CardinalExtractor.getInstance(FrenchNumeric.PlaceHolderPureNumber);
                 break;
             case Currency:
-                builder.put(Pattern.compile(FrenchNumeric.CurrencyRegex), "IntegerNum");
+                builder.put(Pattern.compile(BaseNumbers.CurrencyRegex), "IntegerNum");
                 break;
             case Default:
                 break;
+            default:
+                break;
         }
 
-        if (cardExtract == null)
-        {
+        if (cardExtract == null) {
             cardExtract = CardinalExtractor.getInstance();
         }
 
         builder.putAll(cardExtract.getRegexes());
 
-        FractionExtractor fracExtract = new FractionExtractor();
+        FractionExtractor fracExtract = new FractionExtractor(mode);
         builder.putAll(fracExtract.getRegexes());
 
         this.regexes = Collections.unmodifiableMap(builder);
+
+        HashMap<Pattern, Pattern> ambiguityFiltersDict = new HashMap<>();
+        if (mode != NumberMode.Unit) {
+            for (Map.Entry<String, String> pair : FrenchNumeric.AmbiguityFiltersDict.entrySet()) {
+                Pattern key = RegExpUtility.getSafeRegExp(pair.getKey());
+                Pattern val = RegExpUtility.getSafeRegExp(pair.getValue());
+                ambiguityFiltersDict.put(key, val);
+            }
+        }
+
+        this.ambiguityFiltersDict = ambiguityFiltersDict;
     }
 }

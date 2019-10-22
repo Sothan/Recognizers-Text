@@ -2,33 +2,26 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using DateObject = System.DateTime;
-
 using Microsoft.Recognizers.Definitions.English;
+using DateObject = System.DateTime;
 
 namespace Microsoft.Recognizers.Text.DateTime
 {
     public class BaseTimeZoneParser : IDateTimeParser
     {
-        public static readonly string ParserName = Constants.SYS_DATETIME_TIMEZONE; //"TimeZone";
+        public static readonly string ParserName = Constants.SYS_DATETIME_TIMEZONE; // "TimeZone";
 
-        public ParseResult Parse(ExtractResult result)
-        {
-            return Parse(result, DateObject.Now);
-        }
-
-        public List<DateTimeParseResult> FilterResults(string query, List<DateTimeParseResult> candidateResults)
-        {
-            return candidateResults;
-        }
+        public static readonly Regex TimeZoneEndRegex = new Regex("time$|timezone$", RegexOptions.Singleline);
 
         // Compute UTC offset in minutes from matched timezone offset in text. e.g. "-4:30" -> -270; "+8"-> 480.
-        public int ComputeMinutes(string utcOffset)
+        public static int ComputeMinutes(string utcOffset)
         {
             if (utcOffset.Length == 0)
             {
                 return Constants.InvalidOffsetValue;
             }
+
+            utcOffset = utcOffset.Trim();
 
             int sign = Constants.PositiveSign; // later than utc, default value
             if (utcOffset.StartsWith("+") || utcOffset.StartsWith("-") || utcOffset.StartsWith("±"))
@@ -64,24 +57,51 @@ namespace Microsoft.Recognizers.Text.DateTime
                 return Constants.InvalidOffsetValue;
             }
 
-            int offsetInMinutes = hours * 60 + minutes;
+            int offsetInMinutes = (hours * 60) + minutes;
             offsetInMinutes *= sign;
 
             return offsetInMinutes;
         }
 
+        public static string ConvertOffsetInMinsToOffsetString(int offsetMins)
+        {
+            return $"UTC{(offsetMins >= 0 ? "+" : "-")}{ConvertMinsToRegularFormat(Math.Abs(offsetMins))}";
+        }
+
+        public static string ConvertMinsToRegularFormat(int offsetMins)
+        {
+            return TimeSpan.FromMinutes(offsetMins).ToString(@"hh\:mm");
+        }
+
+        public static string NormalizeText(string text)
+        {
+            text = Regex.Replace(text, @"\s+", " ");
+            text = TimeZoneEndRegex.Replace(text, string.Empty);
+            return text.TrimEnd(' ');
+        }
+
+        public ParseResult Parse(ExtractResult result)
+        {
+            return Parse(result, DateObject.Now);
+        }
+
+        public List<DateTimeParseResult> FilterResults(string query, List<DateTimeParseResult> candidateResults)
+        {
+            return candidateResults;
+        }
+
         public DateTimeParseResult Parse(ExtractResult er, DateObject refDate)
         {
-            DateTimeParseResult result;
-            result = new DateTimeParseResult
+            DateTimeParseResult result = new DateTimeParseResult
             {
                 Start = er.Start,
                 Length = er.Length,
                 Text = er.Text,
-                Type = er.Type
+                Type = er.Type,
             };
-            
-            string text = er.Text.ToLower();
+
+            string text = er.Text;
+            string normalizedText = NormalizeText(text);
             string matched = Regex.Match(text, TimeZoneDefinitions.DirectUtcRegex).Groups[2].Value;
             int offsetInMinutes = ComputeMinutes(matched);
 
@@ -90,17 +110,18 @@ namespace Microsoft.Recognizers.Text.DateTime
                 result.Value = GetDateTimeResolutionResult(offsetInMinutes, text);
                 result.ResolutionStr = Constants.UtcOffsetMinsKey + ": " + offsetInMinutes;
             }
-            else if (TimeZoneDefinitions.AbbrToMinMapping.ContainsKey(text) &&
-                     TimeZoneDefinitions.AbbrToMinMapping[text] != Constants.InvalidOffsetValue)
+            else if (TimeZoneDefinitions.AbbrToMinMapping.ContainsKey(normalizedText) &&
+                     TimeZoneDefinitions.AbbrToMinMapping[normalizedText] != Constants.InvalidOffsetValue)
             {
-                int utcMinuteShift = TimeZoneDefinitions.AbbrToMinMapping[text];
+                int utcMinuteShift = TimeZoneDefinitions.AbbrToMinMapping[normalizedText];
 
                 result.Value = GetDateTimeResolutionResult(utcMinuteShift, text);
                 result.ResolutionStr = Constants.UtcOffsetMinsKey + ": " + utcMinuteShift;
             }
-            else if (TimeZoneDefinitions.FullToMinMapping.ContainsKey(text))
+            else if (TimeZoneDefinitions.FullToMinMapping.ContainsKey(normalizedText) &&
+                     TimeZoneDefinitions.FullToMinMapping[normalizedText] != Constants.InvalidOffsetValue)
             {
-                int utcMinuteShift = TimeZoneDefinitions.FullToMinMapping[text.ToLower()];
+                int utcMinuteShift = TimeZoneDefinitions.FullToMinMapping[normalizedText];
                 result.Value = GetDateTimeResolutionResult(utcMinuteShift, text);
                 result.ResolutionStr = Constants.UtcOffsetMinsKey + ": " + utcMinuteShift;
             }
@@ -114,8 +135,8 @@ namespace Microsoft.Recognizers.Text.DateTime
                     {
                         Value = "UTC+XX:XX",
                         UtcOffsetMins = Constants.InvalidOffsetValue,
-                        TimeZoneText = text
-                    }
+                        TimeZoneText = text,
+                    },
                 };
                 result.ResolutionStr = Constants.UtcOffsetMinsKey + ": XX:XX";
             }
@@ -132,21 +153,11 @@ namespace Microsoft.Recognizers.Text.DateTime
                 {
                     Value = ConvertOffsetInMinsToOffsetString(offsetMins),
                     UtcOffsetMins = offsetMins,
-                    TimeZoneText = text
-                }
+                    TimeZoneText = text,
+                },
             };
 
             return val;
-        }
-
-        public string ConvertOffsetInMinsToOffsetString(int offsetMins)
-        {
-            return $"UTC{(offsetMins >= 0 ? "+" : "-")}{ConvertMinsToRegularFormat(Math.Abs(offsetMins))}";
-        }
-
-        public string ConvertMinsToRegularFormat(int offsetMins)
-        {
-            return TimeSpan.FromMinutes(offsetMins).ToString(@"hh\:mm");
         }
     }
 }

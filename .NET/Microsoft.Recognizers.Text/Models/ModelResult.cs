@@ -6,13 +6,13 @@ namespace Microsoft.Recognizers.Text
     {
         public string Text { get; set; }
 
-        public int? Start { get; set; }
+        public int Start { get; set; } = Constants.InvalidIndex;
 
-        public int? End { get; set; }
+        public int End { get; set; } = Constants.InvalidIndex;
 
         public string TypeName { get; set; }
-        
-        //Resolution field
+
+        // Resolution field
         public SortedDictionary<string, object> Resolution { get; set; }
     }
 }

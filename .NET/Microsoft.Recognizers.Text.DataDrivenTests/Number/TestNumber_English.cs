@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Microsoft.Recognizers.Text.DataDrivenTests;
+﻿using Microsoft.Recognizers.Text.DataDrivenTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Recognizers.Text.Number.Tests
@@ -9,73 +8,67 @@ namespace Microsoft.Recognizers.Text.Number.Tests
     {
         public static TestResources TestResources { get; protected set; }
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            TestResources = new TestResources();
-            TestResources.InitFromTestContext(context);
-        }
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            base.TestSpecInitialize(TestResources);
-        }
-
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "NumberModel-English.csv", "NumberModel-English#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void NumberModel()
+        public void OrdinalModelSuppressExtendedTypes(TestModel testSpec)
         {
-            base.TestNumber();
+            TestNumber(testSpec);
         }
 
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "NumberModelPercentMode-English.csv", "NumberModelPercentMode-English#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void NumberModelPercentMode()
+        public void NumberModel(TestModel testSpec)
         {
-            base.TestNumber();
+            TestNumber(testSpec);
         }
 
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "NumberModelExperimentalMode-English.csv", "NumberModelExperimentalMode-English#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void NumberModelExperimentalMode()
+        public void NumberModelPercentMode(TestModel testSpec)
         {
-            base.TestNumber();
+            TestNumber(testSpec);
         }
 
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "OrdinalModel-English.csv", "OrdinalModel-English#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void OrdinalModel()
+        public void NumberModelExperimentalMode(TestModel testSpec)
         {
-            base.TestNumber();
+            TestNumber(testSpec);
         }
 
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "PercentModel-English.csv", "PercentModel-English#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void PercentModel()
+        public void OrdinalModel(TestModel testSpec)
         {
-            base.TestNumber();
+            TestNumber(testSpec);
         }
 
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "PercentModelPercentMode-English.csv", "PercentModelPercentMode-English#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void PercentModelPercentMode()
+        public void PercentModel(TestModel testSpec)
         {
-            base.TestNumber();
+            TestNumber(testSpec);
         }
 
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "NumberRangeModel-English.csv", "NumberRangeModel-English#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void NumberRangeModel()
+        public void PercentModelPercentMode(TestModel testSpec)
         {
-            base.TestNumber();
+            TestNumber(testSpec);
         }
 
-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "NumberRangeModelExperimentalMode-English.csv", "NumberRangeModelExperimentalMode-English#csv", DataAccessMethod.Sequential)]
+        [NetCoreTestDataSource]
         [TestMethod]
-        public void NumberRangeModelExperimentalMode()
+        public void NumberRangeModel(TestModel testSpec)
         {
-            base.TestNumber();
+            TestNumber(testSpec);
+        }
+
+        [NetCoreTestDataSource]
+        [TestMethod]
+        public void NumberRangeModelExperimentalMode(TestModel testSpec)
+        {
+            TestNumber(testSpec);
         }
     }
 }

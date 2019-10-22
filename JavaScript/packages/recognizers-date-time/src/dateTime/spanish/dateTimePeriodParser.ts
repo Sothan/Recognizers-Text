@@ -1,6 +1,6 @@
 import { RegExpUtility } from "@microsoft/recognizers-text";
 import { BaseDateTimePeriodParser, IDateTimePeriodParserConfiguration } from "../baseDateTimePeriod";
-import { DateTimeResolutionResult, DateUtils, FormatUtil } from "../utilities";
+import { DateTimeResolutionResult, DateUtils, DateTimeFormatUtil } from "../utilities";
 import { SpanishDateTime } from "../../resources/spanishDateTime";
 
 export class SpanishDateTimePeriodParser extends BaseDateTimePeriodParser {
@@ -27,13 +27,13 @@ export class SpanishDateTimePeriodParser extends BaseDateTimePeriodParser {
         if (matches.length && matches[0].index === 0 && matches[0].length === trimedText.length) {
             let swift = this.config.getSwiftPrefix(trimedText);
 
-            let date = DateUtils.addDays(referenceDate, swift)
+            let date = DateUtils.addDays(referenceDate, swift);
             date.setHours(0, 0, 0, 0);
             let day = date.getDate();
             let month = date.getMonth();
             let year = date.getFullYear();;
 
-            ret.timex = FormatUtil.formatDate(date) + timeStr;
+            ret.timex = DateTimeFormatUtil.formatDate(date) + timeStr;
 
             ret.pastValue = ret.futureValue = [
                 DateUtils.safeCreateFromValue(DateUtils.minValue(), year, month, day, beginHour, 0, 0),

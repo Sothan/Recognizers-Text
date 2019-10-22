@@ -1,4 +1,5 @@
-[{
+[
+  {
     "Input": "75ml",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
@@ -14,15 +15,14 @@
         "End": 3
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Das Ding ist mindestens 3 Zoll breit.",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "3 Zoll",
+        "Text": "3 zoll",
         "TypeName": "dimension",
         "Resolution": {
           "value": "3",
@@ -32,15 +32,14 @@
         "End": 29
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Da müssen noch 3 Teelöffel Salz rein.",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "3 Teelöffel",
+        "Text": "3 teelöffel",
         "TypeName": "dimension",
         "Resolution": {
           "value": "3",
@@ -50,15 +49,14 @@
         "End": 25
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Auf dem Oktoberfest wurden bisher insgesamt ca. achtzig Millionen liter Bier ausgeschenkt.",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "achtzig Millionen liter",
+        "Text": "achtzig millionen liter",
         "TypeName": "dimension",
         "Resolution": {
           "value": "80000000",
@@ -68,26 +66,7 @@
         "End": 70
       }
     ]
-  }
-  ,
-  {
-    "Input": "Auf dem Oktoberfest wurden bisher insgesamt ca. achtzig Millionen liter Bier ausgeschenkt.",
-    "NotSupportedByDesign": "python",
-    "NotSupported": "javascript",
-    "Results": [
-      {
-        "Text": "achtzig Millionen liter",
-        "TypeName": "dimension",
-        "Resolution": {
-          "value": "80000000",
-          "unit": "Liter"
-        },
-        "Start": 48,
-        "End": 70
-      }
-    ]
-  }
-  ,
+  },
   {
     "Input": "Ein Fußballfeld ist zwischen 4.050 m² und 10.800 m² groß.",
     "NotSupportedByDesign": "python",
@@ -102,8 +81,7 @@
         },
         "Start": 29,
         "End": 36
-      }
-      ,
+      },
       {
         "Text": "10.800 m²",
         "TypeName": "dimension",
@@ -115,8 +93,7 @@
         "End": 50
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Eine Geschwindigkeitsbegrenzung von 120 km/h macht auf der Autobahn keinen Sinn.",
     "NotSupportedByDesign": "python",
@@ -133,15 +110,14 @@
         "End": 43
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Dafür brauchen wir mindestens 12 Kubikmeter Beton.",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "12 Kubikmeter",
+        "Text": "12 kubikmeter",
         "TypeName": "dimension",
         "Resolution": {
           "value": "12",
@@ -151,15 +127,14 @@
         "End": 42
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Ein Pfund Hack bitte.",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "Ein Pfund",
+        "Text": "ein pfund",
         "TypeName": "dimension",
         "Resolution": {
           "value": "1",
@@ -169,15 +144,14 @@
         "End": 8
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Das dürften ca. 50 Gigabyte an Daten sein die übertragen werden müssen.",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "50 Gigabyte",
+        "Text": "50 gigabyte",
         "TypeName": "dimension",
         "Resolution": {
           "value": "50",
@@ -187,15 +161,14 @@
         "End": 26
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Dreizehn Meilen westlich von hier liegt die nächste Stadt.",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "Dreizehn Meilen",
+        "Text": "dreizehn meilen",
         "TypeName": "dimension",
         "Resolution": {
           "value": "13",
@@ -205,15 +178,14 @@
         "End": 14
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Ein Tennisfeld(Einzel) ist 195,63 Quadratmeter groß. Für Doppel sind es 260,76 Quadratmeter. Dagegen wirkt eine Tischtennisfeld mit 4,18m^2 mickrig.",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "195,63 Quadratmeter",
+        "Text": "195,63 quadratmeter",
         "TypeName": "dimension",
         "Resolution": {
           "value": "195,63",
@@ -221,10 +193,9 @@
         },
         "Start": 27,
         "End": 45
-      }
-      ,
+      },
       {
-        "Text": "260,76 Quadratmeter",
+        "Text": "260,76 quadratmeter",
         "TypeName": "dimension",
         "Resolution": {
           "value": "260,76",
@@ -232,8 +203,7 @@
         },
         "Start": 72,
         "End": 90
-      }
-      ,
+      },
       {
         "Text": "4,18m^2",
         "TypeName": "dimension",
@@ -245,8 +215,7 @@
         "End": 138
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Während der 4004-Prozessor noch eine Strukturgröße von 10 μm hatte, werden die Prozessoren mit der Skylake-Architektur mit 14 nm gefertigt. Toshibas NAND-Flashspeicher von 2013 hatte eine von 19 Nanometern.",
     "NotSupportedByDesign": "python",
@@ -261,8 +230,7 @@
         },
         "Start": 55,
         "End": 59
-      }
-      ,
+      },
       {
         "Text": "14 nm",
         "TypeName": "dimension",
@@ -272,10 +240,9 @@
         },
         "Start": 123,
         "End": 127
-      }
-      ,
+      },
       {
-        "Text": "19 Nanometern",
+        "Text": "19 nanometern",
         "TypeName": "dimension",
         "Resolution": {
           "value": "19",
@@ -285,15 +252,14 @@
         "End": 204
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Das Licht bewegt sich mit 299.792.458 Metern pro Sekunde durch den leeren Raum.",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "299.792.458 Metern pro Sekunde",
+        "Text": "299.792.458 metern pro sekunde",
         "TypeName": "dimension",
         "Resolution": {
           "value": "299792458",
@@ -303,15 +269,14 @@
         "End": 55
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Bei 500Km ist Pause.",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "500Km",
+        "Text": "500km",
         "TypeName": "dimension",
         "Resolution": {
           "value": "500",
@@ -321,8 +286,7 @@
         "End": 8
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Eine BGM-109 erreich eine Höchstgeschwindigkeit von 878 km/h bzw. 244 Metern pro Sekunde",
     "NotSupportedByDesign": "python",
@@ -337,10 +301,9 @@
         },
         "Start": 52,
         "End": 59
-      }
-      ,
+      },
       {
-        "Text": "244 Metern pro Sekunde",
+        "Text": "244 metern pro sekunde",
         "TypeName": "dimension",
         "Resolution": {
           "value": "244",
@@ -350,15 +313,14 @@
         "End": 87
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Wir brauchen da noch einen Teelöffel Salz.",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
     "Results": [
       {
-        "Text": "einen Teelöffel",
+        "Text": "einen teelöffel",
         "TypeName": "dimension",
         "Resolution": {
           "value": "1",
@@ -368,12 +330,16 @@
         "End": 35
       }
     ]
-  }
-  ,
+  },
   {
     "Input": "Sekunde",
     "NotSupportedByDesign": "python",
     "NotSupported": "javascript",
+    "Results": []
+  },
+  {
+    "Input": "2:00 pm",
+    "NotSupported": "java",
     "Results": []
   }
 ]
