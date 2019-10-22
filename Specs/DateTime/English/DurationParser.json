@@ -1253,11 +1253,7 @@
   },
   {
     "Input": "I'll leave for two decades.",
-<<<<<<< HEAD
-    "NotSupported": "javascript, python, java",
-=======
     "NotSupported": "javascript, python",
->>>>>>> ff5558b2d0cc3f1f45f518ef9f946cb8987b0fb9
     "Results": [
       {
         "Text": "two decades",
@@ -1275,8 +1271,6 @@
         "Length": 11
       }
     ]
-<<<<<<< HEAD
-=======
   },
   {
     "Input": "I'll leave for a fortnight.",
@@ -1298,6 +1292,5 @@
         "Length": 11
       }
     ]
->>>>>>> ff5558b2d0cc3f1f45f518ef9f946cb8987b0fb9
   }
 ]

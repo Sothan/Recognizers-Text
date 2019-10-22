@@ -137,16 +137,6 @@ namespace Microsoft.Recognizers.Text.DateTime
         {
             if (!Constants.TimexBusinessDay.Equals(unitStr))
             {
-<<<<<<< HEAD
-                if(unitStr.Equals("10Y"))
-                {
-                    number = number * 10;
-                    unitStr = "Y";
-                }
-                else
-                {
-                    unitStr = unitStr.Substring(0, 1);
-=======
                 switch (unitStr)
                 {
                     case Constants.DECADE_UNIT:
@@ -160,7 +150,6 @@ namespace Microsoft.Recognizers.Text.DateTime
                     default:
                         unitStr = unitStr.Substring(0, 1);
                         break;
->>>>>>> ff5558b2d0cc3f1f45f518ef9f946cb8987b0fb9
                 }
             }
 
